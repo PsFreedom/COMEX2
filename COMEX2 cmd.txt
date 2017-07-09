@@ -1,0 +1,7 @@
+cd /export/comex/krpingTrimmed/
+dmesg -c && modprobe -r rdma_krping
+make clean && make && make install && modprobe rdma_krping
+
+
+echo "server,addr=192.168.12.1,port=5678,n_nodes=2,total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x,node_ID=1" >/proc/krping
+echo "client,addr=192.168.12.1,port=5678,n_nodes=2,total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x,node_ID=2" >/proc/krping

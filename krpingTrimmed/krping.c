@@ -81,6 +81,7 @@ MODULE_LICENSE("Dual BSD/GPL");
 #define MAX_INLINE_PAYLOAD 162 //also say how big is the piggy
 #define PAGESCOUNT 1024
 #define RPING_BUFSIZE (4*1024*1024)
+
 enum mem_type {
 	DMA = 1,
 	FASTREG = 2,
@@ -157,11 +158,10 @@ union bufferx{
  */
  
 struct krping_sharedspace {
-  struct scatterlist sg[4096]; //scatter list, max 8gb for now
-  char *bufferpages[4096]; //our buffer, normal addr
-  uint64_t dmapages[4096]; //our buffer, dma addr
-  int numbigpages; //number of big pages that it actually use
-  
+	struct scatterlist sg[4096]; //scatter list, max 8gb for now
+	char *bufferpages[4096]; //our buffer, normal addr
+	uint64_t dmapages[4096]; //our buffer, dma addr
+	int numbigpages; //number of big pages that it actually use
 };
  
 /*
@@ -242,19 +242,19 @@ struct krping_cb {
   
 };
 // regis memory
-static int regis_bigspace(struct krping_sharedspace *bigspace,int num_bigpages){
-  int i;
-  bigspace->numbigpages=num_bigpages;
-  for(i=0;i<num_bigpages;i++){
-     //sg_set_page(&cb->sg[i],alloc_pages( GFP_KERNEL, 10),4*1024*1024,0); // choice A, get page directly
-    bigspace->bufferpages[i]=kmalloc(RPING_BUFSIZE, GFP_KERNEL); // choice B, get buffer and addr
-    sg_set_buf(&bigspace->sg[i],bigspace->bufferpages[i],RPING_BUFSIZE);
-  }
+static int regis_bigspace(struct krping_sharedspace *bigspace, int num_bigpages){
+	int i;
+	bigspace->numbigpages = num_bigpages;
+	for(i=0; i<num_bigpages; i++){
+		//sg_set_page(&cb->sg[i],alloc_pages( GFP_KERNEL, 10),4*1024*1024,0); // choice A, get page directly
+		bigspace->bufferpages[i] = kmalloc(RPING_BUFSIZE, GFP_KERNEL); // choice B, get buffer and addr
+		sg_set_buf(&bigspace->sg[i], bigspace->bufferpages[i], RPING_BUFSIZE);
+	}
 }
 
 //big page align in 4MB chunks
 static uint64_t translate_useraddr(struct krping_cb *cb,uint64_t offset){
-  return cb->bigspace->bufferpages[offset/RPING_BUFSIZE]+(offset%RPING_BUFSIZE);
+	return cb->bigspace->bufferpages[offset/RPING_BUFSIZE]+(offset%RPING_BUFSIZE);
 }
 
 static int krping_cma_event_handler(struct rdma_cm_id *cma_id,
@@ -908,6 +908,8 @@ static int krping_setup_qp(struct krping_cb *cb, struct rdma_cm_id *cm_id)
 	return ret;
 }
 
+
+
 static void krping_test_server(struct krping_cb *cb)
 {
   
@@ -949,6 +951,7 @@ static void krping_test_server(struct krping_cb *cb)
   ret=down_interruptible(&cb->sem_exit);
   
 }
+
 
 
 static void fill_sockaddr(struct sockaddr_storage *sin, struct krping_cb *cb)
@@ -1187,8 +1190,8 @@ int krping_doit(char *cmd)
 	bigspaceptr = kzalloc(sizeof(*bigspaceptr), GFP_KERNEL);
 	if (!bigspaceptr)
 		return -ENOMEM;
-	cb->bigspace=bigspaceptr;
-	regis_bigspace(bigspaceptr,PAGESCOUNT);
+	cb->bigspace = bigspaceptr;
+	regis_bigspace(bigspaceptr, PAGESCOUNT);
 	///
 	
 	mutex_lock(&krping_mutex);
@@ -1207,59 +1210,58 @@ int krping_doit(char *cmd)
 	sema_init(&cb->sem_read,0);
 	sema_init(&cb->sem_write,0);
 	
-	while ((op = krping_getopt("krping", &cmd, krping_opts, NULL, &optarg,
-			      &optint)) != 0) {
+	while ((op = krping_getopt("krping", &cmd, krping_opts, NULL, &optarg, &optint)) != 0) {
 		switch (op) {
-		case 'a':
-			cb->addr_str = optarg;
-			in4_pton(optarg, -1, cb->addr, -1, NULL);
-			cb->addr_type = AF_INET;
-			DEBUG_LOG("ipaddr (%s)\n", optarg);
-			break;
-		case 'A':
-			cb->addr_str = optarg;
-			in6_pton(optarg, -1, cb->addr, -1, NULL);
-			cb->addr_type = AF_INET6;
-			DEBUG_LOG("ipv6addr (%s)\n", optarg);
-			break;
-		case 'p':
-			cb->port = htons(optint);
-			DEBUG_LOG("port %d\n", (int)optint);
-			break;
-		case 's':
-			cb->server = 1;
-			DEBUG_LOG("server\n");
-			break;
-		case 'c':
-			cb->server = 0;
-			DEBUG_LOG("client\n");
-			break;
-		case 'v':
-			cb->verbose++;
-			DEBUG_LOG("verbose\n");
-			break;
-		case 'i':
-			node_ID = (int)optint;			// for COMEX
-			break;
-		case 'n':
-			n_nodes = (int)optint;
-			break;
-		case 't':
-			total_pages = (int)optint;
-			break;
-		case 'w':
-			writeOut_buff = (int)optint;
-			break;
-		case 'r':
-			readIn_buff = (int)optint;
-			break;
-		case 'o':
-			strcpy(proc_name, optarg);
-			break;
-		default:
-			printk(KERN_ERR PFX "unknown opt %s\n", optarg);
-			ret = -EINVAL;
-			break;
+			case 'a':
+				cb->addr_str = optarg;
+				in4_pton(optarg, -1, cb->addr, -1, NULL);
+				cb->addr_type = AF_INET;
+				DEBUG_LOG("ipaddr (%s)\n", optarg);
+				break;
+			case 'A':
+				cb->addr_str = optarg;
+				in6_pton(optarg, -1, cb->addr, -1, NULL);
+				cb->addr_type = AF_INET6;
+				DEBUG_LOG("ipv6addr (%s)\n", optarg);
+				break;
+			case 'p':
+				cb->port = htons(optint);
+				DEBUG_LOG("port %d\n", (int)optint);
+				break;
+			case 's':
+				cb->server = 1;
+				DEBUG_LOG("server\n");
+				break;
+			case 'c':
+				cb->server = 0;
+				DEBUG_LOG("client\n");
+				break;
+			case 'v':
+				cb->verbose++;
+				DEBUG_LOG("verbose\n");
+				break;
+			case 'i':
+				node_ID = (int)optint;			// for COMEX
+				break;
+			case 'n':
+				n_nodes = (int)optint;
+				break;
+			case 't':
+				total_pages = (int)optint;
+				break;
+			case 'w':
+				writeOut_buff = (int)optint;
+				break;
+			case 'r':
+				readIn_buff = (int)optint;
+				break;
+			case 'o':
+				strcpy(proc_name, optarg);
+				break;
+			default:
+				printk(KERN_ERR PFX "unknown opt %s\n", optarg);
+				ret = -EINVAL;
+				break;
 		}
 	}
 	
@@ -1310,7 +1312,7 @@ static int krping_read_proc(struct seq_file *seq, void *v)
 	mutex_lock(&krping_mutex);
 	list_for_each_entry(cb, &krping_cbs, list) {
 		if (cb->pd) {
-			seq_printf(seq,"good");
+			seq_printf(seq,"good\n");
 		} else {
 			seq_printf(seq, "%d listen\n", num++);
 		}
@@ -1361,12 +1363,12 @@ static int krping_read_open(struct inode *inode, struct file *file)
         return single_open(file, krping_read_proc, inode->i_private);
 }
 struct file_operations krping_ops = {
-	.owner = THIS_MODULE,
-	.open = krping_read_open,
-	.read = seq_read,
+	.owner   = THIS_MODULE,
+	.open    = krping_read_open,
+	.read    = seq_read,
 	.llseek  = seq_lseek,
 	.release = single_release,
-	.write = krping_write_proc,
+	.write   = krping_write_proc,
   };
 
 static int __init krping_init(void)
