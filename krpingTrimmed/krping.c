@@ -912,44 +912,41 @@ static int krping_setup_qp(struct krping_cb *cb, struct rdma_cm_id *cm_id)
 
 static void krping_test_server(struct krping_cb *cb)
 {
-  
 	int ret;
-  char t[6]="a";
-  
-  //exchange buffer info
-  ret = send_buffer_info(cb);
-  if (ret) {
-    printk(KERN_ERR PFX "buffer info err %d\n", ret);
-    return;
-  }
-  
-  
-  //test send
-  CHK(universal_send(cb, 99,t, 4)) 
-  ret=down_interruptible(&cb->sem_verb);
-  t[0]++;
-  
-  //test read
-  printk("issue read\n");
-  CHK(do_read(cb,0,0,24) )
-  printk("wait sem read\n");
-  ret=down_interruptible(&cb->sem_read);
-  //dma_sync_single_for_cpu(cb->pd->device->dma_device, cb->rdma_dma_addr, sizeof(cb->rdma_buf), DMA_FROM_DEVICE);
-  
-  printk("string= %s\n",(cb->rdma_buf) );
-  
-  
-  //test write, otherside will check at exit
-  sprintf(cb->rdma_buf+16,"whataburger11 ");
-   //dma_sync_single_for_device(cb->pd->device->dma_device, cb->rdma_dma_addr, sizeof(cb->rdma_buf), DMA_TO_DEVICE);
-  
-  CHK(do_write(cb,16,16,24) )
-  ret=down_interruptible(&cb->sem_write);
-  printk("done\n");
-  
-  CHK(universal_send(cb, 5,t, 4)) //test kill signal
-  ret=down_interruptible(&cb->sem_exit);
-  
+	char t[6]="a";
+
+	//exchange buffer info
+	ret = send_buffer_info(cb);
+	if (ret) {
+		printk(KERN_ERR PFX "buffer info err %d\n", ret);
+		return;
+	}
+
+	//test send
+	CHK(universal_send(cb, 99,t, 4)) 
+	ret=down_interruptible(&cb->sem_verb);
+	t[0]++;
+
+	//test read
+	printk("issue read\n");
+	CHK(do_read(cb,0,0,24) )
+	printk("wait sem read\n");
+	ret=down_interruptible(&cb->sem_read);
+	//dma_sync_single_for_cpu(cb->pd->device->dma_device, cb->rdma_dma_addr, sizeof(cb->rdma_buf), DMA_FROM_DEVICE);
+
+	printk("string= %s\n",(cb->rdma_buf) );
+
+
+	//test write, otherside will check at exit
+	sprintf(cb->rdma_buf+16,"whataburger11 ");
+	//dma_sync_single_for_device(cb->pd->device->dma_device, cb->rdma_dma_addr, sizeof(cb->rdma_buf), DMA_TO_DEVICE);
+
+	CHK(do_write(cb,16,16,24) )
+	ret=down_interruptible(&cb->sem_write);
+	printk("done\n");
+
+//	CHK(universal_send(cb, 5,t, 4)) //test kill signal
+	ret=down_interruptible(&cb->sem_exit);
 }
 
 
@@ -1049,34 +1046,32 @@ err0:
 
 static void krping_test_client(struct krping_cb *cb)
 {
-  
 	int start, ret;
-  char t[200]="zxg";
+	char t[200]="zxg";
 	start = 65;
-  
-  //exchange buffer info
-  sprintf(cb->bigspace->bufferpages[0],"rdma-ping-%d: ", 1); //someone will read here
-  printk("rdma buffer= %s\n",(char*)(cb->bigspace->bufferpages[0]) );
-  //dma_sync_sg_for_device(cb->pd->device->dma_device, cb->sg, PAGESCOUNT, DMA_TO_DEVICE);
-  ret = send_buffer_info(cb); 
-  if (ret) {
-    printk(KERN_ERR PFX "buffer info error %d\n", ret);
-    return;
-  }
-  /*
-  CHK(universal_send(cb, 99,t, 4)) 
-  ret=down_interruptible(&cb->sem_verb);
-  t[0]--;
-  
-  
-  //CHK(universal_send(cb, 99,&t, 4) ); //send
-  */
-  CHK(universal_send(cb, 5,t, 4)) //test kill signal
-  ret=down_interruptible(&cb->sem_exit);
-  printk("unlocked\n");
-  //dma_sync_sg_for_cpu(cb->pd->device->dma_device, cb->sg, PAGESCOUNT, DMA_FROM_DEVICE);
-  printk("string= %s\n",(char*)(cb->bigspace->bufferpages[0]+16) ); //someone write here //testbug
-  
+
+	//exchange buffer info
+	sprintf(cb->bigspace->bufferpages[0],"rdma-ping-%d: ", 1); //someone will read here
+	printk("rdma buffer= %s\n",(char*)(cb->bigspace->bufferpages[0]) );
+	//dma_sync_sg_for_device(cb->pd->device->dma_device, cb->sg, PAGESCOUNT, DMA_TO_DEVICE);
+	ret = send_buffer_info(cb); 
+	if (ret) {
+		printk(KERN_ERR PFX "buffer info error %d\n", ret);
+		return;
+	}
+	/*
+	CHK(universal_send(cb, 99,t, 4)) 
+	ret=down_interruptible(&cb->sem_verb);
+	t[0]--;
+
+
+	//CHK(universal_send(cb, 99,&t, 4) ); //send
+	*/
+//	CHK(universal_send(cb, 5, t, 4)) //test kill signal
+	ret=down_interruptible(&cb->sem_exit);
+	printk("unlocked\n");
+	//dma_sync_sg_for_cpu(cb->pd->device->dma_device, cb->sg, PAGESCOUNT, DMA_FROM_DEVICE);
+	printk("string= %s\n",(char*)(cb->bigspace->bufferpages[0]+16) ); //someone write here //testbug
 }
 
 static int krping_connect_client(struct krping_cb *cb)
