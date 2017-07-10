@@ -1212,7 +1212,7 @@ extern struct semaphore COMEX_MUTEX_1;
 extern void (*COMEX_module_echo)(char *);
 
 //	Global Exported Function	// Exported to kernel module 
-extern void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff, int total_pages, char *namePtr, char *COMEX_addr);
+extern void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff, int total_pages, char *namePtr);
 
 //	Global Private Function		// Only for kernel use.
 extern void COMEX_read_from_local(struct page *new_page, int pageNO);

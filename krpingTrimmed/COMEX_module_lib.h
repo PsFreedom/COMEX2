@@ -14,12 +14,7 @@ void COMEX_module_echo_fn(char *str){
 }
 
 void COMEX_init()
-{
-	char *COMEX_area;
-	long total_mem, i;
-	printk(KERN_INFO "COMEX Kernel module V.2 --> %s\n", proc_name);
-	printk(KERN_INFO "ID %d n_nodes %d total_pages %d\n", node_ID, n_nodes, total_pages);
-	printk(KERN_INFO "writeOut_buff %d readIn_buff %d\n", writeOut_buff, readIn_buff);
-	
+{	
 	COMEX_module_echo = &COMEX_module_echo_fn;
+	COMEX_init_ENV(node_ID, n_nodes-1, writeOut_buff, readIn_buff, total_pages, proc_name);
 }

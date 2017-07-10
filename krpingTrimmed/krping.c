@@ -79,7 +79,7 @@ MODULE_LICENSE("Dual BSD/GPL");
  */
 #define RPING_SQ_DEPTH 128
 #define MAX_INLINE_PAYLOAD 162 //also say how big is the piggy
-#define PAGESCOUNT 1024
+#define PAGESCOUNT 2048
 #define RPING_BUFSIZE (4*1024*1024)
 
 enum mem_type {
@@ -158,9 +158,9 @@ union bufferx{
  */
  
 struct krping_sharedspace {
-	struct scatterlist sg[4096]; //scatter list, max 8gb for now
-	char *bufferpages[4096]; //our buffer, normal addr
-	uint64_t dmapages[4096]; //our buffer, dma addr
+	struct scatterlist sg[PAGESCOUNT]; //scatter list, max 8gb for now
+	char *bufferpages[PAGESCOUNT]; //our buffer, normal addr
+	uint64_t dmapages[PAGESCOUNT]; //our buffer, dma addr
 	int numbigpages; //number of big pages that it actually use
 };
  
@@ -234,7 +234,7 @@ struct krping_cb {
 	struct rdma_cm_id *child_cm_id;	/* connection on server side */
 	struct list_head list;	
   //main big memory
-	uint64_t remote_addr[4096];		// remote buffer, normal addr
+	uint64_t remote_addr[PAGESCOUNT];		// remote buffer, normal addr
   int numpages;
   //for buffer exchange
   u64 ptable_dma_addr;
@@ -728,10 +728,10 @@ static int krping_setup_buffers(struct krping_cb *cb)
   DEBUG_LOG("done rdma malloc\n");
 
   //page table ptr, to read ptr from, will initialize in dma_buffer send, hard coded size for here, can use less.
-  cb->ptable_dma_addr = dma_map_single(cb->pd->device->dma_device,&cb->bigspace->dmapages,sizeof(char*)*4096, DMA_BIDIRECTIONAL);
+  cb->ptable_dma_addr = dma_map_single(cb->pd->device->dma_device,&cb->bigspace->dmapages,sizeof(char*)*PAGESCOUNT, DMA_BIDIRECTIONAL);
 	pci_unmap_addr_set(cb, ptable_mapping, cb->ptable_dma_addr);
 
-  cb->remote_dmabuf_addr=dma_map_single(cb->pd->device->dma_device,&cb->remote_addr,sizeof(char*)*4096, DMA_BIDIRECTIONAL);
+  cb->remote_dmabuf_addr=dma_map_single(cb->pd->device->dma_device,&cb->remote_addr,sizeof(char*)*PAGESCOUNT, DMA_BIDIRECTIONAL);
 	pci_unmap_addr_set(cb, dmabuf_mapping, cb->remote_dmabuf_addr);
 
   
@@ -805,10 +805,10 @@ static void krping_free_buffers(struct krping_cb *cb)
 			 cb->size, DMA_BIDIRECTIONAL);
   dma_unmap_single(cb->pd->device->dma_device,
 			 pci_unmap_addr(cb, ptable_mapping),
-			 sizeof(char*)*4096, DMA_BIDIRECTIONAL);
+			 sizeof(char*)*PAGESCOUNT, DMA_BIDIRECTIONAL);
   dma_unmap_single(cb->pd->device->dma_device,
 			 pci_unmap_addr(cb, dmabuf_mapping),
-			 sizeof(char*)*4096, DMA_BIDIRECTIONAL);
+			 sizeof(char*)*PAGESCOUNT, DMA_BIDIRECTIONAL);
   dma_unmap_sg(cb->pd->device->dma_device,
 			 cb->bigspace->sg,
 			 cb->bigspace->numbigpages, DMA_BIDIRECTIONAL);     
