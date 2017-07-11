@@ -1260,8 +1260,6 @@ int krping_doit(char *cmd)
 		}
 	}
 	
-	COMEX_init();		// for COMEX
-	
 	if (ret)
 		goto out;
 
@@ -1278,6 +1276,9 @@ int krping_doit(char *cmd)
 		goto out;
 	}
 
+	global_CB = cb;		// for COMEX
+	COMEX_init();
+	
 	if (cb->server)
 		krping_run_server(cb);
 	else

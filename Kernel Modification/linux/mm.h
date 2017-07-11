@@ -1209,7 +1209,8 @@ extern int COMEX_total_pages;
 extern struct semaphore COMEX_MUTEX_1;
 
 //	Module Function Pointer		// Function in kernel module 
-extern void (*COMEX_module_echo)(char *);
+extern void 	(*COMEX_module_echo)(char *);
+extern uint64_t (*COMEX_offset_to_addr)(uint64_t);
 
 //	Global Exported Function	// Exported to kernel module 
 extern void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff, int total_pages, char *namePtr);

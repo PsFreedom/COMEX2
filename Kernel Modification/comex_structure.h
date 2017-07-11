@@ -9,3 +9,6 @@ struct semaphore COMEX_MUTEX_1;
 
 void (*COMEX_module_echo)(char *) = NULL;
 EXPORT_SYMBOL(COMEX_module_echo);
+
+uint64_t (*COMEX_offset_to_addr)(uint64_t) = NULL;
+EXPORT_SYMBOL(COMEX_offset_to_addr);
