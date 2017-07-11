@@ -16,7 +16,11 @@ void COMEX_module_echo_fn(char *str){
 	printk(KERN_INFO "%s: Echo! %s\n", __FUNCTION__, str);
 }
 
-uint64_t COMEX_offset_to_addr_fn(uint64_t offset){
+uint64_t COMEX_offset_to_addr_fn(uint64_t offset)
+{
+	if(offset > (PAGESCOUNT*1024)){
+		printk(KERN_INFO "%s: Wrong addr %lu\n", __FUNCTION__, offset);
+	}
 	return translate_useraddr(global_CB, offset);
 }
 

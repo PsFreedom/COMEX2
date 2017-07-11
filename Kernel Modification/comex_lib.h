@@ -8,9 +8,9 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 	printk(KERN_INFO "ID %d n_nodes %d total_pages %d\n", node_ID, n_nodes, total_pages);
 	printk(KERN_INFO "writeOut_buff %d readIn_buff %d\n", writeOut_buff, readIn_buff);
 	
-	for(i=0; i<total_pages; i++){
-		printk(KERN_INFO "%d %lu --> %lu\n", i, (uint64_t)i*X86PageSize, COMEX_offset_to_addr((uint64_t)i*X86PageSize));
-	}
+//	for(i=0; i<total_pages; i++){
+//		printk(KERN_INFO "%d %lu --> %lu\n", i, (uint64_t)i*X86PageSize, COMEX_offset_to_addr((uint64_t)i*X86PageSize));
+//	}
 
 ///// Semalphore & MUTEX
 	sema_init(&COMEX_MUTEX_1, 1);
@@ -27,8 +27,8 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 		COMEX_Buddy_page[i].pageNO    =  i;
 		COMEX_Buddy_page[i].private   =  0;
 		COMEX_Buddy_page[i]._mapcount = -1;
-//		COMEX_Buddy_page[i].CMX_cntr  =  0;
-//		COMEX_Buddy_page[i].CMX_CKSM  =  0;
+		COMEX_Buddy_page[i].CMX_cntr  =  0;
+		COMEX_Buddy_page[i].CMX_CKSM  =  0;
 		INIT_LIST_COMEX(&COMEX_Buddy_page[i].lru);
 	}
 	
@@ -52,14 +52,14 @@ EXPORT_SYMBOL(COMEX_init_ENV);
 int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, unsigned long *retPageNO)
 {
 	int COMEX_pageNO = COMEX_rmqueue_smallest(0);
-//	char *new_vAddr  = COMEX_area + ((long)COMEX_pageNO*X86PageSize);
+	char *new_vAddr  = (char *)COMEX_offset_to_addr((uint64_t)COMEX_pageNO*X86PageSize);
 	char *old_vAddr  = (char *)kmap(old_page);
 	
 	if(COMEX_pageNO < 0){	// No page available
 		return -1;
 	}
 	
-//	memcpy(new_vAddr, old_vAddr, X86PageSize);
+	memcpy(new_vAddr, old_vAddr, X86PageSize);
 //	COMEX_Buddy_page[COMEX_pageNO].CMX_cntr++;
 //	COMEX_Buddy_page[COMEX_pageNO].CMX_CKSM = checkSum_page(old_page);
 //	if(checkSum_page(old_page) != 0)
@@ -73,10 +73,10 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, unsigned long *re
 
 void COMEX_read_from_local(struct page *new_page, int pageNO)
 {
-//	char *old_vAddr = COMEX_area + ((long)pageNO*X86PageSize);
+	char *old_vAddr = (char *)COMEX_offset_to_addr((uint64_t)pageNO*X86PageSize);
 	char *new_vAddr = (char *)kmap(new_page);
 	
-//	memcpy(new_vAddr, old_vAddr, X86PageSize);
+	memcpy(new_vAddr, old_vAddr, X86PageSize);
 //	COMEX_Buddy_page[pageNO].CMX_cntr--;
 //	if(COMEX_Buddy_page[pageNO].CMX_CKSM != 0)
 //		printk(KERN_INFO "%s: No %d - %lu %lu\n", __FUNCTION__, pageNO, COMEX_Buddy_page[pageNO].CMX_CKSM, checkSum_page(new_page));
