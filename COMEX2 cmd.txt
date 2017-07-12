@@ -1,4 +1,3 @@
-
 cd /export/comex && rm -rf linux-3.10.87 && tar -zxf linux-3.10.87.tar.gz && cp myConfig-2017-06-12 linux-3.10.87/.config
 cd /export/comex/linux-3.10.87 && make clean && make -j 8 && make -j 8 modules && make headers_install && make modules_install && make install && rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot 
 
@@ -15,12 +14,12 @@ echo "client,addr=192.168.12.1,port=5678,n_nodes=2,total_pages=2097152,writeOut_
 
 
 cd /export/NPB/NPB3.3-SER/ && make suite 
-cd /export/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./bt.D.x && cat
-cd /export/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./dc.B.x && cat
-cd /export/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./ft.D.x && cat
-cd /export/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./cg.D.x && cat
-cd /export/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./is.C.x && cat
-cd /export/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./lu.D.x && cat
-cd /export/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./mg.D.x && cat
-cd /export/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./sp.D.x && cat
-cd /export/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./ua.D.x && cat
+cd /export/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./bt.D.x 
+cd /export/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./dc.B.x 
+cd /export/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./ft.D.x 
+cd /export/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./cg.D.x 
+cd /export/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./is.C.x 
+cd /export/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./lu.D.x 
+cd /export/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./mg.D.x 
+cd /export/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./sp.D.x 
+cd /export/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./ua.D.x 

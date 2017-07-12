@@ -60,7 +60,6 @@
 #include <rdma/rdma_cm.h>
 
 #include "getopt.h"
-#include "COMEX_module_lib.h"		// for COMEX
 
 #define PFX "krping: "
 
@@ -81,6 +80,7 @@ MODULE_LICENSE("Dual BSD/GPL");
 #define MAX_INLINE_PAYLOAD 162 //also say how big is the piggy
 #define PAGESCOUNT 2048
 #define RPING_BUFSIZE (4*1024*1024)
+#include "COMEX_module_lib.h"		// for COMEX
 
 enum mem_type {
 	DMA = 1,

@@ -384,7 +384,7 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 			else if(swp_type(entry) == 9)
 			{
 //				printk(KERN_INFO "%s: swp_type(entry) = %d!\n", __FUNCTION__, swp_type(entry));
-				COMEX_read_from_local(new_page, (int)swp_offset(entry));
+				COMEX_read_from_local(new_page, swp_offset(entry));
 				count_vm_event(PSWPIN);
 				SetPageDirty(new_page);
 				SetPageUptodate(new_page);

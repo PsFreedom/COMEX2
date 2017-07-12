@@ -1216,7 +1216,7 @@ extern uint64_t (*COMEX_offset_to_addr)(uint64_t);
 extern void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff, int total_pages, char *namePtr);
 
 //	Global Private Function		// Only for kernel use.
-extern void COMEX_read_from_local(struct page *new_page, int pageNO);
+extern void COMEX_read_from_local(struct page *new_page, unsigned long pageNO);
 
 ////////// 	End COMEX Section 	//////////
 

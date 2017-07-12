@@ -3,6 +3,10 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 	char initMSG[50];
 	int i, ret=0;
 	
+	COMEX_ID = node_ID;
+	COMEX_total_nodes = n_nodes;
+	COMEX_total_pages = total_pages;
+	
 	strcpy(proc_name, namePtr);
 	printk(KERN_INFO "COMEX Kernel v.2 --> %s\n", proc_name);
 	printk(KERN_INFO "ID %d n_nodes %d total_pages %d\n", node_ID, n_nodes, total_pages);
@@ -51,13 +55,16 @@ EXPORT_SYMBOL(COMEX_init_ENV);
 
 int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, unsigned long *retPageNO)
 {
-	int COMEX_pageNO = COMEX_rmqueue_smallest(0);
-	char *new_vAddr  = (char *)COMEX_offset_to_addr((uint64_t)COMEX_pageNO*X86PageSize);
-	char *old_vAddr  = (char *)kmap(old_page);
+	long COMEX_pageNO = (long)COMEX_rmqueue_smallest(0);
+	char *new_vAddr;
+	char *old_vAddr;
 	
-	if(COMEX_pageNO < 0){	// No page available
+	if(COMEX_pageNO < 0 || COMEX_pageNO >= COMEX_total_pages){	// No page available
+//		printk(KERN_INFO "%s: Wrong pageNO %ld\n", __FUNCTION__, COMEX_pageNO);
 		return -1;
 	}
+	new_vAddr  = (char *)COMEX_offset_to_addr(COMEX_pageNO*X86PageSize);
+	old_vAddr  = (char *)kmap(old_page);
 	
 	memcpy(new_vAddr, old_vAddr, X86PageSize);
 //	COMEX_Buddy_page[COMEX_pageNO].CMX_cntr++;
@@ -67,14 +74,22 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, unsigned long *re
 	
 	kunmap(old_page);
 	*retNodeID = -11;
-	*retPageNO = (unsigned long)COMEX_pageNO;
+	*retPageNO = COMEX_pageNO;
 	return 1;
 }
 
-void COMEX_read_from_local(struct page *new_page, int pageNO)
+void COMEX_read_from_local(struct page *new_page, unsigned long pageNO)
 {
-	char *old_vAddr = (char *)COMEX_offset_to_addr((uint64_t)pageNO*X86PageSize);
-	char *new_vAddr = (char *)kmap(new_page);
+	char *old_vAddr;
+	char *new_vAddr;
+	
+	if(pageNO < 0 || pageNO >= COMEX_total_pages){	// No page available
+		printk(KERN_INFO "%s: Wrong pageNO %ld\n", __FUNCTION__, pageNO);
+		return -1;
+	}
+	
+	old_vAddr = (char *)COMEX_offset_to_addr(pageNO*X86PageSize);
+	new_vAddr = (char *)kmap(new_page);
 	
 	memcpy(new_vAddr, old_vAddr, X86PageSize);
 //	COMEX_Buddy_page[pageNO].CMX_cntr--;
