@@ -11,6 +11,7 @@ static int readIn_buff;
 
 struct krping_cb *global_CB;
 static uint64_t translate_useraddr(struct krping_cb *, uint64_t);
+static int universal_send(struct krping_cb *cb, u64 imm, char* addr, u64 size);
 
 void COMEX_module_echo_fn(char *str){
 	printk(KERN_INFO "%s: Echo! %s\n", __FUNCTION__, str);
@@ -20,14 +21,16 @@ uint64_t COMEX_offset_to_addr_fn(uint64_t offset)
 {
 	if(offset >= ((uint64_t)PAGESCOUNT*1024*4096))
 		printk(KERN_INFO "%s: Wrong addr %lu >= %lu\n", __FUNCTION__, offset, ((uint64_t)PAGESCOUNT*1024*4096));
-	
 	return translate_useraddr(global_CB, offset);
 }
 
 void COMEX_init()
 {	
+	char test_str[11]="TEST 1234";
+
 	COMEX_module_echo    = &COMEX_module_echo_fn;
 	COMEX_offset_to_addr = &COMEX_offset_to_addr_fn;
 	
 	COMEX_init_ENV(node_ID, n_nodes-1, writeOut_buff, readIn_buff, total_pages, proc_name);
+	CHK(universal_send(global_CB, 99, test_str, 10))
 }

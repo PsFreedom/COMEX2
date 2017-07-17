@@ -414,7 +414,8 @@ static int deep_send(struct krping_cb *cb, u64 imm){
 static int universal_send(struct krping_cb *cb, u64 imm, char* addr, u64 size){
   void *info = &cb->send_buf;
   memcpy(info,addr,size);
-  return deep_send(cb, imm);
+   CHK(deep_send(cb, imm))
+   return down_interruptible(&cb->sem_verb);
 }
 //no more one send, then tell RDMA write whole things
 static int send_buffer_info(struct krping_cb *cb)
@@ -471,7 +472,7 @@ static int universal_recv_handler(struct krping_cb *cb, struct ib_wc *wc){
           //
           cb->state=RDMA_READY;
           
-          wake_up_interruptible(&cb->sem);
+          
           break;
         case 5: //set buffers info
           DEBUG_LOG("recv exit");
@@ -480,6 +481,7 @@ static int universal_recv_handler(struct krping_cb *cb, struct ib_wc *wc){
         default:
           printk("unexpected,unhandled immediate received=%d %s\n",wc->ex.imm_data,cb->recv_buf.piggy);
       }
+	  wake_up_interruptible(&cb->sem);
     }else{
       printk("call recv handler but no imm\n");
     }
@@ -921,7 +923,7 @@ static void krping_test_server(struct krping_cb *cb)
 		printk(KERN_ERR PFX "buffer info err %d\n", ret);
 		return;
 	}
-
+/*
 	//test send
 	CHK(universal_send(cb, 99,t, 4)) 
 	ret=down_interruptible(&cb->sem_verb);
@@ -944,9 +946,10 @@ static void krping_test_server(struct krping_cb *cb)
 	CHK(do_write(cb,16,16,24) )
 	ret=down_interruptible(&cb->sem_write);
 	printk("done\n");
-
+*/
 //	CHK(universal_send(cb, 5,t, 4)) //test kill signal
-	ret=down_interruptible(&cb->sem_exit);
+	//ret=down_interruptible(&cb->sem_exit);
+	
 }
 
 
@@ -1034,7 +1037,8 @@ static void krping_run_server(struct krping_cb *cb)
 	}
 
 	krping_test_server(cb);
-  
+  return;
+  //don't go below
 	rdma_disconnect(cb->child_cm_id);
 err2:
 	krping_free_buffers(cb);
@@ -1042,6 +1046,7 @@ err1:
 	krping_free_qp(cb);
 err0:
 	rdma_destroy_id(cb->child_cm_id);
+	
 }
 
 static void krping_test_client(struct krping_cb *cb)
@@ -1051,8 +1056,8 @@ static void krping_test_client(struct krping_cb *cb)
 	start = 65;
 
 	//exchange buffer info
-	sprintf(cb->bigspace->bufferpages[0],"rdma-ping-%d: ", 1); //someone will read here
-	printk("rdma buffer= %s\n",(char*)(cb->bigspace->bufferpages[0]) );
+	//sprintf(cb->bigspace->bufferpages[0],"rdma-ping-%d: ", 1); //someone will read here
+	//printk("rdma buffer= %s\n",(char*)(cb->bigspace->bufferpages[0]) );
 	//dma_sync_sg_for_device(cb->pd->device->dma_device, cb->sg, PAGESCOUNT, DMA_TO_DEVICE);
 	ret = send_buffer_info(cb); 
 	if (ret) {
@@ -1068,10 +1073,10 @@ static void krping_test_client(struct krping_cb *cb)
 	//CHK(universal_send(cb, 99,&t, 4) ); //send
 	*/
 //	CHK(universal_send(cb, 5, t, 4)) //test kill signal
-	ret=down_interruptible(&cb->sem_exit);
-	printk("unlocked\n");
+	//ret=down_interruptible(&cb->sem_exit);
+	//printk("unlocked\n");
 	//dma_sync_sg_for_cpu(cb->pd->device->dma_device, cb->sg, PAGESCOUNT, DMA_FROM_DEVICE);
-	printk("string= %s\n",(char*)(cb->bigspace->bufferpages[0]+16) ); //someone write here //testbug
+	//printk("string= %s\n",(char*)(cb->bigspace->bufferpages[0]+16) ); //someone write here //testbug
 }
 
 static int krping_connect_client(struct krping_cb *cb)
@@ -1160,12 +1165,13 @@ static void krping_run_client(struct krping_cb *cb)
 	}
 	krping_test_client(cb);
   
-  
+  return;
 	rdma_disconnect(cb->cm_id);
 err2:
 	krping_free_buffers(cb);
 err1:
 	krping_free_qp(cb);
+	
 }
 
 int krping_doit(char *cmd)
@@ -1276,14 +1282,17 @@ int krping_doit(char *cmd)
 		goto out;
 	}
 
-	global_CB = cb;		// for COMEX
-	COMEX_init();
+
 	
 	if (cb->server)
 		krping_run_server(cb);
 	else
 		krping_run_client(cb);
-
+////
+	global_CB = cb;		// for COMEX
+	COMEX_init();
+	ret=down_interruptible(&cb->sem_exit);
+////	
 	DEBUG_LOG("destroy cm_id %p\n", cb->cm_id);
 	rdma_destroy_id(cb->cm_id);
 out:
