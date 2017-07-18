@@ -3,10 +3,14 @@ void COMEX_init_Remote()
 	int i,j;
 	printk(KERN_INFO "%s... Begin\n", __FUNCTION__);
 	
-	COMEX_R_free_group = (COMEX_R_free_group_t *)vmalloc(sizeof(COMEX_R_free_group_t)*COMEX_total_nodes);
+	COMEX_free_group = (COMEX_R_free_group_t *)vmalloc(sizeof(COMEX_R_free_group_t)*COMEX_total_nodes);
 	for(i=0; i<COMEX_total_nodes; i++){
-		COMEX_R_free_group[i].total_group = 0;
-		INIT_LIST_HEAD(&COMEX_R_free_group[i].free_group);
+		COMEX_free_group[i].mssg_qouta  = MAX_MSSG;
+		COMEX_free_group[i].total_group = 0;
+		INIT_LIST_HEAD(&COMEX_free_group[i].free_group);
+		
+		if(list_empty(&COMEX_free_group[i].free_group))
+			printk(KERN_INFO "%d... list_empty!\n", i);
 	}
 }
 
@@ -17,6 +21,7 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 	
 	COMEX_ID = node_ID;
 	COMEX_total_nodes = n_nodes;
+	COMEX_total_nodes = 10;
 	COMEX_total_pages = total_pages;
 	
 	strcpy(proc_name, namePtr);
@@ -29,7 +34,7 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 //	}
 
 ///// Semalphore & MUTEX
-	sema_init(&COMEX_MUTEX_1, 1);
+	sema_init(&COMEX_remote_MUTEX, 1);
 	spin_lock_init(&COMEX_buddy_spin);
 	
 ///// Buddy System
