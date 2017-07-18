@@ -1,11 +1,11 @@
-cd /export/comex && rm -rf linux-3.10.87 && tar -zxf linux-3.10.87.tar.gz && cp myConfig-2017-06-12 linux-3.10.87/.config
-cd /export/comex/linux-3.10.87 && make clean && make -j 8 && make -j 8 modules && make headers_install && make modules_install && make install && rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot 
+cd /home/comex && rm -rf linux-3.10.87 && tar -zxf linux-3.10.87.tar.gz && cp myConfig linux-3.10.87/.config
+cd /home/comex/linux-3.10.87 && make clean && make -j 8 && make -j 8 modules && make headers_install && make modules_install && make install && rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot 
 rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot
 
 
 yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/
 yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/
-cd /export/comex/krpingTrimmed/
+cd /home/comex/krpingTrimmed
 dmesg -c && modprobe -r rdma_krping
 make clean && make && make install && modprobe rdma_krping
 
@@ -14,16 +14,16 @@ echo "server,addr=192.168.35.1,port=5678,n_nodes=2,total_pages=2097152,writeOut_
 echo "client,addr=192.168.35.1,port=5678,n_nodes=2,total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x,node_ID=2" >/proc/krping
 
 
-cd /home/benchmark/NPB/NPB3.3-SER/ && make suite 
-cd /home/benchmark/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./bt.D.x 
-cd /home/benchmark/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./dc.B.x 
-cd /home/benchmark/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./ft.D.x 
-cd /home/benchmark/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./cg.D.x 
-cd /home/benchmark/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./is.C.x 
-cd /home/benchmark/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./lu.D.x 
-cd /home/benchmark/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./mg.D.x 
-cd /home/benchmark/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./sp.D.x 
-cd /home/benchmark/NPB/NPB3.3-SER/bin && /usr/bin/time -v ./ua.D.x 
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER && make suite 
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v ./bt.D.x 
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v ./dc.B.x 
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v ./ft.D.x 
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v ./cg.D.x 
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v ./is.D.x 
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v ./lu.D.x 
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v ./mg.D.x 
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v ./sp.D.x 
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v ./ua.D.x 
 
 
 
