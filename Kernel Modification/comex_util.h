@@ -63,7 +63,7 @@ int get_page_PID(struct page *page)
 	
 	anon_vma = page_lock_anon_vma_read(page);
 	if (!anon_vma){
-		return NULL;
+		return -1;
 	}
 
 	pgoff = page->index << (PAGE_CACHE_SHIFT - PAGE_SHIFT);

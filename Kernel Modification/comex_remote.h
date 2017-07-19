@@ -1,5 +1,5 @@
-#define MAX_TRY 5;
-#define MAX_MSSG 16;
+#define MAX_TRY 5
+#define MAX_MSSG 8
 
 typedef struct{
 	int mssg_qouta;
@@ -26,6 +26,24 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, unsigned long *r
 //	printk(KERN_INFO "%s... Begin\n", __FUNCTION__);
 	
 	dest_node = COMEX_hash(get_page_PID(old_page));
+	down_interruptible(&COMEX_remote_MUTEX);
+	for(i=0; i<MAX_TRY; i++)
+	{
+		if(COMEX_free_group[dest_node].total_group < MAX_MSSG/2 && 
+		   COMEX_free_group[dest_node].mssg_qouta  > 0)
+		{
+			printk(KERN_INFO "%s: Ask %d qouta %d\n", __FUNCTION__, dest_node, COMEX_free_group[dest_node].mssg_qouta);
+			COMEX_free_group[dest_node].mssg_qouta--;
+		}
+		if(COMEX_free_group[dest_node].total_group > 0)
+		{
+			printk(KERN_INFO "%s: Claim to %d\n", __FUNCTION__, dest_node);
+		}
+		dest_node = COMEX_hash(dest_node);
+	}
 
+	up(&COMEX_remote_MUTEX);
+	*retNodeID = 0;
+	*retOffset = 0;
 	return -1;
 }

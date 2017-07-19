@@ -21,7 +21,7 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 	
 	COMEX_ID = node_ID;
 	COMEX_total_nodes = n_nodes;
-	COMEX_total_nodes = 10;
+	COMEX_total_nodes = 5;
 	COMEX_total_pages = total_pages;
 	
 	strcpy(proc_name, namePtr);
@@ -104,7 +104,7 @@ void COMEX_read_from_local(struct page *new_page, unsigned long pageNO)
 	
 	if(pageNO < 0 || pageNO >= COMEX_total_pages){	// No page available
 		printk(KERN_INFO "%s: Wrong pageNO %ld\n", __FUNCTION__, pageNO);
-		return -1;
+		return;
 	}
 	
 	old_vAddr = (char *)COMEX_offset_to_addr(pageNO*X86PageSize);
