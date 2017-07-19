@@ -17,6 +17,7 @@ typedef struct{
 
 //////////////////// Comm struct
 
+
 ////////////////////
 
 int COMEX_hash(int seed){
@@ -30,6 +31,7 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, unsigned long *r
 	
 	dest_node = COMEX_hash(get_page_PID(old_page));
 	down_interruptible(&COMEX_remote_MUTEX);
+	
 	for(i=0; i<MAX_TRY; i++){
 		if(COMEX_free_group[dest_node].total_group < MAX_MSSG/2 && 
 		   COMEX_free_group[dest_node].mssg_qouta  > 0)
@@ -38,7 +40,7 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, unsigned long *r
 				COMEX_free_group[dest_node].mssg_qouta--;
 				COMEX_free_group[dest_node].back_off += 1<<(MAX_MSSG - COMEX_free_group[dest_node].mssg_qouta);
 				
-				RDMD_verb_send(dest_node, 10001, NULL, COMEX_free_group[dest_node].back_off);
+				COMEX_verb_send(dest_node, 10001, &COMEX_ID, sizeof(COMEX_ID));
 			}
 			else{
 				COMEX_free_group[dest_node].back_off--;

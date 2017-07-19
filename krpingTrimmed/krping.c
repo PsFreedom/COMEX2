@@ -477,7 +477,11 @@ static int universal_recv_handler(struct krping_cb *cb, struct ib_wc *wc){
         case 5: //set buffers info
           DEBUG_LOG("recv exit");
           up(&cb->sem_exit);
-          break;  
+          break; 
+        case 10001: //set buffers info
+			COMEX_do_verb( wc->ex.imm_data, &cb->recv_buf.piggy);
+			up(&cb->sem_exit);
+			break;  
         default:
           printk("unexpected,unhandled immediate received=%d %s\n",wc->ex.imm_data,cb->recv_buf.piggy);
       }

@@ -1210,7 +1210,7 @@ extern struct semaphore COMEX_remote_MUTEX;
 
 //	Module Function Pointer		// Function in kernel module 
 extern void 	(*COMEX_module_echo)(char *);
-extern void 	(*RDMD_verb_send)(int, int, void *, int);
+extern void 	(*COMEX_verb_send)(int, int, void *, int);
 extern uint64_t (*COMEX_offset_to_addr)(uint64_t);
 
 //	Global Exported Function	// Exported to kernel module 
