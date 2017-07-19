@@ -7,6 +7,7 @@ void COMEX_init_Remote()
 	for(i=0; i<COMEX_total_nodes; i++){
 		COMEX_free_group[i].mssg_qouta  = MAX_MSSG;
 		COMEX_free_group[i].total_group = 0;
+		COMEX_free_group[i].back_off 	= 0;
 		INIT_LIST_HEAD(&COMEX_free_group[i].free_group);
 		
 		if(list_empty(&COMEX_free_group[i].free_group))
@@ -48,8 +49,8 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 		COMEX_Buddy_page[i].pageNO    =  i;
 		COMEX_Buddy_page[i].private   =  0;
 		COMEX_Buddy_page[i]._mapcount = -1;
-		COMEX_Buddy_page[i].CMX_cntr  =  0;
-		COMEX_Buddy_page[i].CMX_CKSM  =  0;
+//		COMEX_Buddy_page[i].CMX_cntr  =  0;
+//		COMEX_Buddy_page[i].CMX_CKSM  =  0;
 		INIT_LIST_COMEX(&COMEX_Buddy_page[i].lru);
 	}
 	

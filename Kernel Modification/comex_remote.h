@@ -4,6 +4,7 @@
 typedef struct{
 	int mssg_qouta;
 	int total_group;
+	int back_off;
 	struct list_head free_group;
 } COMEX_R_free_group_t;
 COMEX_R_free_group_t *COMEX_free_group;
@@ -13,6 +14,8 @@ typedef struct{
 	unsigned long addr_end;
 	struct list_head link;
 } free_group_t;
+
+//////////////////// Comm struct
 
 ////////////////////
 
@@ -27,13 +30,19 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, unsigned long *r
 	
 	dest_node = COMEX_hash(get_page_PID(old_page));
 	down_interruptible(&COMEX_remote_MUTEX);
-	for(i=0; i<MAX_TRY; i++)
-	{
+	for(i=0; i<MAX_TRY; i++){
 		if(COMEX_free_group[dest_node].total_group < MAX_MSSG/2 && 
 		   COMEX_free_group[dest_node].mssg_qouta  > 0)
-		{
-			printk(KERN_INFO "%s: Ask %d qouta %d\n", __FUNCTION__, dest_node, COMEX_free_group[dest_node].mssg_qouta);
-			COMEX_free_group[dest_node].mssg_qouta--;
+		   {
+			if(COMEX_free_group[dest_node].back_off <= 0){
+				COMEX_free_group[dest_node].mssg_qouta--;
+				COMEX_free_group[dest_node].back_off += 1<<(MAX_MSSG - COMEX_free_group[dest_node].mssg_qouta);
+				
+				RDMD_verb_send(dest_node, 10001, NULL, COMEX_free_group[dest_node].back_off);
+			}
+			else{
+				COMEX_free_group[dest_node].back_off--;
+			}
 		}
 		if(COMEX_free_group[dest_node].total_group > 0)
 		{
