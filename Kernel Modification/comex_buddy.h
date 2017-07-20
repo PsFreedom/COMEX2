@@ -11,7 +11,6 @@ struct COMEX_list_head {
 
 typedef struct COMEX_free_area_type {
 	int nr_free;
-
 	struct COMEX_list_head free_list;
 } COMEX_free_area_t;
 COMEX_free_area_t COMEX_free_area[COMEX_MAX_ORDER];
@@ -22,8 +21,8 @@ typedef struct Dummy_page {
 	int _mapcount;
 	struct COMEX_list_head lru;
 	
-	int CMX_cntr;			// TEMP
-	unsigned long CMX_CKSM;	// TEMP
+//	int CMX_cntr;			// TEMP
+//	unsigned long CMX_CKSM;	// TEMP
 } COMEX_page;
 COMEX_page *COMEX_Buddy_page;
 
@@ -94,7 +93,6 @@ static inline int COMEX_page_is_buddy(COMEX_page *buddy, int order)
 static inline void COMEX_expand(COMEX_page *page, int low, int high, COMEX_free_area_t *area)
 {
 	unsigned long size = 1 << high;
-
 	while (high > low) {
 		area--;
 		high--;
@@ -119,7 +117,7 @@ static inline int COMEX_rmqueue_smallest(unsigned int order)
 		if(COMEX__list_empty(&area->free_list)){
 			continue;
 		}
-
+		
 		page = COMEX_list_entry(area->free_list.next, COMEX_page, lru);
 		COMEX_list_del(&page->lru);
 		COMEX_rmv_page_order(page);
@@ -142,7 +140,7 @@ static inline void COMEX_free_page(int inPageNO, int order)
 	
 	COMEX_page *page = &COMEX_Buddy_page[inPageNO];
 	COMEX_page *buddy;
-	
+
 	spin_lock(&COMEX_buddy_spin);
 	
 	page_idx = page->pageNO & ((1 << COMEX_MAX_ORDER) - 1);

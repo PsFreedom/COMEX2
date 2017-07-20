@@ -139,7 +139,7 @@ enum test_state {
 	ADDR_RESOLVED,
 	ROUTE_RESOLVED,
 	CONNECTED,
-  RDMA_READY,
+	RDMA_READY,
 	ERROR
 };
 
@@ -170,10 +170,10 @@ struct krping_sharedspace {
 struct krping_cb {
 	int server;			/* 0 iff client */
 	struct ib_cq *cq_send;
-  struct ib_cq *cq_recv;
+	struct ib_cq *cq_recv;
 	struct ib_pd *pd;
 	struct ib_qp *qp;
-  struct krping_sharedspace *bigspace;
+	struct krping_sharedspace *bigspace;
 	enum mem_type mem;
 	struct ib_mr *dma_mr;
   
@@ -412,10 +412,10 @@ static int deep_send(struct krping_cb *cb, u64 imm){
   return ret;
 }
 static int universal_send(struct krping_cb *cb, u64 imm, char* addr, u64 size){
-  void *info = &cb->send_buf;
-  memcpy(info,addr,size);
-   CHK(deep_send(cb, imm))
-   return down_interruptible(&cb->sem_verb);
+	void *info = &cb->send_buf;
+	memcpy(info,addr,size);
+	CHK(deep_send(cb, imm))
+	return down_interruptible(&cb->sem_verb);
 }
 //no more one send, then tell RDMA write whole things
 static int send_buffer_info(struct krping_cb *cb)

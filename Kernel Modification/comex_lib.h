@@ -22,7 +22,7 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 	
 	COMEX_ID = node_ID;
 	COMEX_total_nodes = n_nodes;
-	COMEX_total_nodes = 5;
+	COMEX_total_nodes = 3;
 	COMEX_total_pages = total_pages;
 	
 	strcpy(proc_name, namePtr);

@@ -1200,6 +1200,14 @@ static inline void sync_mm_rss(struct mm_struct *mm)
 
 #define X86PageSize 4096
 
+//	Comm structure
+
+typedef struct{
+	int src_node;
+	int page_no;
+	char size; 
+} reply_pages_t;
+
 //	Global variable
 extern int COMEX_Ready;
 extern int COMEX_ID;
@@ -1215,6 +1223,7 @@ extern uint64_t (*COMEX_offset_to_addr)(uint64_t);
 
 //	Global Exported Function	// Exported to kernel module 
 extern void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff, int total_pages, char *namePtr);
+extern void COMEX_pages_request(int target);
 
 //	Global Private Function		// Only for kernel use.
 extern void COMEX_read_from_local(struct page *new_page, unsigned long pageNO);

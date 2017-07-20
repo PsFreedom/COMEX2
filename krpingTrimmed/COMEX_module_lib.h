@@ -20,14 +20,20 @@ void COMEX_module_echo_fn(char *str){
 uint64_t COMEX_offset_to_addr_fn(uint64_t offset)
 {
 	if(offset >= ((uint64_t)PAGESCOUNT*1024*4096))
-		printk(KERN_INFO "%s: Wrong addr %lu >= %lu\n", __FUNCTION__, offset, ((uint64_t)PAGESCOUNT*1024*4096));
+		printk(KERN_INFO "%s: Wrong addr %llu >= %llu\n", __FUNCTION__, offset, ((uint64_t)PAGESCOUNT*1024*4096));
 	return translate_useraddr(global_CB, offset);
 }
 
 void COMEX_verb_send_fn(int target, int CMD_num, void *ptr, int struct_size)
 {
-	CHK(universal_send(global_CB, CMD_num, ptr, struct_size))
-	printk(KERN_INFO "%s: %d %d %p %d\n", __FUNCTION__, target, CMD_num, ptr, struct_size);
+//	CHK(universal_send(global_CB, CMD_num, ptr, struct_size))
+	if(CMD_num == 10010){
+		printk(KERN_INFO "%s: %d %d %p %d | %d\n", __FUNCTION__, target, CMD_num, ptr, struct_size, *(int*)ptr);
+	}
+	else if(CMD_num == 10011){
+		reply_pages_t *myStruct = ptr;
+		printk(KERN_INFO "%s: %d %d %p %d | %d %d %d\n", __FUNCTION__, target, CMD_num, ptr, struct_size, myStruct->src_node, myStruct->page_no, myStruct->size);
+	}
 }
 
 void COMEX_do_verb(int CMD_num, void *piggy)
@@ -45,4 +51,10 @@ void COMEX_init()
 	
 	COMEX_init_ENV(node_ID, n_nodes-1, writeOut_buff, readIn_buff, total_pages, proc_name);
 	CHK(universal_send(global_CB, 99, test_str, 10))
+	
+	COMEX_pages_request(4);
+	COMEX_pages_request(2);
+	COMEX_pages_request(7);
+	COMEX_pages_request(9);
+	COMEX_pages_request(147);
 }
