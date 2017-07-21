@@ -39,7 +39,7 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, unsigned long *r
 				COMEX_free_group[dest_node].mssg_qouta--;
 				COMEX_free_group[dest_node].back_off += 1<<(MAX_MSSG - COMEX_free_group[dest_node].mssg_qouta);
 				
-				COMEX_verb_send(dest_node, 10010, &COMEX_ID, sizeof(COMEX_ID));
+				COMEX_verb_send(dest_node, CODE_COMEX_PAGE_RQST, &COMEX_ID, sizeof(COMEX_ID));
 			}
 			else{
 				COMEX_free_group[dest_node].back_off--;
@@ -72,6 +72,6 @@ void COMEX_pages_request(int target)
 		myStruct.size     = i;
 	}
 	
-	COMEX_verb_send(target, 10011, &myStruct, sizeof(myStruct));
+	COMEX_verb_send(target, CODE_COMEX_PAGE_RPLY, &myStruct, sizeof(myStruct));
 }
 EXPORT_SYMBOL(COMEX_pages_request);

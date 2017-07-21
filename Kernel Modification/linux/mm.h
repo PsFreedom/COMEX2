@@ -1200,6 +1200,9 @@ static inline void sync_mm_rss(struct mm_struct *mm)
 
 #define X86PageSize 4096
 
+#define CODE_COMEX_PAGE_RQST 10010
+#define CODE_COMEX_PAGE_RPLY 10011
+
 //	Comm structure
 
 typedef struct{
