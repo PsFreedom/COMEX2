@@ -83,7 +83,6 @@ MODULE_LICENSE("Dual BSD/GPL");
 #define RPING_BUFSIZE (4*1024*1024)
 #define VERB_RECV_SLOT 64
 
-#include "COMEX_module_lib.h"		// for COMEX
 enum mem_type {
 	DMA = 1,
 	FASTREG = 2,
@@ -244,6 +243,9 @@ struct krping_cb {
   int remotenodeID;
 };
 struct krping_cb **cbs;
+
+#include "COMEX_module_lib.h"		// for COMEX
+
 // regis memory
 static int regis_bigspace(struct krping_sharedspace *bigspace,int num_bigpages){
   int i;
@@ -330,7 +332,7 @@ static int do_write(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 
   int ret;
   struct ib_send_wr *bad_wr;
   uint64_t pageno,pageoffset;
-  ret=down_interruptible(&cb->sem_write_able);
+  ret=down_killable(&cb->sem_write_able);
   DEBUG_LOG("RDMA WRITE\n");
   printk("localoffset=%lld remoteoffset=%lld\n",local_offset,remote_offset);
 	cb->rdma_sgl.lkey = cb->dma_mr->rkey; //no lkey?
@@ -359,7 +361,7 @@ static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 s
   int ret;
   struct ib_send_wr *bad_wr;
   uint32_t pageno,pageoffset;
-  ret=down_interruptible(&cb->sem_read_able);
+  ret=down_killable(&cb->sem_read_able);
   DEBUG_LOG("RDMA READ\n");
 	cb->rdma_sgl.lkey = cb->dma_mr->rkey; //no lkey?
   //change
@@ -420,13 +422,13 @@ static int deep_send(struct krping_cb *cb, u64 imm){
 static int universal_send(struct krping_cb *cb, u64 imm, char* addr, u64 size){
   int ret;
   void *info = &cb->send_buf;
-  ret=down_interruptible(&cb->sem_verb_able);
+  ret=down_killable(&cb->sem_verb_able);
   memcpy(info,addr,size);
   ret=deep_send(cb, imm);
   if(ret){
     DEBUG_LOG("SEND VERB ISSUE ERROR\n");
   }
-  return down_interruptible(&cb->sem_verb_done);
+  return down_killable(&cb->sem_verb_done);
 }
 //no more one send, then tell RDMA write whole things
 static int send_buffer_info(struct krping_cb *cb)
@@ -443,10 +445,10 @@ static int send_buffer_info(struct krping_cb *cb)
   info->instanceno=htonl(cb->mynodeID);
   DEBUG_LOG("send RDMA buffer table addr %llx rkey %x len =%d pages\n", (uint64_t)cb->ptable_dma_addr, cb->dma_mr->rkey, PAGESCOUNT);
   ret= deep_send(cb, 2);
-  ret=down_interruptible(&cb->sem_verb_done);
+  ret=down_killable(&cb->sem_verb_done);
   DEBUG_LOG("send buffer info success wait for recv\n");
   wait_event_interruptible(cb->sem, cb->state >= RDMA_READY); //send done
-  ret=down_interruptible(&cb->sem_read); //recv then read done
+  ret=down_killable(&cb->sem_read); //recv then read done
   if (ret) {
     printk(KERN_ERR PFX "post read err %d\n", ret);
     return ret;
@@ -487,12 +489,12 @@ static int universal_recv_handler(struct krping_cb *cb, struct ib_wc *wc){
 			DEBUG_LOG("recv exit");
 			up(&cb->sem_exit);
 			break;
-        case CODE_COMEX_PAGE_RQST: //set buffers info
-			COMEX_do_verb( wc->ex.imm_data, &cb->recv_buf[slot].piggy);
-			up(&cb->sem_exit);
+        case 99: //set buffers info
+			printk("unexpected,unhandled immediate received=%d %s\n",wc->ex.imm_data,cb->recv_buf[slot].piggy);
 			break;
         default:
-          printk("unexpected,unhandled immediate received=%d %s\n",wc->ex.imm_data,cb->recv_buf[slot].piggy);
+			COMEX_do_verb( wc->ex.imm_data, &cb->recv_buf[slot].piggy);
+			up(&cb->sem_exit);
       }
     }else{
       printk("call recv handler but no imm\n");
@@ -905,7 +907,7 @@ static void krping_test_server(struct krping_cb *cb)
   //DEBUG_LOG("%d:issue read\n",cb->cbindex);
   //CHK(do_read(cb,0,0,24) )
   //DEBUG_LOG("%d:wait sem read\n",cb->cbindex);
-  //ret=down_interruptible(&cb->sem_read);
+  //ret=down_killable(&cb->sem_read);
   //dma_sync_single_for_cpu(cb->pd->device->dma_device, cb->rdma_dma_addr, sizeof(cb->rdma_buf), DMA_FROM_DEVICE);
   
   //DEBUG_LOG("%d:string= %s\n",cb->cbindex,(cb->rdma_buf) );
@@ -916,12 +918,12 @@ static void krping_test_server(struct krping_cb *cb)
    //dma_sync_single_for_device(cb->pd->device->dma_device, cb->rdma_dma_addr, sizeof(cb->rdma_buf), DMA_TO_DEVICE);
   
   CHK(do_write(cb,16,16,24) )
-  ret=down_interruptible(&cb->sem_write);
+  ret=down_killable(&cb->sem_write);
   DEBUG_LOG("%d:done\n",cb->cbindex);
   */
   //CHK(universal_send(cb, 5,t, 4)) //test kill signal
   up(&cb->sem_ready);
-  ret=down_interruptible(&cb->sem_exit);
+  ret=down_killable(&cb->sem_exit);
   DEBUG_LOG("%d:unlocked from server\n",cb->cbindex);
 }
 
@@ -993,7 +995,7 @@ static void krping_test_client(struct krping_cb *cb)
   }
   /*
   CHK(universal_send(cb, 99,t, 4)) 
-  ret=down_interruptible(&cb->sem_verb_done);
+  ret=down_killable(&cb->sem_verb_done);
   t[0]--;
   
   
@@ -1001,7 +1003,7 @@ static void krping_test_client(struct krping_cb *cb)
   */
   //CHK(universal_send(cb, 5,t, 4)) //test kill signal
   up(&cb->sem_ready);
-  ret=down_interruptible(&cb->sem_exit);
+  ret=down_killable(&cb->sem_exit);
   DEBUG_LOG("%d:unlocked from client\n",cb->cbindex);
   //dma_sync_sg_for_cpu(cb->pd->device->dma_device, cb->sg, PAGESCOUNT, DMA_FROM_DEVICE);
   //printk("%d:string= %s\n",cb->cbindex,(char*)(cb->bigspace->bufferpages[0]+16) ); //someone write here //testbug
@@ -1268,8 +1270,6 @@ int krping_doit(char *cmd)
 		}
 	}
 	
-	COMEX_init();		// for COMEX
-	
 	//if (ret)
 	//	goto out;
   for(i=0;i<totalcb;i++){
@@ -1301,7 +1301,7 @@ int krping_doit(char *cmd)
   //// chk for readiness of each
   
   for(i=0;i<totalcb;i++){
-    down_interruptible(&cb[i]->sem_ready);
+    down_killable(&cb[i]->sem_ready);
   }
   ssleep(3);
   DEBUG_LOG("Allthread ready to operate\n");
@@ -1321,6 +1321,8 @@ int krping_doit(char *cmd)
     }
   //}
   
+  COMEX_init();	// for COMEX
+  
   //RDMA test
   /*
   for(k=0;k<2;k++){
@@ -1330,7 +1332,7 @@ int krping_doit(char *cmd)
   }
   */
   /////
-  ret=down_interruptible(&sem_killsw); //never get unlocked naturally
+  ret=down_killable(&sem_killsw); //never get unlocked naturally
   //// should never run below this line
 
   DEBUG_LOG("\n\nKILL SWITCH UNLOCKED\n");

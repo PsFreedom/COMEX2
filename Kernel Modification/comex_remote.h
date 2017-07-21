@@ -29,7 +29,7 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, unsigned long *r
 //	printk(KERN_INFO "%s... Begin\n", __FUNCTION__);
 	
 	dest_node = COMEX_hash(get_page_PID(old_page));
-	down_interruptible(&COMEX_remote_MUTEX);
+	down_killable(&COMEX_remote_MUTEX);
 	
 	for(i=0; i<MAX_TRY; i++){
 		if(COMEX_free_group[dest_node].total_group < MIN_SIZE_RQ/2 && 
