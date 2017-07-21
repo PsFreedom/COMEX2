@@ -10,8 +10,7 @@ dmesg -c && modprobe -r rdma_krping
 make clean && make && make install && modprobe rdma_krping
 
 
-echo "server,total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x" >/proc/krping
-echo "client,addr=192.168.35.1,port=5678,n_nodes=2,total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x,node_ID=5" >/proc/krping
+echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x" >/proc/krping
 
 
 cd /home/benchmark/NPB3.3.1/NPB3.3-SER && make suite 

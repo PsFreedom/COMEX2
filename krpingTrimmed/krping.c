@@ -243,7 +243,7 @@ struct krping_cb {
   int mynodeID;
   int remotenodeID;
 };
-struct krping_cb *cbs[];
+struct krping_cb **cbs;
 // regis memory
 static int regis_bigspace(struct krping_sharedspace *bigspace,int num_bigpages){
   int i;
@@ -488,7 +488,7 @@ static int universal_recv_handler(struct krping_cb *cb, struct ib_wc *wc){
 			up(&cb->sem_exit);
 			break;
         case CODE_COMEX_PAGE_RQST: //set buffers info
-			COMEX_do_verb( wc->ex.imm_data, &cb->recv_buf.piggy);
+			COMEX_do_verb( wc->ex.imm_data, &cb->recv_buf[slot].piggy);
 			up(&cb->sem_exit);
 			break;
         default:
@@ -1157,17 +1157,17 @@ int krping_doit(char *cmd)
 	unsigned long optint;
   struct semaphore sem_killsw;
   char stri[]="responsethread  ";
-  sema_init(&sem_killsw,0);
   // for debug
   int j,k;
   char t[170]="zxg   ";
   //
+  sema_init(&sem_killsw,0);
   bigspaceptr = kzalloc(sizeof(*bigspaceptr)*totalcb, GFP_KERNEL);
   if (!bigspaceptr)
 		return -ENOMEM;
   regis_bigspace(bigspaceptr,PAGESCOUNT); //4MB each
   
-  cbs=kzalloc(sizeof (void*)*CONF_totalCB);
+  cbs=kzalloc(sizeof (void*)*CONF_totalCB, GFP_KERNEL);
   for(i=0;i<totalcb;i++){
   task[i]=(struct task_struct*)kzalloc(sizeof(struct task_struct), GFP_KERNEL);
 	cb[i] = (struct krping_cb *)kzalloc(sizeof(struct krping_cb), GFP_KERNEL);
@@ -1248,13 +1248,6 @@ int krping_doit(char *cmd)
 			cb[0]->verbose++;
 			DEBUG_LOG("verbose\n");
 			break;
-      //
-		case 'i':
-			node_ID = (int)optint;			// for COMEX
-			break;
-		case 'n':
-			n_nodes = (int)optint;
-			break;
 		case 't':
 			total_pages = (int)optint;
 			break;
@@ -1275,7 +1268,7 @@ int krping_doit(char *cmd)
 		}
 	}
 	
-//	COMEX_init();		// for COMEX
+	COMEX_init();		// for COMEX
 	
 	//if (ret)
 	//	goto out;
