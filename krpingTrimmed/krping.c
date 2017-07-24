@@ -1150,123 +1150,133 @@ static void krping_run_all(struct krping_cb *cb)
 int krping_doit(char *cmd)
 {
 	struct krping_cb* cb[CONF_totalCB];
-  struct task_struct *task[CONF_totalCB];
-  struct krping_sharedspace *bigspaceptr;
+	struct task_struct *task[CONF_totalCB];
+	struct krping_sharedspace *bigspaceptr;
+
 	int op,i;
 	int ret = 0;
-  int totalcb=CONF_totalCB;
+	int totalcb = CONF_totalCB;
 	char *optarg;
 	unsigned long optint;
-  struct semaphore sem_killsw;
-  char stri[]="responsethread  ";
-  // for debug
-  int j,k;
-  char t[170]="zxg   ";
-  //
-  sema_init(&sem_killsw,0);
-  bigspaceptr = kzalloc(sizeof(*bigspaceptr)*totalcb, GFP_KERNEL);
-  if (!bigspaceptr)
+	struct semaphore sem_killsw;
+	char stri[]="responsethread  ";
+	
+// for debug
+	int j,k;
+	char t[170]="zxg   ";
+//
+
+	sema_init(&sem_killsw, 0);
+	bigspaceptr = kzalloc(sizeof(*bigspaceptr)*totalcb, GFP_KERNEL);
+	if (!bigspaceptr)
 		return -ENOMEM;
-  regis_bigspace(bigspaceptr,PAGESCOUNT); //4MB each
+	regis_bigspace(bigspaceptr,PAGESCOUNT); //4MB each
   
-  cbs=kzalloc(sizeof (void*)*CONF_totalCB, GFP_KERNEL);
-  for(i=0;i<totalcb;i++){
-  task[i]=(struct task_struct*)kzalloc(sizeof(struct task_struct), GFP_KERNEL);
-	cb[i] = (struct krping_cb *)kzalloc(sizeof(struct krping_cb), GFP_KERNEL);
-	cbs[i]=cb[i];
-  if (!cb[i])
-		return -ENOMEM;
-  cb[i]->cbindex=i;
-	cb[i]->bigspace=bigspaceptr;
-  cb[i]->exitstatus=4;
+	cbs = kzalloc(sizeof(void*)*CONF_totalCB, GFP_KERNEL);
+	for(i=0;i<totalcb;i++)
+	{
+		task[i] = (struct task_struct*)kzalloc(sizeof(struct task_struct), GFP_KERNEL);
+		cb[i]   = (struct krping_cb *)kzalloc(sizeof(struct krping_cb), GFP_KERNEL);
+		cbs[i]  = cb[i];
+		
+		if (!cb[i])
+			return -ENOMEM;
+		
+		cb[i]->cbindex    = i;
+		cb[i]->bigspace   = bigspaceptr;
+		cb[i]->exitstatus = 4;
+		cb[i]->state      = IDLE;
+		cb[i]->size       = RPING_BUFSIZE;
+		cb[i]->txdepth    = RPING_SQ_DEPTH;
+		cb[i]->mem        = DMA;
+		
+		init_waitqueue_head(&cb[i]->sem);
+		sema_init(&cb[i]->sem_exit,0);
+		sema_init(&cb[i]->sem_verb_able,1);
+		sema_init(&cb[i]->sem_verb_done,0);
+		sema_init(&cb[i]->sem_read_able,1);
+		sema_init(&cb[i]->sem_read,0);
+		sema_init(&cb[i]->sem_write_able,1);
+		sema_init(&cb[i]->sem_write,0);
+		sema_init(&cb[i]->sem_ready,0);
+		
+		// IP
+		cb[i]->addr_str  = CONF_allIP[i];
+		in4_pton(CONF_allIP[i], -1, cb[i]->addr, -1, NULL);
+		cb[i]->addr_type = AF_INET;
+		DEBUG_LOG("ipaddr %d: (%s)\n", i,CONF_allIP[i]);
+		
+		// Port
+		cb[i]->port = CONF_allPort[i];
+		DEBUG_LOG("port %d\n", (int)CONF_allPort[i]);
+
+		// ID
+		cb[i]->mynodeID = CONF_nodeID;
+		
+		// server?
+		cb[i]->server =CONF_isServer[i];
+		
+		if(cb[i]->server){
+			DEBUG_LOG("server\n");
+		}else{
+			DEBUG_LOG("client\n");
+		}
+		DEBUG_LOG("=======\n");
+		//
+	}
   
-	cb[i]->state = IDLE;
-	cb[i]->size = RPING_BUFSIZE;
-	cb[i]->txdepth = RPING_SQ_DEPTH;
-	cb[i]->mem = DMA;
-	init_waitqueue_head(&cb[i]->sem);
-  sema_init(&cb[i]->sem_exit,0);
-	sema_init(&cb[i]->sem_verb_able,1);
-	sema_init(&cb[i]->sem_verb_done,0);
-	sema_init(&cb[i]->sem_read_able,1);
-  sema_init(&cb[i]->sem_read,0);
-	sema_init(&cb[i]->sem_write_able,1);
-  sema_init(&cb[i]->sem_write,0);
-  sema_init(&cb[i]->sem_ready,0);
-  // IP
-  cb[i]->addr_str=CONF_allIP[i];
-  in4_pton(CONF_allIP[i], -1, cb[i]->addr, -1, NULL);
-  cb[i]->addr_type = AF_INET;
-  DEBUG_LOG("ipaddr %d: (%s)\n", i,CONF_allIP[i]);
-  // Port
-  cb[i]->port = CONF_allPort[i];
-	DEBUG_LOG("port %d\n", (int)CONF_allPort[i]);
-	//
-	cb[i]->mynodeID=CONF_nodeID;
-  // server?
-  cb[i]->server =CONF_isServer[i];
-  if(cb[i]->server){
-    DEBUG_LOG("server\n");
-  }else{
-    DEBUG_LOG("client\n");
-  }
-  DEBUG_LOG("=======\n");
-  //
-  }
-  
-  //// ???? check later
+//// ???? check later
 	mutex_lock(&krping_mutex);
 	list_add_tail(&cb[0]->list, &krping_cbs);
 	mutex_unlock(&krping_mutex);
 ////
-  while ((op = krping_getopt("krping", &cmd, krping_opts, NULL, &optarg,
-			      &optint)) != 0) {
-		switch (op) {
-		case 'a':
-			cb[0]->addr_str = optarg;
-			in4_pton(optarg, -1, cb[0]->addr, -1, NULL);
-			cb[0]->addr_type = AF_INET;
-			DEBUG_LOG("ipaddr (%s)\n", optarg);
-			break;
-		case 'A':
-			cb[0]->addr_str = optarg;
-			in6_pton(optarg, -1, cb[0]->addr, -1, NULL);
-			cb[0]->addr_type = AF_INET6;
-			DEBUG_LOG("ipv6addr (%s)\n", optarg);
-			break;
-		case 'p':
-			cb[0]->port = htons(optint);
-			DEBUG_LOG("port %d\n", (int)optint);
-			break;
-		case 's':
-			cb[0]->server = 1;
-			DEBUG_LOG("server\n");
-			break;
-		case 'c':
-			cb[0]->server = 0;
-			DEBUG_LOG("client\n");
-			break;
-		case 'v':
-			cb[0]->verbose++;
-			DEBUG_LOG("verbose\n");
-			break;
-		case 't':
-			total_pages = (int)optint;
-			break;
-		case 'w':
-			writeOut_buff = (int)optint;
-			break;
-		case 'r':
-			readIn_buff = (int)optint;
-			break;
-		case 'o':
-			strcpy(proc_name, optarg);
-			break;
-      //
-		default:
-			printk(KERN_ERR PFX "unknown opt %s\n", optarg);
-			ret = -EINVAL;
-			break;
+	while ((op = krping_getopt("krping", &cmd, krping_opts, NULL, &optarg, &optint)) != 0)
+	{
+		switch (op){
+			case 'a':
+				cb[0]->addr_str = optarg;
+				in4_pton(optarg, -1, cb[0]->addr, -1, NULL);
+				cb[0]->addr_type = AF_INET;
+				DEBUG_LOG("ipaddr (%s)\n", optarg);
+				break;
+			case 'A':
+				cb[0]->addr_str = optarg;
+				in6_pton(optarg, -1, cb[0]->addr, -1, NULL);
+				cb[0]->addr_type = AF_INET6;
+				DEBUG_LOG("ipv6addr (%s)\n", optarg);
+				break;
+			case 'p':
+				cb[0]->port = htons(optint);
+				DEBUG_LOG("port %d\n", (int)optint);
+				break;
+			case 's':
+				cb[0]->server = 1;
+				DEBUG_LOG("server\n");
+				break;
+			case 'c':
+				cb[0]->server = 0;
+				DEBUG_LOG("client\n");
+				break;
+			case 'v':
+				cb[0]->verbose++;
+				DEBUG_LOG("verbose\n");
+				break;
+			case 't':
+				total_pages = (int)optint;
+				break;
+			case 'w':
+				writeOut_buff = (int)optint;
+				break;
+			case 'r':
+				readIn_buff = (int)optint;
+				break;
+			case 'o':
+				strcpy(proc_name, optarg);
+				break;
+			default:
+				printk(KERN_ERR PFX "unknown opt %s\n", optarg);
+				ret = -EINVAL;
+				break;
 		}
 	}
 	
@@ -1426,6 +1436,7 @@ static int krping_read_open(struct inode *inode, struct file *file)
         //return single_open(file, krping_read_proc, inode->i_private);
         return single_open(file, krping_read_proc, inode->i_private);
 }
+
 struct file_operations krping_ops = {
 	.owner = THIS_MODULE,
 	.open = krping_read_open,
@@ -1433,7 +1444,7 @@ struct file_operations krping_ops = {
 	.llseek  = seq_lseek,
 	.release = single_release,
 	.write = krping_write_proc,
-  };
+};
 
 static int __init krping_init(void)
 {
