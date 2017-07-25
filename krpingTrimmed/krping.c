@@ -448,24 +448,25 @@ static void work_queue_send(struct work_struct *work_arg){
   //DEBUG_LOG(" %lld %d \n",data->imm,data->size);
   kfree(data);
 }
+
 //put message in the queue-> wake up a sem, a thread in 
 // https://stackoverflow.com/questions/19146317/how-to-create-a-kernel-thread-in-atomic-context-and-use-it-multiple-times-bug
 // http://www.makelinux.net/ldd3/chp-7-sect-6
-static void universal_queue_send(struct krping_cb *cb, u64 imm, char* addr, u64 size){
-  int ret; 
-  struct work_data *data = kmalloc(sizeof(struct work_data), GFP_ATOMIC);
+static void universal_queue_send(struct krping_cb *cb, u64 imm, char* addr, u64 size)
+{
+	int ret; 
+	struct work_data *data = kmalloc(sizeof(struct work_data), GFP_ATOMIC);
   
-  //init params
-  memcpy(data->payload.piggy,addr,size);
-  data->imm=imm;
-  data->size=size;
-  data->cb=cb;
-  //init work quque
-  printk(KERN_INFO "%s ########### called\n", __FUNCTION__);
+//init params
+	memcpy(data->payload.piggy,addr,size);
+	data->imm=imm;
+	data->size=size;
+	data->cb=cb;
   
-  INIT_WORK(&data->real_work, work_queue_send);
-  queue_work(cb->wq, &data->real_work);
-  return;
+//init work quque  
+	INIT_WORK(&data->real_work, work_queue_send);
+	queue_work(cb->wq, &data->real_work);
+	return;
 }
 //no more one send, then tell RDMA write whole things
 static int send_buffer_info(struct krping_cb *cb)
@@ -1314,105 +1315,84 @@ int krping_doit(char *cmd)
 			break;
 		}
 	}
-  for(i=0;i<totalcb;i++){
-    cbs[i]->cm_id = rdma_create_id(krping_cma_event_handler, cbs[i], RDMA_PS_TCP, IB_QPT_RC);
-    if (IS_ERR(cbs[i]->cm_id)) {
-      ret = PTR_ERR(cbs[i]->cm_id);
-      printk(KERN_ERR PFX "rdma_create_id error %d\n", ret);
-      goto out;
-    }
-  }
+
+	for(i=0; i<totalcb; i++){
+		cbs[i]->cm_id = rdma_create_id(krping_cma_event_handler, cbs[i], RDMA_PS_TCP, IB_QPT_RC);
+		if (IS_ERR(cbs[i]->cm_id)) {
+			ret = PTR_ERR(cbs[i]->cm_id);
+			printk(KERN_ERR PFX "rdma_create_id error %d\n", ret);
+			goto out;
+		}
+	}
 /////////////
 
-  for(i=0;i<totalcb;i++){
-       if(cbs[i]->server!=0){
-        stri[14]='0'+i;
-        printk("server thread %d start\n",i);
-        task[i]=kthread_run(&krping_run_all,(struct krping_cb *)cbs[i],stri);
+	for(i=0; i<totalcb; i++){
+		if(cbs[i]->server != 0){
+			stri[14] = '0'+i;
+			printk("server thread %d start\n",i);
+			task[i] = kthread_run(&krping_run_all, (struct krping_cb *)cbs[i], stri);
+		}
+	}
+	printk("going to sleep\n\n"); //5 sec before any client start
+	ssleep(10);
 
-       }
-  }
-  printk("going to sleep\n\n"); //5 sec before any client start
-  ssleep(10);
 
+//run all server first, then all client, just in case
+	for(i=0; i<totalcb; i++){
+		if(cbs[i]->server == 0){
+			stri[14] = '0'+i;
+			printk("client thread %d start\n", i);
+			task[i] = kthread_run(&krping_run_all, (struct krping_cb *)cbs[i], stri);
+		}
+	}
+	
+//// chk for readiness of each
+	for(i=0; i<totalcb; i++){
+		ret = down_killable(&cbs[i]->sem_ready);
+	}
+	ssleep(3);
+	DEBUG_LOG("Allthread ready to operate\n");
+	DEBUG_LOG("===========================\n");
+  
+//// ready to operate!  
+	COMEX_init();	// for COMEX
+	ret = down_killable(&sem_killsw); //never get unlocked naturally
+	
+//// should never run below this line
+	DEBUG_LOG("\n\nKILL SWITCH UNLOCKED\n");
+  
+  
+//// wind down process
+	DEBUG_LOG("breaking down!\n");
+	for(i=0; i<totalcb; i++){
+		disconnect_cb(cbs[i]);
+	}
+	
+//free buffer and deregister shared space
+	dma_unmap_sg(cbs[0]->pd->device->dma_device,
+				 cbs[0]->bigspace->sg,
+				 cbs[0]->bigspace->numbigpages, DMA_BIDIRECTIONAL);
 
-  //run all server first, then all client, just in case
-  for(i=0;i<totalcb;i++){
-       if(cbs[i]->server==0){
-        stri[14]='0'+i;
-        printk("client thread %d start\n",i);
-        task[i]=kthread_run(&krping_run_all,(struct krping_cb *)cbs[i],stri);
-
-       }
-  }
-  //// chk for readiness of each
-  
-  for(i=0;i<totalcb;i++){
-    ret=down_interruptible(&cbs[i]->sem_ready);
-  }
-  ssleep(3);
-  DEBUG_LOG("Allthread ready to operate\n");
-  DEBUG_LOG("===========================\n");
-  
-  //// ready to operate!
-  
-  //verb test
-  
-/*  //for(k=0;k<2;k++){
-    for(i=0;i<totalcb;i++){
-      for(j=0;j<50;j++){
-        //DEBUG_LOG("sending %d %d\n",i,j);
-        sprintf(t,"zxyf %d %d",cbs[i]->cbindex,j);
-         // CHK(universal_send(cbs[i], 99,t, 14)) 
-         universal_queue_send(cbs[i], 99,t, 14); 
-      }
-    }
-  //}*/
-  
-  COMEX_init();	// for COMEX
-  
-  //RDMA test
-  /*
-  for(k=0;k<2;k++){
-    for(i=0;i<2;i++){
-      
-    }
-  }
-  */
-
-  ret=down_interruptible(&sem_killsw); //never get unlocked naturally
-  //// should never run below this line
-
-  DEBUG_LOG("\n\nKILL SWITCH UNLOCKED\n");
-  
-  
-  //// wind down process
-  DEBUG_LOG("breaking down!\n");
-  for(i=0;i<totalcb;i++){
-    disconnect_cb(cbs[i]);
-  }
-  //free buffer and deregister shared space
-  dma_unmap_sg(cbs[0]->pd->device->dma_device,
-			 cbs[0]->bigspace->sg,
-			 cbs[0]->bigspace->numbigpages, DMA_BIDIRECTIONAL);     
-  for(i=0;i<PAGESCOUNT;i++){
-    kfree((void*)cbs[0]->bigspace->bufferpages[i]);
-  }
-  //decompose all buffers in cb
-  for(i=0;i<totalcb;i++){
-    winddown_cb(cbs[i],cbs[i]->exitstatus);
-    
-    flush_workqueue(cbs[i]->wq);
-    destroy_workqueue(cbs[i]->wq);
-  }
+	for(i=0; i<PAGESCOUNT; i++){
+		kfree((void*)cbs[0]->bigspace->bufferpages[i]);
+	}
+	
+//decompose all buffers in cb
+	for(i=0; i<totalcb; i++){
+		winddown_cb(cbs[i],cbs[i]->exitstatus);
+		flush_workqueue(cbs[i]->wq);
+		destroy_workqueue(cbs[i]->wq);
+	}
+	
 out:
 	mutex_lock(&krping_mutex);
 	list_del(&cbs[0]->list);
 	mutex_unlock(&krping_mutex);
-  for(i=0;i<totalcb;i++){
-    kfree(cbs[i]);
-  }
-  kfree(cbs);
+	
+	for(i=0; i<totalcb; i++){
+		kfree(cbs[i]);
+	}
+	kfree(cbs);
 	return ret;
 }
 

@@ -19,6 +19,16 @@ typedef struct{
 
 ////////////////////
 
+void print_freelist(int nodeID)
+{
+	free_group_t *myPtr;
+	
+	printk(KERN_INFO "List NO - %d\n", nodeID);
+	list_for_each_entry(myPtr, &COMEX_free_group[nodeID].free_group, link){
+		printk(KERN_INFO " >>> %lu - %lu\n", myPtr->addr_start, myPtr->addr_end);
+	}
+}
+
 int COMEX_hash(int seed){
 	return (seed+1)%COMEX_total_nodes;
 }
@@ -75,3 +85,20 @@ void COMEX_pages_request(int target)
 	COMEX_verb_send(target, CODE_COMEX_PAGE_RPLY, &myStruct, sizeof(myStruct));
 }
 EXPORT_SYMBOL(COMEX_pages_request);
+
+void COMEX_page_receive(int nodeID, int pageNO, int group_size)
+{
+	free_group_t *group_ptr = (free_group_t *)kzalloc(sizeof(free_group_t), GFP_ATOMIC);
+	
+	group_ptr->addr_start = (unsigned long)pageNO*X86PageSize;
+	group_ptr->addr_end   = group_ptr->addr_start + (X86PageSize*(1<<group_size)) - X86PageSize;
+	INIT_LIST_HEAD(&group_ptr->link);
+	
+	spin_lock(&COMEX_freelist_spin);
+	list_add_tail(&group_ptr->link, &COMEX_free_group[nodeID].free_group);
+	spin_unlock(&COMEX_freelist_spin);
+	
+	print_freelist(nodeID);
+//	printk(KERN_INFO "%s: >>> %d - %lu %lu \n", __FUNCTION__, nodeID, group_ptr->addr_start, group_ptr->addr_end);
+}
+EXPORT_SYMBOL(COMEX_page_receive);
