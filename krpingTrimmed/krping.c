@@ -53,6 +53,7 @@
 #include <linux/random.h>
 #include <linux/sched.h>
 #include <linux/kthread.h>
+#include <linux/workqueue.h>
 #include <linux/delay.h> // require for sleep?
 #include <asm/atomic.h>
 #include <asm/pci.h>
@@ -79,7 +80,7 @@ MODULE_LICENSE("Dual BSD/GPL");
  */
 #define RPING_SQ_DEPTH 128
 #define MAX_INLINE_PAYLOAD 162 //also say how big is the piggy
-#define PAGESCOUNT 1024
+#define PAGESCOUNT 2048
 #define RPING_BUFSIZE (4*1024*1024)
 #define VERB_RECV_SLOT 64
 
@@ -158,11 +159,11 @@ union bufferx{
  *
  */
  
-struct krping_sharedspace {
-	struct scatterlist sg[PAGESCOUNT]; //scatter list, max 8gb for now
-	char *bufferpages[PAGESCOUNT]; //our buffer, normal addr
-	uint64_t dmapages[PAGESCOUNT]; //our buffer, dma addr
-	int numbigpages; //number of big pages that it actually use
+struct krping_sharedspace{
+	struct   scatterlist sg[PAGESCOUNT]; 	//scatter list, max 8gb for now
+	char    *bufferpages[PAGESCOUNT]; 		//our buffer, normal addr
+	uint64_t dmapages[PAGESCOUNT]; 			//our buffer, dma addr
+	int      numbigpages; 					//number of big pages that it actually use
 };
  
 /*
@@ -208,9 +209,7 @@ struct krping_cb {
 
 	enum test_state state;		/* used for cond/signalling */
 	wait_queue_head_t sem;
-  struct semaphore sem_exit;
-  struct semaphore sem_verb_able;
-  struct semaphore sem_verb_done;
+  struct semaphore sem_verb;
   struct semaphore sem_read_able;
   struct semaphore sem_read;
   struct semaphore sem_write_able;
@@ -241,21 +240,30 @@ struct krping_cb {
   int cbindex;
   int mynodeID;
   int remotenodeID;
+  struct workqueue_struct *wq;//for queued response
 };
 struct krping_cb **cbs;
 
-#include "COMEX_module_lib.h"		// for COMEX
+ struct work_data {
+    struct work_struct real_work;
+    union bufferx payload;
+    uint64_t imm;
+    int size;
+    struct krping_cb *cb;
+};
 
+#include "COMEX_module_lib.h"		// for COMEX
 // regis memory
-static int regis_bigspace(struct krping_sharedspace *bigspace,int num_bigpages){
-  int i;
-  bigspace->numbigpages=num_bigpages;
-  for(i=0;i<num_bigpages;i++){
-     //sg_set_page(&cb->sg[i],alloc_pages( GFP_KERNEL, 10),4*1024*1024,0); // choice A, get page directly
-    bigspace->bufferpages[i]=kmalloc(RPING_BUFSIZE, GFP_KERNEL); // choice B, get buffer and addr
-    sg_set_buf(&bigspace->sg[i],bigspace->bufferpages[i],RPING_BUFSIZE);
-  }
-  return 0;
+static int regis_bigspace(struct krping_sharedspace *bigspace,int num_bigpages)
+{
+	int i;
+	bigspace->numbigpages = num_bigpages;
+	for(i=0; i<num_bigpages; i++){
+		//sg_set_page(&cb->sg[i],alloc_pages( GFP_KERNEL, 10),4*1024*1024,0); // choice A, get page directly
+		bigspace->bufferpages[i] = kmalloc(RPING_BUFSIZE, GFP_KERNEL); // choice B, get buffer and addr
+		sg_set_buf(&bigspace->sg[i], bigspace->bufferpages[i], RPING_BUFSIZE);
+	}
+	return 0;
 }
 
 //big page align in 4MB chunks
@@ -408,6 +416,7 @@ static int deep_send(struct krping_cb *cb, u64 imm){
   int ret;
   
   
+cb->send_sgl.addr = &cb->send_buf;
 	//cb->send_sgl.addr = cb->send_dma_addr;
 	//cb->send_sgl.length = sizeof cb->send_buf;
  //cb->send_sgl.lkey = cb->dma_mr->lkey; //
@@ -422,13 +431,41 @@ static int deep_send(struct krping_cb *cb, u64 imm){
 static int universal_send(struct krping_cb *cb, u64 imm, char* addr, u64 size){
   int ret;
   void *info = &cb->send_buf;
-  ret=down_killable(&cb->sem_verb_able);
+  ret=down_killable(&cb->sem_verb);
   memcpy(info,addr,size);
   ret=deep_send(cb, imm);
   if(ret){
     DEBUG_LOG("SEND VERB ISSUE ERROR\n");
   }
-  return down_killable(&cb->sem_verb_done);
+  return 0;
+}
+
+
+//called by work queue
+static void work_queue_send(struct work_struct *work_arg){
+  struct work_data * data = container_of(work_arg, struct work_data, real_work);
+  universal_send(data->cb,data->imm,&data->payload,data->size);
+  //DEBUG_LOG(" %lld %d \n",data->imm,data->size);
+  kfree(data);
+}
+//put message in the queue-> wake up a sem, a thread in 
+// https://stackoverflow.com/questions/19146317/how-to-create-a-kernel-thread-in-atomic-context-and-use-it-multiple-times-bug
+// http://www.makelinux.net/ldd3/chp-7-sect-6
+static void universal_queue_send(struct krping_cb *cb, u64 imm, char* addr, u64 size){
+  int ret; 
+  struct work_data *data = kmalloc(sizeof(struct work_data), GFP_ATOMIC);
+  
+  //init params
+  memcpy(data->payload.piggy,addr,size);
+  data->imm=imm;
+  data->size=size;
+  data->cb=cb;
+  //init work quque
+  printk(KERN_INFO "%s ########### called\n", __FUNCTION__);
+  
+  INIT_WORK(&data->real_work, work_queue_send);
+  queue_work(cb->wq, &data->real_work);
+  return;
 }
 //no more one send, then tell RDMA write whole things
 static int send_buffer_info(struct krping_cb *cb)
@@ -445,7 +482,6 @@ static int send_buffer_info(struct krping_cb *cb)
   info->instanceno=htonl(cb->mynodeID);
   DEBUG_LOG("send RDMA buffer table addr %llx rkey %x len =%d pages\n", (uint64_t)cb->ptable_dma_addr, cb->dma_mr->rkey, PAGESCOUNT);
   ret= deep_send(cb, 2);
-  ret=down_killable(&cb->sem_verb_done);
   DEBUG_LOG("send buffer info success wait for recv\n");
   wait_event_interruptible(cb->sem, cb->state >= RDMA_READY); //send done
   ret=down_killable(&cb->sem_read); //recv then read done
@@ -487,14 +523,13 @@ static int universal_recv_handler(struct krping_cb *cb, struct ib_wc *wc){
           break;
         case 5: //set buffers info
 			DEBUG_LOG("recv exit");
-			up(&cb->sem_exit);
 			break;
         case 99: //set buffers info
 			printk("unexpected,unhandled immediate received=%d %s\n",wc->ex.imm_data,cb->recv_buf[slot].piggy);
 			break;
         default:
 			COMEX_do_verb( wc->ex.imm_data, &cb->recv_buf[slot].piggy);
-			up(&cb->sem_exit);
+			
       }
     }else{
       printk("call recv handler but no imm\n");
@@ -533,8 +568,7 @@ static void krping_cq_event_handler_send(struct ib_cq *cq, void *ctx)
 		switch (wc.opcode) {
 		case IB_WC_SEND:
 			//DEBUG_LOG("send completion\n");
-      up(&cb->sem_verb_done);
-      up(&cb->sem_verb_able);
+      up(&cb->sem_verb);
 			break;
 
 		case IB_WC_RDMA_WRITE:
@@ -668,7 +702,7 @@ static void krping_setup_wr(struct krping_cb *cb)
   }
 //send structures that have never changed, thus init here only once
 	cb->sq_wr.opcode = IB_WR_SEND_WITH_IMM;
-	cb->sq_wr.send_flags = IB_SEND_SIGNALED ; //inline? IB_SEND_INLINE
+	cb->sq_wr.send_flags = IB_SEND_SIGNALED | IB_SEND_INLINE ; //inline? IB_SEND_INLINE
 
 	cb->send_sgl.addr = cb->send_dma_addr;
 	cb->send_sgl.length = sizeof cb->send_buf;
@@ -814,6 +848,7 @@ static int krping_create_qp(struct krping_cb *cb)
 	init_attr.cap.max_recv_wr = 128; //modified
 	init_attr.cap.max_recv_sge = 8;
 	init_attr.cap.max_send_sge = 8; 
+  init_attr.cap.max_inline_data = 180;
 	init_attr.qp_type = IB_QPT_RC;
 	init_attr.send_cq = cb->cq_send;
 	init_attr.recv_cq = cb->cq_recv;
@@ -923,7 +958,6 @@ static void krping_test_server(struct krping_cb *cb)
   */
   //CHK(universal_send(cb, 5,t, 4)) //test kill signal
   up(&cb->sem_ready);
-  ret=down_killable(&cb->sem_exit);
   DEBUG_LOG("%d:unlocked from server\n",cb->cbindex);
 }
 
@@ -995,7 +1029,7 @@ static void krping_test_client(struct krping_cb *cb)
   }
   /*
   CHK(universal_send(cb, 99,t, 4)) 
-  ret=down_killable(&cb->sem_verb_done);
+  ret=down_killable(&cb->sem_verb);
   t[0]--;
   
   
@@ -1003,7 +1037,6 @@ static void krping_test_client(struct krping_cb *cb)
   */
   //CHK(universal_send(cb, 5,t, 4)) //test kill signal
   up(&cb->sem_ready);
-  ret=down_killable(&cb->sem_exit);
   DEBUG_LOG("%d:unlocked from client\n",cb->cbindex);
   //dma_sync_sg_for_cpu(cb->pd->device->dma_device, cb->sg, PAGESCOUNT, DMA_FROM_DEVICE);
   //printk("%d:string= %s\n",cb->cbindex,(char*)(cb->bigspace->bufferpages[0]+16) ); //someone write here //testbug
@@ -1149,169 +1182,164 @@ static void krping_run_all(struct krping_cb *cb)
 
 int krping_doit(char *cmd)
 {
-	struct krping_cb* cb[CONF_totalCB];
-	struct task_struct *task[CONF_totalCB];
-	struct krping_sharedspace *bigspaceptr;
+
+  struct task_struct *task[CONF_totalCB];
+  struct krping_sharedspace *bigspaceptr;
 
 	int op,i;
 	int ret = 0;
-	int totalcb = CONF_totalCB;
+  int totalcb=CONF_totalCB;
 	char *optarg;
 	unsigned long optint;
-	struct semaphore sem_killsw;
-	char stri[]="responsethread  ";
-	
-// for debug
-	int j,k;
-	char t[170]="zxg   ";
-//
-
-	sema_init(&sem_killsw, 0);
-	bigspaceptr = kzalloc(sizeof(*bigspaceptr)*totalcb, GFP_KERNEL);
-	if (!bigspaceptr)
+  struct semaphore sem_killsw;
+  char stri[]="responsethread  ";
+  // for debug
+  int j,k;
+  char t[170]="zxg   ";
+  //
+  sema_init(&sem_killsw,0);
+  cbs=kmalloc(sizeof(void*)*CONF_totalCB,GFP_KERNEL);
+  bigspaceptr = kzalloc(sizeof(*bigspaceptr)*totalcb, GFP_KERNEL);
+  if (!bigspaceptr)
 		return -ENOMEM;
-	regis_bigspace(bigspaceptr,PAGESCOUNT); //4MB each
-  
-	cbs = kzalloc(sizeof(void*)*CONF_totalCB, GFP_KERNEL);
-	for(i=0;i<totalcb;i++)
-	{
-		task[i] = (struct task_struct*)kzalloc(sizeof(struct task_struct), GFP_KERNEL);
-		cb[i]   = (struct krping_cb *)kzalloc(sizeof(struct krping_cb), GFP_KERNEL);
-		cbs[i]  = cb[i];
-		
-		if (!cb[i])
-			return -ENOMEM;
-		
-		cb[i]->cbindex    = i;
-		cb[i]->bigspace   = bigspaceptr;
-		cb[i]->exitstatus = 4;
-		cb[i]->state      = IDLE;
-		cb[i]->size       = RPING_BUFSIZE;
-		cb[i]->txdepth    = RPING_SQ_DEPTH;
-		cb[i]->mem        = DMA;
-		
-		init_waitqueue_head(&cb[i]->sem);
-		sema_init(&cb[i]->sem_exit,0);
-		sema_init(&cb[i]->sem_verb_able,1);
-		sema_init(&cb[i]->sem_verb_done,0);
-		sema_init(&cb[i]->sem_read_able,1);
-		sema_init(&cb[i]->sem_read,0);
-		sema_init(&cb[i]->sem_write_able,1);
-		sema_init(&cb[i]->sem_write,0);
-		sema_init(&cb[i]->sem_ready,0);
-		
-		// IP
-		cb[i]->addr_str  = CONF_allIP[i];
-		in4_pton(CONF_allIP[i], -1, cb[i]->addr, -1, NULL);
-		cb[i]->addr_type = AF_INET;
-		DEBUG_LOG("ipaddr %d: (%s)\n", i,CONF_allIP[i]);
-		
-		// Port
-		cb[i]->port = CONF_allPort[i];
-		DEBUG_LOG("port %d\n", (int)CONF_allPort[i]);
-
-		// ID
-		cb[i]->mynodeID = CONF_nodeID;
-		
-		// server?
-		cb[i]->server =CONF_isServer[i];
-		
-		if(cb[i]->server){
-			DEBUG_LOG("server\n");
-		}else{
-			DEBUG_LOG("client\n");
-		}
-		DEBUG_LOG("=======\n");
-		//
-	}
-  
-//// ???? check later
+  regis_bigspace(bigspaceptr,PAGESCOUNT); //4MB each
+  for(i=0;i<totalcb;i++){
+    task[i]=(struct task_struct*)kzalloc(sizeof(struct task_struct), GFP_KERNEL);
+    cbs[i] = (struct krping_cb *)kzalloc(sizeof(struct krping_cb), GFP_KERNEL);
+    if(!cbs[i]->wq){ //no chance it exist, but just in case
+      cbs[i]->wq=create_singlethread_workqueue("COMEX Verb send wq");
+    }
+    if (!cbs[i])
+      return -ENOMEM;
+    cbs[i]->cbindex=i;
+    cbs[i]->bigspace=bigspaceptr;
+    cbs[i]->exitstatus=4;
+    
+    cbs[i]->state = IDLE;
+    cbs[i]->size = RPING_BUFSIZE;
+    cbs[i]->txdepth = RPING_SQ_DEPTH;
+    cbs[i]->mem = DMA;
+    
+    init_waitqueue_head(&cbs[i]->sem);
+    sema_init(&cbs[i]->sem_verb,1);
+    sema_init(&cbs[i]->sem_read_able,1);
+    sema_init(&cbs[i]->sem_read,0);
+    sema_init(&cbs[i]->sem_write_able,1);
+    sema_init(&cbs[i]->sem_write,0);
+    sema_init(&cbs[i]->sem_ready,0);
+    // IP
+    cbs[i]->addr_str=CONF_allIP[i];
+    in4_pton(CONF_allIP[i], -1, cbs[i]->addr, -1, NULL);
+    cbs[i]->addr_type = AF_INET;
+    DEBUG_LOG("ipaddr %d: (%s)\n", i,CONF_allIP[i]);
+    // Port
+    cbs[i]->port = CONF_allPort[i];
+    DEBUG_LOG("port %d\n", (int)CONF_allPort[i]);
+    //
+    cbs[i]->mynodeID=CONF_nodeID;
+    // server?
+    cbs[i]->server =CONF_isServer[i];
+    if(cbs[i]->server){
+      DEBUG_LOG("server\n");
+    }else{
+      DEBUG_LOG("client\n");
+    }
+    DEBUG_LOG("=======\n");
+    //
+  }
+  //// ???? check later
 	mutex_lock(&krping_mutex);
-	list_add_tail(&cb[0]->list, &krping_cbs);
+	list_add_tail(&cbs[0]->list, &krping_cbs);
 	mutex_unlock(&krping_mutex);
 ////
-	while ((op = krping_getopt("krping", &cmd, krping_opts, NULL, &optarg, &optint)) != 0)
-	{
-		switch (op){
-			case 'a':
-				cb[0]->addr_str = optarg;
-				in4_pton(optarg, -1, cb[0]->addr, -1, NULL);
-				cb[0]->addr_type = AF_INET;
-				DEBUG_LOG("ipaddr (%s)\n", optarg);
-				break;
-			case 'A':
-				cb[0]->addr_str = optarg;
-				in6_pton(optarg, -1, cb[0]->addr, -1, NULL);
-				cb[0]->addr_type = AF_INET6;
-				DEBUG_LOG("ipv6addr (%s)\n", optarg);
-				break;
-			case 'p':
-				cb[0]->port = htons(optint);
-				DEBUG_LOG("port %d\n", (int)optint);
-				break;
-			case 's':
-				cb[0]->server = 1;
-				DEBUG_LOG("server\n");
-				break;
-			case 'c':
-				cb[0]->server = 0;
-				DEBUG_LOG("client\n");
-				break;
-			case 'v':
-				cb[0]->verbose++;
-				DEBUG_LOG("verbose\n");
-				break;
-			case 't':
-				total_pages = (int)optint;
-				break;
-			case 'w':
-				writeOut_buff = (int)optint;
-				break;
-			case 'r':
-				readIn_buff = (int)optint;
-				break;
-			case 'o':
-				strcpy(proc_name, optarg);
-				break;
-			default:
-				printk(KERN_ERR PFX "unknown opt %s\n", optarg);
-				ret = -EINVAL;
-				break;
+  while ((op = krping_getopt("krping", &cmd, krping_opts, NULL, &optarg,
+			      &optint)) != 0) {
+		switch (op) {
+		case 'a':
+			cbs[0]->addr_str = optarg;
+			in4_pton(optarg, -1, cbs[0]->addr, -1, NULL);
+			cbs[0]->addr_type = AF_INET;
+			DEBUG_LOG("ipaddr (%s)\n", optarg);
+			break;
+		case 'A':
+			cbs[0]->addr_str = optarg;
+			in6_pton(optarg, -1, cbs[0]->addr, -1, NULL);
+			cbs[0]->addr_type = AF_INET6;
+			DEBUG_LOG("ipv6addr (%s)\n", optarg);
+			break;
+		case 'p':
+			cbs[0]->port = htons(optint);
+			DEBUG_LOG("port %d\n", (int)optint);
+			break;
+		case 's':
+			cbs[0]->server = 1;
+
+			DEBUG_LOG("server\n");
+			break;
+		case 'c':
+			cbs[0]->server = 0;
+
+			DEBUG_LOG("client\n");
+			break;
+		case 'v':
+			cbs[0]->verbose++;
+			DEBUG_LOG("verbose\n");
+			break;
+       //COMEX
+		case 't':
+			total_pages = (int)optint;
+			break;
+		case 'w':
+			writeOut_buff = (int)optint;
+			break;
+		case 'r':
+			readIn_buff = (int)optint;
+			break;
+		case 'o':
+			strcpy(proc_name, optarg);
+			break;
+      
+		default:
+			printk(KERN_ERR PFX "unknown opt %s\n", optarg);
+			ret = -EINVAL;
+			break;
 		}
 	}
-	
-	//if (ret)
-	//	goto out;
   for(i=0;i<totalcb;i++){
-    cb[i]->cm_id = rdma_create_id(krping_cma_event_handler, cb[i], RDMA_PS_TCP, IB_QPT_RC);
-    if (IS_ERR(cb[i]->cm_id)) {
-      ret = PTR_ERR(cb[i]->cm_id);
+    cbs[i]->cm_id = rdma_create_id(krping_cma_event_handler, cbs[i], RDMA_PS_TCP, IB_QPT_RC);
+    if (IS_ERR(cbs[i]->cm_id)) {
+      ret = PTR_ERR(cbs[i]->cm_id);
       printk(KERN_ERR PFX "rdma_create_id error %d\n", ret);
       goto out;
     }
   }
 /////////////
+
   for(i=0;i<totalcb;i++){
-       if(cb[i]->server!=0){
+       if(cbs[i]->server!=0){
         stri[14]='0'+i;
         printk("server thread %d start\n",i);
-        task[i]=kthread_run(&krping_run_all,(struct krping_cb *)cb[i],stri);
+        task[i]=kthread_run(&krping_run_all,(struct krping_cb *)cbs[i],stri);
+
        }
   }
   printk("going to sleep\n\n"); //5 sec before any client start
   ssleep(10);
+
+
   //run all server first, then all client, just in case
   for(i=0;i<totalcb;i++){
-       if(cb[i]->server==0){
+       if(cbs[i]->server==0){
         stri[14]='0'+i;
         printk("client thread %d start\n",i);
-        task[i]=kthread_run(&krping_run_all,(struct krping_cb *)cb[i],stri);
+        task[i]=kthread_run(&krping_run_all,(struct krping_cb *)cbs[i],stri);
+
        }
   }
   //// chk for readiness of each
   
   for(i=0;i<totalcb;i++){
-    down_killable(&cb[i]->sem_ready);
+    ret=down_interruptible(&cbs[i]->sem_ready);
   }
   ssleep(3);
   DEBUG_LOG("Allthread ready to operate\n");
@@ -1321,15 +1349,16 @@ int krping_doit(char *cmd)
   
   //verb test
   
-  //for(k=0;k<2;k++){
+/*  //for(k=0;k<2;k++){
     for(i=0;i<totalcb;i++){
       for(j=0;j<50;j++){
         //DEBUG_LOG("sending %d %d\n",i,j);
-        sprintf(t,"zxyf %d %d",cb[i]->cbindex,j);
-          CHK(universal_send(cb[i], 99,t, 14)) 
+        sprintf(t,"zxyf %d %d",cbs[i]->cbindex,j);
+         // CHK(universal_send(cbs[i], 99,t, 14)) 
+         universal_queue_send(cbs[i], 99,t, 14); 
       }
     }
-  //}
+  //}*/
   
   COMEX_init();	// for COMEX
   
@@ -1341,8 +1370,8 @@ int krping_doit(char *cmd)
     }
   }
   */
-  /////
-  ret=down_killable(&sem_killsw); //never get unlocked naturally
+
+  ret=down_interruptible(&sem_killsw); //never get unlocked naturally
   //// should never run below this line
 
   DEBUG_LOG("\n\nKILL SWITCH UNLOCKED\n");
@@ -1351,24 +1380,30 @@ int krping_doit(char *cmd)
   //// wind down process
   DEBUG_LOG("breaking down!\n");
   for(i=0;i<totalcb;i++){
-    disconnect_cb(cb[i]);
+    disconnect_cb(cbs[i]);
   }
   //free buffer and deregister shared space
-  dma_unmap_sg(cb[0]->pd->device->dma_device,
-			 cb[0]->bigspace->sg,
-			 cb[0]->bigspace->numbigpages, DMA_BIDIRECTIONAL);     
+  dma_unmap_sg(cbs[0]->pd->device->dma_device,
+			 cbs[0]->bigspace->sg,
+			 cbs[0]->bigspace->numbigpages, DMA_BIDIRECTIONAL);     
   for(i=0;i<PAGESCOUNT;i++){
-    kfree((void*)cb[0]->bigspace->bufferpages[i]);
+    kfree((void*)cbs[0]->bigspace->bufferpages[i]);
   }
   //decompose all buffers in cb
   for(i=0;i<totalcb;i++){
-    winddown_cb(cb[i],cb[i]->exitstatus);
+    winddown_cb(cbs[i],cbs[i]->exitstatus);
+    
+    flush_workqueue(cbs[i]->wq);
+    destroy_workqueue(cbs[i]->wq);
   }
 out:
 	mutex_lock(&krping_mutex);
-	list_del(&cb[0]->list);
+	list_del(&cbs[0]->list);
 	mutex_unlock(&krping_mutex);
-	kfree(cb);
+  for(i=0;i<totalcb;i++){
+    kfree(cbs[i]);
+  }
+  kfree(cbs);
 	return ret;
 }
 

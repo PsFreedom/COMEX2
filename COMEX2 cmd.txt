@@ -2,6 +2,8 @@ cd /home/comex && rm -rf linux-3.10.87 && tar -zxf linux-3.10.87.tar.gz && cp my
 cd /home/comex/linux-3.10.87 && make clean && make -j 8 && make -j 8 modules && make headers_install && make modules_install && make install && rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot 
 rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot
 
+tail -n 1000 /var/log/messages
+tail -n 10000 /var/log/messages
 
 yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/
 yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/

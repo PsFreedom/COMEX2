@@ -9,6 +9,7 @@ static int readIn_buff;
 
 static uint64_t translate_useraddr(struct krping_cb *, uint64_t);
 static int universal_send(struct krping_cb *cb, u64 imm, char* addr, u64 size);
+static void universal_queue_send(struct krping_cb *cb, u64 imm, char* addr, u64 size);
 
 void COMEX_module_echo_fn(char *str){
 	printk(KERN_INFO "%s: Echo! %s\n", __FUNCTION__, str);
@@ -42,7 +43,7 @@ void COMEX_verb_send_fn(int target, int CMD_num, void *ptr, int struct_size)
 	else if(CMD_num == CODE_COMEX_PAGE_RPLY){
 		reply_pages_t *myStruct = ptr;
 		printk(KERN_INFO "%s: %d->%d %d %p %d | %d %d %d\n", __FUNCTION__, target, ID_to_CB(target), CMD_num, ptr, struct_size, myStruct->src_node, myStruct->page_no, myStruct->size);
-		CHK(universal_send(cbs[ID_to_CB(target)], CMD_num, ptr, struct_size))
+		universal_queue_send(cbs[ID_to_CB(target)], CMD_num, ptr, struct_size);
 	}
 }
 
