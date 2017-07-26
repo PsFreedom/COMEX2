@@ -1217,8 +1217,6 @@ extern int COMEX_ID;
 extern int COMEX_total_nodes;
 extern int COMEX_total_pages;
 
-extern struct semaphore COMEX_remote_MUTEX;
-
 //	Module Function Pointer		// Function in kernel module 
 extern void 	(*COMEX_module_echo)(char *);
 extern void 	(*COMEX_verb_send)(int, int, void *, int);

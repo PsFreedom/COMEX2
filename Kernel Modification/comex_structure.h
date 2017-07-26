@@ -5,7 +5,6 @@ int COMEX_total_pages = 0;
 char proc_name[100];
 
 spinlock_t COMEX_buddy_spin;
-spinlock_t COMEX_remote_spin;
 struct semaphore COMEX_remote_MUTEX;
 
 void (*COMEX_module_echo)(char *) = NULL;
