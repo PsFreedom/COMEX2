@@ -36,7 +36,7 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 ///// Semalphore & MUTEX
 	sema_init(&COMEX_remote_MUTEX, 1);
 	spin_lock_init(&COMEX_buddy_spin);
-	spin_lock_init(&COMEX_freelist_spin);
+	spin_lock_init(&COMEX_remote_spin);
 	
 ///// Buddy System
 	for(i=0; i<COMEX_MAX_ORDER; i++){
