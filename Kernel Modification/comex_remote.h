@@ -101,10 +101,7 @@ void COMEX_page_receive(int nodeID, int pageNO, int group_size)
 	COMEX_free_group[nodeID].mssg_qouta++;
 	
 	spin_unlock(&COMEX_remote_spin);
-	
-	COMEX_freelist_print(nodeID);
-	COMEX_freelist_getpage(nodeID);
-//	printk(KERN_INFO "%s: >>> %d - %lu %lu \n", __FUNCTION__, nodeID, group_ptr->addr_start, group_ptr->addr_end);
+	printk(KERN_INFO "%s: >>> %d %d %d - %lu %lu \n", __FUNCTION__, nodeID, pageNO, group_size, group_ptr->addr_start, group_ptr->addr_end);
 }
 EXPORT_SYMBOL(COMEX_page_receive);
 
@@ -116,7 +113,7 @@ unsigned long COMEX_freelist_getpage(int list_ID)
 		
 	myPtr = list_entry(COMEX_free_group[list_ID].free_group.next, free_group_t, link);
 	ret_addr = myPtr->addr_start;
-	myPtr->addr_start += X86PageSize;
+//	myPtr->addr_start += X86PageSize;
 	
 	return ret_addr;
 }
