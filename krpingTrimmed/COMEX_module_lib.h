@@ -36,7 +36,6 @@ uint64_t COMEX_offset_to_addr_fn(uint64_t offset)
 
 void COMEX_verb_send_fn(int target, int CMD_num, void *ptr, int struct_size)
 {
-	
 	if(CMD_num == CODE_COMEX_PAGE_RQST){
 //		printk(KERN_INFO "%s: %d %d %p %d | %d\n", __FUNCTION__, target, CMD_num, ptr, struct_size, *(int*)ptr);
 		CHK(universal_send(cbs[target], CMD_num, ptr, struct_size))

@@ -37,9 +37,7 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, unsigned long *r
 {
 	int i, dest_node;
 	
-	dest_node = COMEX_hash(get_page_PID(old_page));
-	spin_lock(&COMEX_remote_spin);
-	
+	dest_node = COMEX_hash(get_page_PID(old_page));	
 	for(i=0; i<MAX_TRY; i++){
 		if(COMEX_free_group[dest_node].total_group < MAX_MSSG*2 && 
 		   COMEX_free_group[dest_node].mssg_qouta  > 0)
@@ -48,22 +46,20 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, unsigned long *r
 				COMEX_free_group[dest_node].mssg_qouta--;
 				COMEX_free_group[dest_node].back_off += 1<<(MAX_MSSG - COMEX_free_group[dest_node].mssg_qouta);
 				
-				spin_unlock(&COMEX_remote_spin);
 				COMEX_verb_send(dest_node, CODE_COMEX_PAGE_RQST, &COMEX_ID, sizeof(COMEX_ID));
-				spin_lock(&COMEX_remote_spin);
 			}
 			else{
 				COMEX_free_group[dest_node].back_off--;
 			}
 		}
 		if(COMEX_free_group[dest_node].total_group > 0){
-			COMEX_freelist_getpage(dest_node);
+			*retOffset = COMEX_freelist_getpage(dest_node);
+//			printk(KERN_INFO "%s: Getpage: %lu\n", __FUNCTION__, *retOffset);
 		}
 		
 		dest_node = COMEX_hash(dest_node);
 	}
 
-	spin_unlock(&COMEX_remote_spin);
 	*retNodeID = 0;
 	*retOffset = 0;
 	return -1;
@@ -90,18 +86,20 @@ void COMEX_page_receive(int nodeID, int pageNO, int group_size)
 {
 	free_group_t *group_ptr = (free_group_t *)kzalloc(sizeof(free_group_t), GFP_ATOMIC);
 	
-	group_ptr->addr_start = (unsigned long)pageNO*X86PageSize;
-	group_ptr->addr_end   = group_ptr->addr_start + (X86PageSize*(1<<group_size)) - X86PageSize;
-	INIT_LIST_HEAD(&group_ptr->link);
+	if(pageNO > 0){
+		group_ptr->addr_start = (unsigned long)pageNO*X86PageSize;
+		group_ptr->addr_end   = group_ptr->addr_start + (X86PageSize*(1<<group_size)) - X86PageSize;
+		INIT_LIST_HEAD(&group_ptr->link);
 
-	spin_lock(&COMEX_remote_spin);
-	
-	list_add_tail(&group_ptr->link, &COMEX_free_group[nodeID].free_group);
-	COMEX_free_group[nodeID].total_group++;
-	COMEX_free_group[nodeID].mssg_qouta++;
-	
-	spin_unlock(&COMEX_remote_spin);
-	printk(KERN_INFO "%s: >>> %d %d %d - %lu %lu \n", __FUNCTION__, nodeID, pageNO, group_size, group_ptr->addr_start, group_ptr->addr_end);
+		list_add_tail(&group_ptr->link, &COMEX_free_group[nodeID].free_group);
+		COMEX_free_group[nodeID].total_group++;
+		COMEX_free_group[nodeID].mssg_qouta++;
+		printk(KERN_INFO "%s: >>> %d %d %d - %lu %lu \n", __FUNCTION__, nodeID, pageNO, group_size, group_ptr->addr_start, group_ptr->addr_end);
+	}
+	else{
+		COMEX_free_group[nodeID].back_off += 100000;
+		kfree(group_ptr);
+	}
 }
 EXPORT_SYMBOL(COMEX_page_receive);
 
@@ -113,7 +111,13 @@ unsigned long COMEX_freelist_getpage(int list_ID)
 		
 	myPtr = list_entry(COMEX_free_group[list_ID].free_group.next, free_group_t, link);
 	ret_addr = myPtr->addr_start;
-//	myPtr->addr_start += X86PageSize;
+	myPtr->addr_start += X86PageSize;
 	
+	if(myPtr->addr_start > myPtr->addr_end){
+		list_del(&myPtr->link);
+		COMEX_free_group[list_ID].total_group--;
+		kfree(myPtr);
+		printk(KERN_INFO "%s: Cut Link - %lu\n", __FUNCTION__, myPtr->addr_end/X86PageSize);
+	}
 	return ret_addr;
 }
