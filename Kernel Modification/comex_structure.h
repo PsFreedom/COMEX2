@@ -6,7 +6,6 @@ char proc_name[100];
 
 spinlock_t COMEX_buddy_spin;
 spinlock_t COMEX_remote_spin;
-struct semaphore COMEX_remote_MUTEX;
 
 void (*COMEX_module_echo)(char *) = NULL;
 EXPORT_SYMBOL(COMEX_module_echo);

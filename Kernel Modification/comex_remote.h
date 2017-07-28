@@ -1,5 +1,5 @@
 #define MAX_TRY 5
-#define MAX_MSSG 4
+#define MAX_MSSG 8
 
 typedef struct{
 	int mssg_qouta;
@@ -44,7 +44,7 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, unsigned long *r
 		{
 			if(COMEX_free_group[dest_node].back_off <= 0){
 				COMEX_free_group[dest_node].mssg_qouta--;
-				COMEX_free_group[dest_node].back_off += 1<<(MAX_MSSG - COMEX_free_group[dest_node].mssg_qouta);
+				COMEX_free_group[dest_node].back_off += 1<<(12 - COMEX_free_group[dest_node].mssg_qouta);
 				
 				COMEX_verb_send(dest_node, CODE_COMEX_PAGE_RQST, &COMEX_ID, sizeof(COMEX_ID));
 			}
@@ -54,9 +54,7 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, unsigned long *r
 		}
 		if(COMEX_free_group[dest_node].total_group > 0){
 			*retOffset = COMEX_freelist_getpage(dest_node);
-//			printk(KERN_INFO "%s: Getpage: %lu\n", __FUNCTION__, *retOffset);
 		}
-		
 		dest_node = COMEX_hash(dest_node);
 	}
 
@@ -86,6 +84,7 @@ void COMEX_page_receive(int nodeID, int pageNO, int group_size)
 {
 	free_group_t *group_ptr = (free_group_t *)kzalloc(sizeof(free_group_t), GFP_ATOMIC);
 	
+	spin_lock(&COMEX_remote_spin);
 	if(pageNO > 0){
 		group_ptr->addr_start = (unsigned long)pageNO*X86PageSize;
 		group_ptr->addr_end   = group_ptr->addr_start + (X86PageSize*(1<<group_size)) - X86PageSize;
@@ -93,13 +92,14 @@ void COMEX_page_receive(int nodeID, int pageNO, int group_size)
 
 		list_add_tail(&group_ptr->link, &COMEX_free_group[nodeID].free_group);
 		COMEX_free_group[nodeID].total_group++;
-		COMEX_free_group[nodeID].mssg_qouta++;
-		printk(KERN_INFO "%s: >>> %d %d %d - %lu %lu \n", __FUNCTION__, nodeID, pageNO, group_size, group_ptr->addr_start, group_ptr->addr_end);
+		printk(KERN_INFO "%s: >>> %d %d %d - %lu %lu (%d)\n", __FUNCTION__, nodeID, pageNO, group_size, group_ptr->addr_start, group_ptr->addr_end, COMEX_free_group[nodeID].mssg_qouta);
 	}
 	else{
-		COMEX_free_group[nodeID].back_off += 100000;
+		COMEX_free_group[nodeID].back_off += 10000;
 		kfree(group_ptr);
 	}
+	COMEX_free_group[nodeID].mssg_qouta++;
+	spin_unlock(&COMEX_remote_spin);
 }
 EXPORT_SYMBOL(COMEX_page_receive);
 

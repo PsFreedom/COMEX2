@@ -4,7 +4,7 @@ rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot
 
 
 tail -n 1000 /var/log/messages
-tail -n 10000 /var/log/messages
+tail -n 30000 /var/log/messages
 
 
 yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/

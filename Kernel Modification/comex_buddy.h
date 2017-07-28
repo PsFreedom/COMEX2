@@ -109,6 +109,7 @@ static inline int COMEX_rmqueue_smallest(unsigned int order)
 	COMEX_free_area_t *area;
 	COMEX_page *page;
 	
+	spin_unlock_wait(&COMEX_buddy_spin);
 	spin_lock(&COMEX_buddy_spin);
 	/* Find a page of the appropriate size in the preferred list */
 	for (current_order = order; current_order < COMEX_MAX_ORDER; ++current_order)
@@ -141,6 +142,7 @@ static inline void COMEX_free_page(int inPageNO, int order)
 	COMEX_page *page = &COMEX_Buddy_page[inPageNO];
 	COMEX_page *buddy;
 
+	spin_unlock_wait(&COMEX_buddy_spin);
 	spin_lock(&COMEX_buddy_spin);
 	
 	page_idx = page->pageNO & ((1 << COMEX_MAX_ORDER) - 1);

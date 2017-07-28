@@ -42,7 +42,7 @@ void COMEX_verb_send_fn(int target, int CMD_num, void *ptr, int struct_size)
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_RPLY){
 		reply_pages_t *myStruct = ptr;
-		printk(KERN_INFO "%s: %d->%d %d %p %d | %d %d %d\n", __FUNCTION__, target, ID_to_CB(target), CMD_num, ptr, struct_size, myStruct->src_node, myStruct->page_no, myStruct->size);
+		printk(KERN_INFO "PAGE_RPLY: %d->%d %d | %d %d %d\n", target, ID_to_CB(target), CMD_num, myStruct->src_node, myStruct->page_no, myStruct->size);
 		universal_queue_send(cbs[ID_to_CB(target)], CMD_num, ptr, struct_size);
 	}
 	else{
@@ -58,7 +58,7 @@ void COMEX_do_verb(int CMD_num, void *piggy)
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_RPLY){
 		reply_pages_t *myStruct = piggy;
-		printk(KERN_INFO "%s: %d %p | %d %d %d\n", __FUNCTION__, CMD_num, piggy, myStruct->src_node, myStruct->page_no, myStruct->size);
+//		printk(KERN_INFO "%s: %d %p | %d %d %d\n", __FUNCTION__, CMD_num, piggy, myStruct->src_node, myStruct->page_no, myStruct->size);
 		COMEX_page_receive(ID_to_CB(myStruct->src_node), myStruct->page_no, myStruct->size);
 	}
 	else{
