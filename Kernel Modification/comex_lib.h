@@ -8,6 +8,8 @@ void COMEX_init_Remote()
 		COMEX_free_group[i].mssg_qouta  = MAX_MSSG;
 		COMEX_free_group[i].total_group = 0;
 		COMEX_free_group[i].back_off 	= 0;
+		
+		spin_lock_init(&COMEX_free_group[i].list_lock);
 		INIT_LIST_HEAD(&COMEX_free_group[i].free_group);
 		
 		if(list_empty(&COMEX_free_group[i].free_group))
