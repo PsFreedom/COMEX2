@@ -1355,6 +1355,7 @@ int try_to_unmap_one_COMEX(struct page *page, struct vm_area_struct *vma,
 //		printk(KERN_INFO "%s: NodeID %d swp_type %d Offset %lu\n", __FUNCTION__, NodeID, swp_type(entry), RemoteOffset);
 	}
 	else{
+		RemoteOffset = RemoteOffset/X86PageSize;
 		offsetField = NodeID + (RemoteOffset<<10);
 		entry = swp_entry(8, offsetField);
 	}

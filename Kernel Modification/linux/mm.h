@@ -1202,6 +1202,8 @@ static inline void sync_mm_rss(struct mm_struct *mm)
 
 #define CODE_COMEX_PAGE_RQST 10010
 #define CODE_COMEX_PAGE_RPLY 10011
+#define CODE_COMEX_PAGE_WRTE 10100
+#define CODE_COMEX_PAGE_READ 10200
 
 //	Comm structure
 
@@ -1210,6 +1212,12 @@ typedef struct{
 	int page_no;
 	char size; 
 } reply_pages_t;
+
+typedef struct{
+	unsigned long local;
+	unsigned long remote;
+	int size;
+} COMEX_address_t;
 
 //	Global variable
 extern int COMEX_Ready;
@@ -1226,9 +1234,12 @@ extern uint64_t (*COMEX_offset_to_addr)(uint64_t);
 extern void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff, int total_pages, char *namePtr);
 extern void COMEX_pages_request(int target);
 extern void COMEX_page_receive(int nodeID, int pageNO, int group_size);
+extern unsigned long checkSum_page(struct page *page);
+extern unsigned long checkSum_Vpage(unsigned char *chrPtr);
 
 //	Global Private Function		// Only for kernel use.
 extern void COMEX_read_from_local(struct page *new_page, unsigned long pageNO);
+extern void COMEX_read_from_remote(struct page *new_page, int node_ID, unsigned long remote_addr);
 
 ////////// 	End COMEX Section 	//////////
 

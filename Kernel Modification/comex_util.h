@@ -9,6 +9,7 @@ unsigned long checkSum_page(struct page *page)
 	kunmap(page);
 	return ret;
 }
+EXPORT_SYMBOL(checkSum_page);
 
 unsigned long checkSum_Vpage(unsigned char *chrPtr)
 {
@@ -19,6 +20,7 @@ unsigned long checkSum_Vpage(unsigned char *chrPtr)
 	}
 	return ret;
 }
+EXPORT_SYMBOL(checkSum_Vpage);
 
 struct task_struct * get_taskStruct(struct page *page)
 {

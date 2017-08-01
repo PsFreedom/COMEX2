@@ -378,8 +378,14 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				offsetField = (unsigned long)swp_offset(entry);
 				NodeID = (int)offsetField & 1023;
 				offsetField = offsetField >> 10;
+				offsetField = offsetField * X86PageSize;
 
-				printk(KERN_INFO "%s: swp_type(entry) = %d!\n", __FUNCTION__, swp_type(entry));
+				COMEX_read_from_remote(new_page, NodeID, offsetField);
+				
+				count_vm_event(PSWPIN);
+				SetPageDirty(new_page);
+				SetPageUptodate(new_page);
+				unlock_page(new_page);
 			}
 			else if(swp_type(entry) == 9)
 			{

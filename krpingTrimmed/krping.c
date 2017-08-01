@@ -80,7 +80,7 @@ MODULE_LICENSE("Dual BSD/GPL");
  */
 #define RPING_SQ_DEPTH 128
 #define MAX_INLINE_PAYLOAD 162 //also say how big is the piggy
-#define PAGESCOUNT 2048
+#define PAGESCOUNT 2060
 #define RPING_BUFSIZE (4*1024*1024)
 #define VERB_RECV_SLOT 64
 
@@ -345,8 +345,8 @@ static int do_write(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 
   struct ib_send_wr *bad_wr;
   uint64_t pageno,pageoffset;
   ret=down_killable(&cb->sem_write_able);
-  DEBUG_LOG("RDMA WRITE\n");
-  printk("localoffset=%lld remoteoffset=%lld\n",local_offset,remote_offset);
+//  DEBUG_LOG("RDMA WRITE\n");
+//  printk("localoffset=%lld remoteoffset=%lld\n",local_offset,remote_offset);
 	cb->rdma_sgl.lkey = cb->dma_mr->rkey; //no lkey?
   //change
   cb->rdma_sq_wr.opcode = IB_WR_RDMA_WRITE;
@@ -360,7 +360,7 @@ static int do_write(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 
   }
 	cb->rdma_sq_wr.wr.rdma.remote_addr = cb->remote_addr[pageno]+pageoffset; 
   //
-  printk("pageno=%lld pageoffset=%lld\n",pageno,pageoffset);
+//  printk("pageno=%lld pageoffset=%lld\n",pageno,pageoffset);
   ret = ib_post_send(cb->qp, &cb->rdma_sq_wr, &bad_wr);
 		if (ret) {
 			printk(KERN_ERR PFX "post read err %d\n", ret);
@@ -374,7 +374,7 @@ static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 s
   struct ib_send_wr *bad_wr;
   uint32_t pageno,pageoffset;
   ret=down_killable(&cb->sem_read_able);
-  DEBUG_LOG("RDMA READ\n");
+//  DEBUG_LOG("RDMA READ\n");
 	cb->rdma_sgl.lkey = cb->dma_mr->rkey; //no lkey?
   //change
   cb->rdma_sq_wr.opcode = IB_WR_RDMA_READ;
@@ -388,7 +388,7 @@ static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 s
   }
   cb->rdma_sq_wr.wr.rdma.remote_addr = cb->remote_addr[pageno]+pageoffset; 
   //
-  printk("pageno=%d pageoffset=%d\n",pageno,pageoffset);
+//printk("pageno=%d pageoffset=%d\n",pageno,pageoffset);
   ret = ib_post_send(cb->qp, &cb->rdma_sq_wr, &bad_wr);
 		if (ret) {
 			printk(KERN_ERR PFX "post read err %d\n", ret);

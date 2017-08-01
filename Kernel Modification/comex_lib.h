@@ -15,6 +15,9 @@ void COMEX_init_Remote()
 		if(list_empty(&COMEX_free_group[i].free_group))
 			printk(KERN_INFO "%d... list_empty!\n", i);
 	}
+	
+	COMEX_writeOut_desc = (buffer_desc_t *)vmalloc(sizeof(buffer_desc_t)*COMEX_total_nodes);
+	memset(COMEX_writeOut_desc, 0, sizeof(buffer_desc_t)*COMEX_total_nodes);
 }
 
 void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff, int total_pages, char *namePtr)
@@ -25,6 +28,8 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 	COMEX_ID = node_ID;
 	COMEX_total_nodes = n_nodes;
 	COMEX_total_pages = total_pages;
+	COMEX_writeOut = writeOut_buff;
+	COMEX_readIn   = readIn_buff;
 	
 	strcpy(proc_name, namePtr);
 	printk(KERN_INFO "COMEX Kernel v.2 --> %s\n", proc_name);
