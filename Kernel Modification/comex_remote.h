@@ -5,7 +5,7 @@ typedef struct{
 	int mssg_qouta;
 	int total_group;
 	int back_off;
-	
+
 	spinlock_t list_lock;
 	struct list_head free_group;
 } COMEX_R_free_group_t;
@@ -37,38 +37,79 @@ int COMEX_hash(int seed){
 
 int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, unsigned long *retOffset)
 {
-	int i, dest_node;
+	int i, dest_node = COMEX_hash(get_page_PID(old_page));
 	
-	
-	dest_node = COMEX_hash(get_page_PID(old_page));	
+	spin_lock(&COMEX_free_group[dest_node].list_lock);
 	for(i=0; i<MAX_TRY; i++){
-		if(COMEX_free_group[dest_node].total_group < MAX_MSSG*2 && 
+		if(COMEX_free_group[dest_node].total_group < MAX_MSSG && 
 		   COMEX_free_group[dest_node].mssg_qouta  > 0)
 		{
 			if(COMEX_free_group[dest_node].back_off <= 0){
-				spin_lock(&COMEX_free_group[dest_node].list_lock);
 				COMEX_free_group[dest_node].mssg_qouta--;
-				COMEX_free_group[dest_node].back_off = 1<<(12 - COMEX_free_group[dest_node].mssg_qouta);
-				spin_unlock(&COMEX_free_group[dest_node].list_lock);
+				COMEX_free_group[dest_node].back_off += 1<<(12 - COMEX_free_group[dest_node].mssg_qouta);
 				
-				COMEX_verb_send(dest_node, CODE_COMEX_PAGE_RQST, &COMEX_ID, sizeof(COMEX_ID));
+				COMEX_RDMA(dest_node, CODE_COMEX_PAGE_RQST, &COMEX_ID, sizeof(COMEX_ID));
 			}
 			else{
-				spin_lock(&COMEX_free_group[dest_node].list_lock);
 				COMEX_free_group[dest_node].back_off--;
-				spin_unlock(&COMEX_free_group[dest_node].list_lock);
 			}
 		}
+		
 		if(COMEX_free_group[dest_node].total_group > 1){
 			*retOffset = COMEX_freelist_getpage(dest_node);
 		}
 		dest_node = COMEX_hash(dest_node);
 	}
 
+	spin_unlock(&COMEX_free_group[dest_node].list_lock);
 	*retNodeID = 0;
 	*retOffset = 0;
 	return -1;
 }
+
+void COMEX_page_receive(int nodeID, int pageNO, int group_size)
+{	
+	spin_lock(&COMEX_free_group[nodeID].list_lock);
+	if(pageNO > 0){
+		free_group_t *group_ptr = (free_group_t *)kzalloc(sizeof(free_group_t), GFP_KERNEL);
+		
+		group_ptr->addr_start = (unsigned long)pageNO*X86PageSize;
+		group_ptr->addr_end   = group_ptr->addr_start + (X86PageSize*(1<<group_size)) - X86PageSize;
+		INIT_LIST_HEAD(&group_ptr->link);
+
+		list_add_tail(&group_ptr->link, &COMEX_free_group[nodeID].free_group);
+		COMEX_free_group[nodeID].mssg_qouta++;
+		COMEX_free_group[nodeID].total_group++;
+//		printk(KERN_INFO "%s: >>> %d %d %d - %lu %lu (%d | %d)\n", __FUNCTION__, nodeID, pageNO, group_size, group_ptr->addr_start, group_ptr->addr_end, COMEX_free_group[nodeID].mssg_qouta, COMEX_free_group[nodeID].back_off);
+
+	}
+	else{
+		COMEX_free_group[nodeID].mssg_qouta++;
+		COMEX_free_group[nodeID].back_off += 50000;
+//		printk(KERN_INFO "%s: >>> %d %d %d - (%d | %d)\n", __FUNCTION__, nodeID, pageNO, group_size, COMEX_free_group[nodeID].mssg_qouta, COMEX_free_group[nodeID].back_off);
+	}
+	spin_unlock(&COMEX_free_group[nodeID].list_lock);
+}
+EXPORT_SYMBOL(COMEX_page_receive);
+
+unsigned long COMEX_freelist_getpage(int list_ID)
+{
+	free_group_t *myPtr;
+	unsigned long ret_addr = 200;
+	
+	myPtr = list_entry(COMEX_free_group[list_ID].free_group.next, free_group_t, link);
+	ret_addr = myPtr->addr_start;
+	myPtr->addr_start += X86PageSize;
+	
+	if(myPtr->addr_start > myPtr->addr_end){
+		list_del(&myPtr->link);
+		COMEX_free_group[list_ID].total_group--;
+		kfree(myPtr);
+//		printk(KERN_INFO "%s: Cut Link - %lu\n", __FUNCTION__, myPtr->addr_end/X86PageSize);
+	}
+	return ret_addr;
+}
+
 
 void COMEX_pages_request(int target)
 {
@@ -83,55 +124,6 @@ void COMEX_pages_request(int target)
 		myStruct.page_no  = COMEX_rmqueue_smallest(i);
 		myStruct.size     = i;
 	}
-	COMEX_verb_send(target, CODE_COMEX_PAGE_RPLY, &myStruct, sizeof(myStruct));
+	COMEX_RDMA(target, CODE_COMEX_PAGE_RPLY, &myStruct, sizeof(myStruct));
 }
 EXPORT_SYMBOL(COMEX_pages_request);
-
-void COMEX_page_receive(int nodeID, int pageNO, int group_size)
-{
-	free_group_t *group_ptr = (free_group_t *)kzalloc(sizeof(free_group_t), GFP_ATOMIC);
-	
-	if(pageNO > 0){
-		group_ptr->addr_start = (unsigned long)pageNO*X86PageSize;
-		group_ptr->addr_end   = group_ptr->addr_start + (X86PageSize*(1<<group_size)) - X86PageSize;
-		INIT_LIST_HEAD(&group_ptr->link);
-
-		spin_lock(&COMEX_free_group[nodeID].list_lock);
-		list_add_tail(&group_ptr->link, &COMEX_free_group[nodeID].free_group);
-		COMEX_free_group[nodeID].mssg_qouta++;
-		COMEX_free_group[nodeID].total_group++;
-		spin_unlock(&COMEX_free_group[nodeID].list_lock);
-		
-		printk(KERN_INFO "%s: >>> %d %d %d - %lu %lu (%d)\n", __FUNCTION__, nodeID, pageNO, group_size, group_ptr->addr_start, group_ptr->addr_end, COMEX_free_group[nodeID].mssg_qouta);
-	}
-	else{
-		spin_lock(&COMEX_free_group[nodeID].list_lock);
-		COMEX_free_group[nodeID].mssg_qouta++;
-		COMEX_free_group[nodeID].back_off += 10000;
-		spin_unlock(&COMEX_free_group[nodeID].list_lock);
-		
-		kfree(group_ptr);
-	}
-}
-EXPORT_SYMBOL(COMEX_page_receive);
-
-unsigned long COMEX_freelist_getpage(int list_ID)
-{
-	free_group_t *myPtr;
-	unsigned long ret_addr = 200;
-	
-	spin_lock(&COMEX_free_group[list_ID].list_lock);
-	myPtr = list_entry(COMEX_free_group[list_ID].free_group.next, free_group_t, link);
-	ret_addr = myPtr->addr_start;
-	myPtr->addr_start += X86PageSize;
-	
-	if(myPtr->addr_start > myPtr->addr_end){
-		list_del(&myPtr->link);
-		COMEX_free_group[list_ID].total_group--;
-		kfree(myPtr);
-		printk(KERN_INFO "%s: Cut Link - %lu\n", __FUNCTION__, myPtr->addr_end/X86PageSize);
-	}
-	
-	spin_unlock(&COMEX_free_group[list_ID].list_lock);
-	return ret_addr;
-}

@@ -5,13 +5,12 @@ int COMEX_total_pages = 0;
 char proc_name[100];
 
 spinlock_t COMEX_buddy_spin;
-spinlock_t COMEX_remote_spin;
 
 void (*COMEX_module_echo)(char *) = NULL;
 EXPORT_SYMBOL(COMEX_module_echo);
 
-void (*COMEX_verb_send)(int, int, void *, int) = NULL;
-EXPORT_SYMBOL(COMEX_verb_send);
+void (*COMEX_RDMA)(int, int, void *, int) = NULL;
+EXPORT_SYMBOL(COMEX_RDMA);
 
 uint64_t (*COMEX_offset_to_addr)(uint64_t) = NULL;
 EXPORT_SYMBOL(COMEX_offset_to_addr);

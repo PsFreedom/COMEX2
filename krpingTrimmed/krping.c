@@ -181,7 +181,7 @@ struct krping_cb {
   
 	int read_inv;
 	u8 key;
-  int exitstatus;
+	int exitstatus;
 	struct ib_recv_wr rq_wr[VERB_RECV_SLOT];	/* recv work request record */
 	struct ib_sge recv_sgl[VERB_RECV_SLOT];		/* recv single SGE */
 	union bufferx recv_buf[VERB_RECV_SLOT]; /* malloc'd buffer */
@@ -202,19 +202,19 @@ struct krping_cb {
 	char *rdma_buf;			/* used as rdma sink */
 	u64  rdma_dma_addr;
 	DECLARE_PCI_UNMAP_ADDR(rdma_mapping)
-  DECLARE_PCI_UNMAP_ADDR(dmabuf_mapping)
-  DECLARE_PCI_UNMAP_ADDR(ptable_mapping)
+	DECLARE_PCI_UNMAP_ADDR(dmabuf_mapping)
+	DECLARE_PCI_UNMAP_ADDR(ptable_mapping)
 	uint32_t remote_rkey;		/* remote guys RKEY */
 	uint32_t remote_len;		/* remote guys LEN */ //resize?
 
 	enum test_state state;		/* used for cond/signalling */
 	wait_queue_head_t sem;
-  struct semaphore sem_verb;
-  struct semaphore sem_read_able;
-  struct semaphore sem_read;
-  struct semaphore sem_write_able;
-  struct semaphore sem_write;
-  struct semaphore sem_ready;
+	struct semaphore sem_verb;
+	struct semaphore sem_read_able;
+	struct semaphore sem_read;
+	struct semaphore sem_write_able;
+	struct semaphore sem_write;
+	struct semaphore sem_ready;
 	uint16_t port;			/* dst port in NBO */
 	u8 addr[16];			/* dst addr in NBO */
 	char *addr_str;			/* dst addr string */
@@ -241,6 +241,7 @@ struct krping_cb {
   int mynodeID;
   int remotenodeID;
   struct workqueue_struct *wq;//for queued response
+  struct workqueue_struct *wq2;//for verb out
 };
 struct krping_cb **cbs;
 
@@ -251,7 +252,12 @@ struct krping_cb **cbs;
     int size;
     struct krping_cb *cb;
 };
-
+ struct workr_data {
+    struct work_struct real_work;
+    uint64_t imm;
+    struct krping_cb *cb;
+    union bufferx savedbuffer;
+};
 #include "COMEX_module_lib.h"		// for COMEX
 // regis memory
 static int regis_bigspace(struct krping_sharedspace *bigspace,int num_bigpages)
@@ -305,9 +311,7 @@ static int krping_cma_event_handler(struct rdma_cm_id *cma_id,
 
 	case RDMA_CM_EVENT_ESTABLISHED:
 		DEBUG_LOG("ESTABLISHED\n");
-		//if (!cb->server) {
-			cb->state = CONNECTED;
-		//}
+		cb->state = CONNECTED;
 		wake_up_interruptible(&cb->sem);
 		break;
 
@@ -465,7 +469,7 @@ static void universal_queue_send(struct krping_cb *cb, u64 imm, char* addr, u64 
   
 //init work quque  
 	INIT_WORK(&data->real_work, work_queue_send);
-	queue_work(cb->wq, &data->real_work);
+	queue_work(cb->wq2, &data->real_work);
 	return;
 }
 //no more one send, then tell RDMA write whole things
@@ -491,54 +495,52 @@ static int send_buffer_info(struct krping_cb *cb)
     return ret;
   }
   DEBUG_LOG("exchange buffer info success\n");
-  //
-  /*
-  DEBUG_LOG("the remote buffer addrs are\n");
-  for(i=0;i<100;i++){
-    DEBUG_LOG("%d = %llx\n",i,cb->remote_addr[i]);
-  }
-  */
+
   return 0;
 }
-static int universal_recv_handler(struct krping_cb *cb, struct ib_wc *wc){
-  //slot is in 
+
+static void universal_recv_handlerQ(struct work_struct *work_arg){
+  struct workr_data * data = container_of(work_arg, struct workr_data, real_work);
+  struct krping_cb *cb=data->cb;
+  uint64_t imm=data->imm;
+  //int slot=data->slot; //not needed
+  struct ib_recv_wr *bad_wr;
+  union bufferx *saved_buff=&data->savedbuffer;
   int ret;
-  int slot=wc->wr_id;
   //DEBUG_LOG("%d: recv slot:%d\n",cb->cbindex,slot);
-  if(wc->opcode==IB_WC_RECV){
-    if(wc->wc_flags & IB_WC_WITH_IMM){
-      switch(wc->ex.imm_data){
+      
+      switch(imm){
         case 2: //set buffers info
-          cb->remote_len  = ntohl(cb->recv_buf[slot].buffer_info.size)*RPING_BUFSIZE; //checkback, need hll? , do we really send big data
-          cb->remote_rkey = ntohl(cb->recv_buf[slot].buffer_info.rkey);
+          cb->remote_len  = ntohl(saved_buff->buffer_info.size)*RPING_BUFSIZE; //checkback, need hll? , do we really send big data
+          cb->remote_rkey = ntohl(saved_buff->buffer_info.rkey);
           cb->rdma_sq_wr.wr.rdma.rkey = cb->remote_rkey;
-		  cb->remotenodeID = ntohl(cb->recv_buf[slot].buffer_info.instanceno);
-          ret=do_read_bufferptr(cb,ntohll(cb->recv_buf[slot].buffer_info.buf),ntohl(cb->recv_buf[slot].buffer_info.size));
+          cb->remotenodeID = ntohl(saved_buff->buffer_info.instanceno);
+          DEBUG_LOG("PASS TWO IF\n");
+        
+          ret=do_read_bufferptr(cb,ntohll(saved_buff->buffer_info.buf),ntohl(saved_buff->buffer_info.size));
           if(ret){
             DEBUG_LOG("%d:BUG IN READ THEIR PTR TABLE\n",cb->cbindex);
-          }
-          //
+          } 
           cb->state=RDMA_READY;
           
           wake_up_interruptible(&cb->sem);
+          
           break;
-        case 5: //set buffers info
+          
+        case 5:
 			DEBUG_LOG("recv exit");
 			break;
         case 99: //set buffers info
-			printk("unexpected,unhandled immediate received=%d %s\n",wc->ex.imm_data,cb->recv_buf[slot].piggy);
+			printk("unexpected,unhandled immediate received=%d %s\n",imm,saved_buff->piggy);
 			break;
         default:
-			COMEX_do_verb( wc->ex.imm_data, &cb->recv_buf[slot].piggy);
-			
+			COMEX_do_verb( imm, saved_buff);
+			break;
       }
-    }else{
-      printk("call recv handler but no imm\n");
-    }
-  }else{
-      printk("call recv handler but not recv event\n");
-  }
-  return 0;
+
+  
+  kfree(data);
+  return ;
 }
 
 static void krping_cq_event_handler_send(struct ib_cq *cq, void *ctx)
@@ -600,10 +602,12 @@ error:
 	wake_up_interruptible(&cb->sem);
 }
 
+
 static void krping_cq_event_handler_recv(struct ib_cq *cq, void *ctx)
 {
+  struct workr_data *data;
 	struct krping_cb *cb = ctx;
-	struct ib_wc wc;
+  struct ib_wc wc;
 	struct ib_recv_wr *bad_wr;
 	int ret;
   
@@ -628,23 +632,24 @@ static void krping_cq_event_handler_recv(struct ib_cq *cq, void *ctx)
 
 		switch (wc.opcode) {
 		case IB_WC_RECV:
-			//DEBUG_LOG("recv completion\n");
-			ret = universal_recv_handler(cb, &wc);
-			if (ret) {
-				printk(KERN_ERR PFX "recv wc error: %d\n", ret);
-				goto error;
-			}
-  //repost recv req in the same slot
-			//DEBUG_LOG("repost slot=%lld\n",wc.wr_id);
-			ret = ib_post_recv(cb->qp, &cb->rq_wr[wc.wr_id], &bad_wr);
-			if (ret) {
-				printk(KERN_ERR PFX "post recv error: %d\n", 
-				       ret);
-				goto error;
-			}else{
-        
+      
+      if(wc.wc_flags & IB_WC_WITH_IMM){   
+        data= kmalloc(sizeof(struct workr_data), GFP_ATOMIC);
+        data->cb=cb;
+        data->imm=wc.ex.imm_data;
+        memcpy(&data->savedbuffer,&cb->recv_buf[wc.wr_id],sizeof(union bufferx));
+        //DEBUG_LOG("pushing data to wq\n");
+        INIT_WORK(&data->real_work, universal_recv_handlerQ);
+        queue_work(cb->wq, &data->real_work);
+      }else{
+        printk("call recv handler but no imm\n");
       }
-			//wake_up_interruptible(&cb->sem);
+      //DEBUG_LOG("repost slot=%lld\n",wc.wr_id);
+      ret = ib_post_recv(cb->qp, &cb->rq_wr[wc.wr_id], &bad_wr);
+      if (ret) {
+        printk(KERN_ERR PFX "post recv error: %d\n", 
+               ret);
+      }
 			break;
 
 		default:
@@ -654,6 +659,7 @@ static void krping_cq_event_handler_recv(struct ib_cq *cq, void *ctx)
 			goto error;
 		}
 	}
+  
 	if (ret) {
 		printk(KERN_ERR PFX "poll error %d\n", ret);
 		goto error;
@@ -663,6 +669,7 @@ error:
 	cb->state = ERROR;
 	wake_up_interruptible(&cb->sem);
 }
+
 static int krping_accept(struct krping_cb *cb)
 {
 	struct rdma_conn_param conn_param;
@@ -725,16 +732,10 @@ static void krping_setup_wr(struct krping_cb *cb)
 static int krping_setup_buffers(struct krping_cb *cb)
 {
 	int ret,i;
-  //char * test[2000];
-  //struct ib_mr * dmatest[2000];
   int tests;
-  //struct ib_fast_reg_page_list *pl;
-  //int plen = (((4*1024*1024 - 1) & PAGE_MASK) + PAGE_SIZE) >> PAGE_SHIFT;
   
 	DEBUG_LOG(PFX "krping_setup_buffers called on cb %p\n", cb);
-  //send/recv buffer do dma only
-  //recv_buf,send_buf is CPU ptr, recv_dma_addr and send_dma_addr is their
-  //VERB_RECV_SLOT slots
+
 	cb->recv_dma_addr = dma_map_single(cb->pd->device->dma_device, cb->recv_buf, sizeof(union bufferx)*VERB_RECV_SLOT, DMA_BIDIRECTIONAL);
 	pci_unmap_addr_set(cb, recv_mapping, cb->recv_dma_addr);
   
@@ -941,7 +942,7 @@ static void krping_test_server(struct krping_cb *cb)
   
   //test read
   //DEBUG_LOG("%d:issue read\n",cb->cbindex);
-  //CHK(do_read(cb,0,0,24) )
+  //CHK(do_read(cb,0,0,24))
   //DEBUG_LOG("%d:wait sem read\n",cb->cbindex);
   //ret=down_killable(&cb->sem_read);
   //dma_sync_single_for_cpu(cb->pd->device->dma_device, cb->rdma_dma_addr, sizeof(cb->rdma_buf), DMA_FROM_DEVICE);
@@ -953,11 +954,10 @@ static void krping_test_server(struct krping_cb *cb)
   sprintf(cb->rdma_buf+16,"whataburger11 ");
    //dma_sync_single_for_device(cb->pd->device->dma_device, cb->rdma_dma_addr, sizeof(cb->rdma_buf), DMA_TO_DEVICE);
   
-  CHK(do_write(cb,16,16,24) )
+  CHK(do_write(cb,16,16,24))
   ret=down_killable(&cb->sem_write);
   DEBUG_LOG("%d:done\n",cb->cbindex);
   */
-  //CHK(universal_send(cb, 5,t, 4)) //test kill signal
   up(&cb->sem_ready);
   DEBUG_LOG("%d:unlocked from server\n",cb->cbindex);
 }
@@ -1028,15 +1028,6 @@ static void krping_test_client(struct krping_cb *cb)
     printk(KERN_ERR PFX "buffer info error %d\n", ret);
     return;
   }
-  /*
-  CHK(universal_send(cb, 99,t, 4)) 
-  ret=down_killable(&cb->sem_verb);
-  t[0]--;
-  
-  
-  //CHK(universal_send(cb, 99,&t, 4) ); //send
-  */
-  //CHK(universal_send(cb, 5,t, 4)) //test kill signal
   up(&cb->sem_ready);
   DEBUG_LOG("%d:unlocked from client\n",cb->cbindex);
   //dma_sync_sg_for_cpu(cb->pd->device->dma_device, cb->sg, PAGESCOUNT, DMA_FROM_DEVICE);
@@ -1156,8 +1147,6 @@ static void krping_run_all(struct krping_cb *cb)
     ret = ib_post_recv(cb->qp, &cb->rq_wr[i], &bad_wr);
     if (ret) {
       printk(KERN_ERR PFX "ib_post_recv failed: %d\n", ret);
-      //disconnect_cb(cb);
-      //winddown_cb(cb,0);
       return;
     }
   }
@@ -1210,12 +1199,13 @@ int krping_doit(char *cmd)
 	{
 		task[i] = (struct task_struct*)kzalloc(sizeof(struct task_struct), GFP_KERNEL);
 		cbs[i]  = (struct krping_cb *)kzalloc(sizeof(struct krping_cb), GFP_KERNEL);
-		
-		if(!cbs[i]->wq){ //no chance it exist, but just in case
-			cbs[i]->wq=create_singlethread_workqueue("COMEX Verb send wq");
-		}
+    
 		if(!cbs[i]){
 			return -ENOMEM;
+		}
+		if(!cbs[i]->wq){ //no chance it exist, but just in case
+			cbs[i]->wq=create_singlethread_workqueue("COMEX RECV wq");
+			cbs[i]->wq2=create_singlethread_workqueue("COMEX VERB wq");
 		}
 		
 		cbs[i]->cbindex=i;
@@ -1308,6 +1298,7 @@ int krping_doit(char *cmd)
 		case 'o':
 			strcpy(proc_name, optarg);
 			break;
+     //
       
 		default:
 			printk(KERN_ERR PFX "unknown opt %s\n", optarg);
@@ -1348,15 +1339,25 @@ int krping_doit(char *cmd)
 	
 //// chk for readiness of each
 	for(i=0; i<totalcb; i++){
-		ret = down_killable(&cbs[i]->sem_ready);
+		ret = down_interruptible(&cbs[i]->sem_ready);
 	}
 	ssleep(3);
 	DEBUG_LOG("Allthread ready to operate\n");
 	DEBUG_LOG("===========================\n");
+  //verb test
+ 
+    for(i=0;i<totalcb;i++){
+      for(j=0;j<50;j++){
+        //DEBUG_LOG("sending %d %d\n",i,j);
+        sprintf(t,"zxyf %d %d",cbs[i]->cbindex,j);
+         // CHK(universal_send(cbs[i], 99,t, 14)) 
+         universal_queue_send(cbs[i], 99,t, 14); 
+      }
+    }
   
 //// ready to operate!  
 	COMEX_init();	// for COMEX
-	ret = down_killable(&sem_killsw); //never get unlocked naturally
+	ret = down_interruptible(&sem_killsw); //never get unlocked naturally
 	
 //// should never run below this line
 	DEBUG_LOG("\n\nKILL SWITCH UNLOCKED\n");
@@ -1381,7 +1382,9 @@ int krping_doit(char *cmd)
 	for(i=0; i<totalcb; i++){
 		winddown_cb(cbs[i],cbs[i]->exitstatus);
 		flush_workqueue(cbs[i]->wq);
-		destroy_workqueue(cbs[i]->wq);
+    flush_workqueue(cbs[i]->wq2);
+    destroy_workqueue(cbs[i]->wq);
+    destroy_workqueue(cbs[i]->wq2);
 	}
 	
 out:
