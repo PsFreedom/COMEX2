@@ -1204,6 +1204,7 @@ static inline void sync_mm_rss(struct mm_struct *mm)
 #define CODE_COMEX_PAGE_RPLY 10011
 #define CODE_COMEX_PAGE_WRTE 10100
 #define CODE_COMEX_PAGE_READ 10200
+#define CODE_COMEX_PAGE_CKSM 19000
 
 //	Comm structure
 

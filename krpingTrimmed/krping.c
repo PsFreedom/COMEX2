@@ -350,7 +350,12 @@ static int do_write(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 
 	cb->rdma_sgl.lkey = cb->dma_mr->rkey; //no lkey?
   //change
   cb->rdma_sq_wr.opcode = IB_WR_RDMA_WRITE;
-  cb->rdma_sgl.addr = cb->rdma_dma_addr+local_offset;
+  pageno=local_offset/RPING_BUFSIZE;
+  pageoffset=local_offset%RPING_BUFSIZE;
+  if(pageoffset+size>RPING_BUFSIZE){
+    printk("\nALERT, BUFFER MISALIGNMENT FOUND\n\n\n");
+  }
+  cb->rdma_sgl.addr = cb->bigspace->dmapages[pageno]+pageoffset;
 	cb->rdma_sq_wr.sg_list->length = size;
   //
   pageno=remote_offset/RPING_BUFSIZE;
@@ -366,6 +371,7 @@ static int do_write(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 
 			printk(KERN_ERR PFX "post read err %d\n", ret);
 			return ret;
 		}
+			ret=down_killable(&cb->sem_write);
   return 0;
 }
 //NOT atomic, must check sem_read if it finish reading
@@ -378,7 +384,12 @@ static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 s
 	cb->rdma_sgl.lkey = cb->dma_mr->rkey; //no lkey?
   //change
   cb->rdma_sq_wr.opcode = IB_WR_RDMA_READ;
-  cb->rdma_sgl.addr = cb->rdma_dma_addr+local_offset;
+  pageno=local_offset/RPING_BUFSIZE;
+  pageoffset=local_offset%RPING_BUFSIZE;
+  if(pageoffset+size>RPING_BUFSIZE){
+    printk("\nALERT, BUFFER MISALIGNMENT FOUND\n\n\n");
+  }
+  cb->rdma_sgl.addr = cb->bigspace->dmapages[pageno]+pageoffset;
 	cb->rdma_sq_wr.sg_list->length = size;
   //
   pageno=remote_offset/RPING_BUFSIZE;
@@ -394,12 +405,14 @@ static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 s
 			printk(KERN_ERR PFX "post read err %d\n", ret);
 			return ret;
 		}
+	ret=down_killable(&cb->sem_read);	
   return 0;
 }
 // internal call,
 static int do_read_bufferptr(struct krping_cb *cb,uint64_t theirptrs,int numpages){
   int ret;
   struct ib_send_wr *bad_wr;
+  ret=down_killable(&cb->sem_read_able);
   printk("theirptrs=%llx numpages=%d\n",theirptrs,numpages);
   cb->rdma_sgl.lkey = cb->dma_mr->rkey; //no lkey?
   cb->rdma_sq_wr.opcode = IB_WR_RDMA_READ;
@@ -412,6 +425,7 @@ static int do_read_bufferptr(struct krping_cb *cb,uint64_t theirptrs,int numpage
 			printk(KERN_ERR PFX "post read err %d\n", ret);
 			return ret;
 		}
+	ret=down_killable(&cb->sem_read);	
   return 0;
 }
 // internal call, will improve
@@ -489,11 +503,6 @@ static int send_buffer_info(struct krping_cb *cb)
   ret= deep_send(cb, 2);
   DEBUG_LOG("send buffer info success wait for recv\n");
   wait_event_interruptible(cb->sem, cb->state >= RDMA_READY); //send done
-  ret=down_killable(&cb->sem_read); //recv then read done
-  if (ret) {
-    printk(KERN_ERR PFX "post read err %d\n", ret);
-    return ret;
-  }
   DEBUG_LOG("exchange buffer info success\n");
 
   return 0;
@@ -515,7 +524,6 @@ static void universal_recv_handlerQ(struct work_struct *work_arg){
           cb->remote_rkey = ntohl(saved_buff->buffer_info.rkey);
           cb->rdma_sq_wr.wr.rdma.rkey = cb->remote_rkey;
           cb->remotenodeID = ntohl(saved_buff->buffer_info.instanceno);
-          DEBUG_LOG("PASS TWO IF\n");
         
           ret=do_read_bufferptr(cb,ntohll(saved_buff->buffer_info.buf),ntohl(saved_buff->buffer_info.size));
           if(ret){
