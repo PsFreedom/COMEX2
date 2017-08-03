@@ -126,7 +126,7 @@ EXPORT_SYMBOL(COMEX_read_from_remote);
 
 void COMEX_page_receive(int nodeID, int pageNO, int group_size)
 {	
-	spin_lock(&COMEX_free_group[dest_node].list_lock);
+	spin_lock(&COMEX_free_group[nodeID].list_lock);
 	if(pageNO > 0){
 		free_group_t *group_ptr = (free_group_t *)kzalloc(sizeof(free_group_t), GFP_KERNEL);
 		
