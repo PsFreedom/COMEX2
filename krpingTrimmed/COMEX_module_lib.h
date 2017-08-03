@@ -50,7 +50,6 @@ void COMEX_RDMA_fn(int target, int CMD_num, void *ptr, int struct_size)
 		COMEX_address_t *myStruct = ptr;
 		if(checkSum_Vpage(COMEX_offset_to_addr_fn(myStruct->local)) != 0)
 			printk(KERN_INFO "PAGE_WRTE: %d | L %lu R %lu %d - %lu\n", target, myStruct->local, myStruct->remote, myStruct->size, checkSum_Vpage(COMEX_offset_to_addr_fn(myStruct->local)));
-		
 		CHK(do_write(cbs[target], myStruct->local, myStruct->remote, myStruct->size))
 		universal_queue_send(cbs[target], CODE_COMEX_PAGE_CKSM, &myStruct->remote, sizeof(myStruct->remote));
 	}
@@ -79,8 +78,7 @@ void COMEX_do_verb(int CMD_num, void *piggy)
 		COMEX_page_receive(ID_to_CB(myStruct->src_node), myStruct->page_no, myStruct->size);
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_CKSM){
-		if(checkSum_Vpage(COMEX_offset_to_addr_fn(*(unsigned long *)piggy)) != 0)
-			printk(KERN_INFO "PAGE_CKSM: %lu - %lu\n", *(unsigned long *)piggy, checkSum_Vpage(COMEX_offset_to_addr_fn(*(unsigned long *)piggy)));
+		printk(KERN_INFO "PAGE_CKSM: %lu - %lu\n", *(unsigned long *)piggy, checkSum_Vpage(COMEX_offset_to_addr_fn(*(unsigned long *)piggy)));
 	}
 	else{
 		printk(KERN_INFO "%s: %d | ERROR Unknown CMD_num %d\n", __FUNCTION__, *(int *)piggy, CMD_num);

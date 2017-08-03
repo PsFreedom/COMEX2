@@ -799,7 +799,7 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 					atomic_set(&page->_count,0);
 					unlock_page(page);
 					goto free_it;
-				}
+				}	
 */				if(COMEX_move_to_Remote(page, &nodeID, &remoteOffset) == 1)
 				{
 //					printk(KERN_INFO "%s: nodeID %d Offset %lu\n", __FUNCTION__, nodeID, remoteOffset);

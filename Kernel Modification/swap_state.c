@@ -381,20 +381,22 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				offsetField = offsetField * X86PageSize;
 
 				COMEX_read_from_remote(new_page, NodeID, offsetField);
-				
 				count_vm_event(PSWPIN);
 				SetPageDirty(new_page);
 				SetPageUptodate(new_page);
 				unlock_page(new_page);
+				
+				if(checkSum_page(new_page) != 0)
+					printk(KERN_INFO "READ: %d %lu - %lu\n", NodeID, offsetField, checkSum_page(new_page));
 			}
 			else if(swp_type(entry) == 9)
 			{
-//				printk(KERN_INFO "%s: swp_type(entry) = %d!\n", __FUNCTION__, swp_type(entry));
 				COMEX_read_from_local(new_page, swp_offset(entry));
 				count_vm_event(PSWPIN);
 				SetPageDirty(new_page);
 				SetPageUptodate(new_page);
 				unlock_page(new_page);
+				printk(KERN_INFO "LOCAL: %lu - %lu\n", swp_offset(entry), checkSum_page(new_page));
 			}
 			else{
 				swap_readpage(new_page);

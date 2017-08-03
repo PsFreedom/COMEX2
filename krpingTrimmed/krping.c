@@ -197,8 +197,10 @@ struct krping_cb {
 	DECLARE_PCI_UNMAP_ADDR(send_mapping)
 	struct ib_mr *send_mr;
 
-	struct ib_send_wr rdma_sq_wr;	/* rdma work request record */
-	struct ib_sge rdma_sgl;		/* rdma single SGE */
+	struct ib_send_wr rdma_sq_wr_write;	/* rdma work request record */
+	struct ib_send_wr rdma_sq_wr_read;	/* rdma work request record */
+	struct ib_sge rdma_sgl_read;		/* rdma single SGE */
+	struct ib_sge rdma_sgl_write;		/* rdma single SGE */
 	char *rdma_buf;			/* used as rdma sink */
 	u64  rdma_dma_addr;
 	DECLARE_PCI_UNMAP_ADDR(rdma_mapping)
@@ -347,28 +349,28 @@ static int do_write(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 
   ret=down_killable(&cb->sem_write_able);
 //  DEBUG_LOG("RDMA WRITE\n");
 //  printk("localoffset=%lld remoteoffset=%lld\n",local_offset,remote_offset);
-	cb->rdma_sgl.lkey = cb->dma_mr->rkey; //no lkey?
+	cb->rdma_sgl_write.lkey = cb->dma_mr->rkey; //no lkey?
   //change
-  cb->rdma_sq_wr.opcode = IB_WR_RDMA_WRITE;
+  cb->rdma_sq_wr_write.opcode = IB_WR_RDMA_WRITE;
   pageno=local_offset/RPING_BUFSIZE;
   pageoffset=local_offset%RPING_BUFSIZE;
   if(pageoffset+size>RPING_BUFSIZE){
-    printk("\nALERT, BUFFER MISALIGNMENT FOUND\n\n\n");
+    DEBUG_LOG("\nALERT, BUFFER MISALIGNMENT FOUND\n\n\n");
   }
-  cb->rdma_sgl.addr = cb->bigspace->dmapages[pageno]+pageoffset;
-	cb->rdma_sq_wr.sg_list->length = size;
+  cb->rdma_sgl_write.addr = cb->bigspace->dmapages[pageno]+pageoffset;
+	cb->rdma_sq_wr_write.sg_list->length = size;
   //
   pageno=remote_offset/RPING_BUFSIZE;
   pageoffset=remote_offset%RPING_BUFSIZE;
   if(pageoffset+size>RPING_BUFSIZE){
-    printk("\nALERT, BUFFER MISALIGNMENT FOUND\n\n\n");
+    DEBUG_LOG("\nALERT, BUFFER MISALIGNMENT FOUND\n\n\n");
   }
-	cb->rdma_sq_wr.wr.rdma.remote_addr = cb->remote_addr[pageno]+pageoffset; 
+	cb->rdma_sq_wr_write.wr.rdma.remote_addr = cb->remote_addr[pageno]+pageoffset; 
   //
 //  printk("pageno=%lld pageoffset=%lld\n",pageno,pageoffset);
-  ret = ib_post_send(cb->qp, &cb->rdma_sq_wr, &bad_wr);
+  ret = ib_post_send(cb->qp, &cb->rdma_sq_wr_write, &bad_wr);
 		if (ret) {
-			printk(KERN_ERR PFX "post read err %d\n", ret);
+			DEBUG_LOG("post read err %d\n", ret);
 			return ret;
 		}
 			ret=down_killable(&cb->sem_write);
@@ -381,26 +383,26 @@ static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 s
   uint32_t pageno,pageoffset;
   ret=down_killable(&cb->sem_read_able);
 //  DEBUG_LOG("RDMA READ\n");
-	cb->rdma_sgl.lkey = cb->dma_mr->rkey; //no lkey?
+	cb->rdma_sgl_read.lkey = cb->dma_mr->rkey; //no lkey?
   //change
-  cb->rdma_sq_wr.opcode = IB_WR_RDMA_READ;
+  cb->rdma_sq_wr_read.opcode = IB_WR_RDMA_READ;
   pageno=local_offset/RPING_BUFSIZE;
   pageoffset=local_offset%RPING_BUFSIZE;
   if(pageoffset+size>RPING_BUFSIZE){
     printk("\nALERT, BUFFER MISALIGNMENT FOUND\n\n\n");
   }
-  cb->rdma_sgl.addr = cb->bigspace->dmapages[pageno]+pageoffset;
-	cb->rdma_sq_wr.sg_list->length = size;
+  cb->rdma_sgl_read.addr = cb->bigspace->dmapages[pageno]+pageoffset;
+	cb->rdma_sq_wr_read.sg_list->length = size;
   //
   pageno=remote_offset/RPING_BUFSIZE;
   pageoffset=remote_offset%RPING_BUFSIZE;
   if(pageoffset+size>RPING_BUFSIZE){
     printk("\nALERT, BUFFER MISALIGNMENT FOUND\n\n\n");
   }
-  cb->rdma_sq_wr.wr.rdma.remote_addr = cb->remote_addr[pageno]+pageoffset; 
+  cb->rdma_sq_wr_read.wr.rdma.remote_addr = cb->remote_addr[pageno]+pageoffset; 
   //
 //printk("pageno=%d pageoffset=%d\n",pageno,pageoffset);
-  ret = ib_post_send(cb->qp, &cb->rdma_sq_wr, &bad_wr);
+  ret = ib_post_send(cb->qp, &cb->rdma_sq_wr_read, &bad_wr);
 		if (ret) {
 			printk(KERN_ERR PFX "post read err %d\n", ret);
 			return ret;
@@ -414,13 +416,13 @@ static int do_read_bufferptr(struct krping_cb *cb,uint64_t theirptrs,int numpage
   struct ib_send_wr *bad_wr;
   ret=down_killable(&cb->sem_read_able);
   printk("theirptrs=%llx numpages=%d\n",theirptrs,numpages);
-  cb->rdma_sgl.lkey = cb->dma_mr->rkey; //no lkey?
-  cb->rdma_sq_wr.opcode = IB_WR_RDMA_READ;
-  cb->rdma_sgl.addr = (uint64_t)cb->remote_dmabuf_addr; //at offset 0
-  cb->rdma_sq_wr.sg_list->length = sizeof(char*)*numpages;
-  cb->rdma_sq_wr.wr.rdma.remote_addr =theirptrs;
+  cb->rdma_sgl_read.lkey = cb->dma_mr->rkey; //no lkey?
+  cb->rdma_sq_wr_read.opcode = IB_WR_RDMA_READ;
+  cb->rdma_sgl_read.addr = (uint64_t)cb->remote_dmabuf_addr; //at offset 0
+  cb->rdma_sq_wr_read.sg_list->length = sizeof(char*)*numpages;
+  cb->rdma_sq_wr_read.wr.rdma.remote_addr =theirptrs;
   
-  ret = ib_post_send(cb->qp, &cb->rdma_sq_wr, &bad_wr);
+  ret = ib_post_send(cb->qp, &cb->rdma_sq_wr_read, &bad_wr);
 		if (ret) {
 			printk(KERN_ERR PFX "post read err %d\n", ret);
 			return ret;
@@ -522,7 +524,7 @@ static void universal_recv_handlerQ(struct work_struct *work_arg){
         case 2: //set buffers info
           cb->remote_len  = ntohl(saved_buff->buffer_info.size)*RPING_BUFSIZE; //checkback, need hll? , do we really send big data
           cb->remote_rkey = ntohl(saved_buff->buffer_info.rkey);
-          cb->rdma_sq_wr.wr.rdma.rkey = cb->remote_rkey;
+          cb->rdma_sq_wr_read.wr.rdma.rkey=cb->rdma_sq_wr_write.wr.rdma.rkey = cb->remote_rkey;
           cb->remotenodeID = ntohl(saved_buff->buffer_info.instanceno);
         
           ret=do_read_bufferptr(cb,ntohll(saved_buff->buffer_info.buf),ntohl(saved_buff->buffer_info.size));
@@ -728,12 +730,17 @@ static void krping_setup_wr(struct krping_cb *cb)
 	cb->sq_wr.num_sge = 1;
     
   
-  cb->rdma_sq_wr.sg_list = &cb->rdma_sgl;
-  cb->rdma_sq_wr.next = NULL;
+  cb->rdma_sq_wr_write.sg_list = &cb->rdma_sgl_write;
+  cb->rdma_sq_wr_write.next = NULL;
   //cb->rdma_sgl.lkey = cb->rdma_mr->lkey;
-  cb->rdma_sq_wr.send_flags = IB_SEND_SIGNALED;
-  cb->rdma_sq_wr.num_sge = 1;
-  
+  cb->rdma_sq_wr_write.send_flags = IB_SEND_SIGNALED;
+  cb->rdma_sq_wr_write.num_sge = 1;
+  //////
+    cb->rdma_sq_wr_read.sg_list = &cb->rdma_sgl_read;
+  cb->rdma_sq_wr_read.next = NULL;
+  //cb->rdma_sgl.lkey = cb->rdma_mr->lkey;
+  cb->rdma_sq_wr_read.send_flags = IB_SEND_SIGNALED;
+  cb->rdma_sq_wr_read.num_sge = 1;
   DEBUG_LOG("setup_wr done\n");
 }
 

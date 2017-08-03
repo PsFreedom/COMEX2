@@ -117,18 +117,16 @@ void COMEX_read_from_remote(struct page *new_page, int node_ID, unsigned long re
 	addr_struct.remote = (unsigned long)remote_addr;
 	addr_struct.size   = 1*X86PageSize;
 	COMEX_RDMA(node_ID, CODE_COMEX_PAGE_READ, &addr_struct, sizeof(addr_struct));
-	
+
 	memcpy(new_vAddr, COMEX_offset_to_addr(buf_vAddr), X86PageSize);	
 	kunmap(new_page);
-	
-	if(checkSum_page(new_page) != 0)
-		printk(KERN_INFO "READ: %lu - %lu %lu\n", remote_addr, checkSum_page(new_page), checkSum_Vpage(COMEX_offset_to_addr(buf_vAddr)));
+//	printk(KERN_INFO "READ: %d %lu - %lu\n", node_ID, remote_addr, checkSum_page(new_page));
 }
 EXPORT_SYMBOL(COMEX_read_from_remote);
 
 void COMEX_page_receive(int nodeID, int pageNO, int group_size)
 {	
-	spin_lock(&COMEX_free_group[nodeID].list_lock);
+	spin_lock(&COMEX_free_group[dest_node].list_lock);
 	if(pageNO > 0){
 		free_group_t *group_ptr = (free_group_t *)kzalloc(sizeof(free_group_t), GFP_KERNEL);
 		
