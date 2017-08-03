@@ -1199,11 +1199,13 @@ static inline void sync_mm_rss(struct mm_struct *mm)
 ////////// 	Begin COMEX Section //////////
 
 #define X86PageSize 4096
+#define MAX_FREE 16
 
 #define CODE_COMEX_PAGE_RQST 10010
 #define CODE_COMEX_PAGE_RPLY 10011
 #define CODE_COMEX_PAGE_WRTE 10100
 #define CODE_COMEX_PAGE_READ 10200
+#define CODE_COMEX_PAGE_FREE 10300
 #define CODE_COMEX_PAGE_CKSM 19000
 
 //	Comm structure
@@ -1219,6 +1221,11 @@ typedef struct{
 	unsigned long remote;
 	int size;
 } COMEX_address_t;
+
+typedef struct{
+	int pageNO[MAX_FREE];
+	short count[MAX_FREE];
+} free_struct_t;
 
 //	Global variable
 extern int COMEX_Ready;
@@ -1237,6 +1244,8 @@ extern void COMEX_pages_request(int target);
 extern void COMEX_page_receive(int nodeID, int pageNO, int group_size);
 extern unsigned long checkSum_page(struct page *page);
 extern unsigned long checkSum_Vpage(unsigned char *chrPtr);
+
+extern void COMEX_free_page(int inPageNO, int order);
 
 //	Global Private Function		// Only for kernel use.
 extern void COMEX_read_from_local(struct page *new_page, unsigned long pageNO);

@@ -18,6 +18,14 @@ void COMEX_init_Remote()
 	
 	COMEX_writeOut_desc = (buffer_desc_t *)vmalloc(sizeof(buffer_desc_t)*COMEX_total_nodes);
 	memset(COMEX_writeOut_desc, 0, sizeof(buffer_desc_t)*COMEX_total_nodes);
+	
+	COMEX_free_struct = (free_struct_t *)vmalloc(sizeof(free_struct_t)*COMEX_total_nodes);
+	for(i=0; i<COMEX_total_nodes; i++){
+		for(j=0; j<MAX_FREE; j++){
+			COMEX_free_struct[i].pageNO[j] = -1;
+			COMEX_free_struct[i].count[j]  =  0;	
+		}
+	}
 }
 
 void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff, int total_pages, char *namePtr)

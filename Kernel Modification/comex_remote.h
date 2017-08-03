@@ -23,7 +23,10 @@ typedef struct{
 } buffer_desc_t;
 buffer_desc_t *COMEX_writeOut_desc;
 
+free_struct_t *COMEX_free_struct;
+
 unsigned long COMEX_freelist_getpage(int);
+void COMEX_free_to_remote(int nodeID, unsigned long offset);
 
 ////////////////////
 
@@ -117,10 +120,10 @@ void COMEX_read_from_remote(struct page *new_page, int node_ID, unsigned long re
 	addr_struct.remote = (unsigned long)remote_addr;
 	addr_struct.size   = 1*X86PageSize;
 	COMEX_RDMA(node_ID, CODE_COMEX_PAGE_READ, &addr_struct, sizeof(addr_struct));
-
+	COMEX_free_to_remote(node_ID, remote_addr);
+	
 	memcpy(new_vAddr, COMEX_offset_to_addr(buf_vAddr), X86PageSize);	
 	kunmap(new_page);
-//	printk(KERN_INFO "READ: %d %lu - %lu\n", node_ID, remote_addr, checkSum_page(new_page));
 }
 EXPORT_SYMBOL(COMEX_read_from_remote);
 
@@ -165,6 +168,43 @@ unsigned long COMEX_freelist_getpage(int list_ID)
 //		printk(KERN_INFO "%s: Cut Link - %lu\n", __FUNCTION__, myPtr->addr_end/X86PageSize);
 	}
 	return ret_addr;
+}
+
+void clean_free_struct(int nodeID){
+	int i;
+	for(i=0; i<MAX_FREE; i++){
+		COMEX_free_struct[nodeID].pageNO[i] = -1;
+		COMEX_free_struct[nodeID].count[i]  =  0;
+	}
+}
+
+void COMEX_free_to_remote(int nodeID, unsigned long offset)
+{
+	int pageNO, i;
+	
+	offset = offset/X86PageSize;
+	pageNO = (int)offset;
+	for(i=0; i<MAX_FREE; i++){
+		if( COMEX_free_struct[nodeID].pageNO[i] + COMEX_free_struct[nodeID].count[i] == pageNO && COMEX_free_struct[nodeID].count[i] < 16384){
+			COMEX_free_struct[nodeID].count[i]++;
+			return;
+		}
+		if( COMEX_free_struct[nodeID].pageNO[i] - 1 == pageNO && COMEX_free_struct[nodeID].count[i] < 16384){
+			COMEX_free_struct[nodeID].pageNO[i]--;
+			COMEX_free_struct[nodeID].count[i]++;
+			return;
+		}
+		if( COMEX_free_struct[nodeID].pageNO[i] == -1){
+			COMEX_free_struct[nodeID].pageNO[i] = pageNO;
+			COMEX_free_struct[nodeID].count[i]  = 1;
+			return;
+		}
+	}
+	
+	COMEX_RDMA(nodeID, CODE_COMEX_PAGE_FREE, &COMEX_free_struct[nodeID], sizeof(COMEX_free_struct[nodeID]));
+	clean_free_struct(nodeID);
+	COMEX_free_struct[nodeID].pageNO[0] = pageNO;
+	COMEX_free_struct[nodeID].count[0]  = 1;
 }
 
 void COMEX_pages_request(int target)

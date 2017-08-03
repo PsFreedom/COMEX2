@@ -133,7 +133,7 @@ static inline int COMEX_rmqueue_smallest(unsigned int order)
 	return -1;
 }
 
-static inline void COMEX_free_page(int inPageNO, int order)
+void COMEX_free_page(int inPageNO, int order)
 {
 	int page_idx = 0;
 	int buddy_idx = 0;
