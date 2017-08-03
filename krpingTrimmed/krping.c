@@ -181,7 +181,7 @@ struct krping_cb {
   
 	int read_inv;
 	u8 key;
-	int exitstatus;
+  int exitstatus;
 	struct ib_recv_wr rq_wr[VERB_RECV_SLOT];	/* recv work request record */
 	struct ib_sge recv_sgl[VERB_RECV_SLOT];		/* recv single SGE */
 	union bufferx recv_buf[VERB_RECV_SLOT]; /* malloc'd buffer */
@@ -197,26 +197,20 @@ struct krping_cb {
 	DECLARE_PCI_UNMAP_ADDR(send_mapping)
 	struct ib_mr *send_mr;
 
-	struct ib_send_wr rdma_sq_wr_write;	/* rdma work request record */
-	struct ib_send_wr rdma_sq_wr_read;	/* rdma work request record */
-	struct ib_sge rdma_sgl_read;		/* rdma single SGE */
-	struct ib_sge rdma_sgl_write;		/* rdma single SGE */
+	struct ib_send_wr rdma_sq_wr_proto;	/* rdma work request record prototype for copy*/
 	char *rdma_buf;			/* used as rdma sink */
-	u64  rdma_dma_addr;
-	DECLARE_PCI_UNMAP_ADDR(rdma_mapping)
-	DECLARE_PCI_UNMAP_ADDR(dmabuf_mapping)
-	DECLARE_PCI_UNMAP_ADDR(ptable_mapping)
+  DECLARE_PCI_UNMAP_ADDR(dmabuf_mapping)
+  DECLARE_PCI_UNMAP_ADDR(ptable_mapping)
 	uint32_t remote_rkey;		/* remote guys RKEY */
 	uint32_t remote_len;		/* remote guys LEN */ //resize?
 
 	enum test_state state;		/* used for cond/signalling */
 	wait_queue_head_t sem;
-	struct semaphore sem_verb;
-	struct semaphore sem_read_able;
-	struct semaphore sem_read;
-	struct semaphore sem_write_able;
-	struct semaphore sem_write;
-	struct semaphore sem_ready;
+  struct semaphore sem_verb;
+  struct semaphore sem_read_able;
+  struct semaphore sem_read;
+  struct semaphore sem_write_able;
+  struct semaphore sem_ready;
 	uint16_t port;			/* dst port in NBO */
 	u8 addr[16];			/* dst addr in NBO */
 	char *addr_str;			/* dst addr string */
@@ -276,7 +270,7 @@ static int regis_bigspace(struct krping_sharedspace *bigspace,int num_bigpages)
 
 //big page align in 4MB chunks
 static uint64_t translate_useraddr(struct krping_cb *cb,uint64_t offset){
-  return cb->bigspace->bufferpages[offset/RPING_BUFSIZE]+(offset%RPING_BUFSIZE);
+  return (uint64_t)cb->bigspace->bufferpages[offset/RPING_BUFSIZE]+(offset%RPING_BUFSIZE);
 }
 
 static int krping_cma_event_handler(struct rdma_cm_id *cma_id,
@@ -345,89 +339,94 @@ static int krping_cma_event_handler(struct rdma_cm_id *cma_id,
 static int do_write(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 size){
   int ret;
   struct ib_send_wr *bad_wr;
-  uint64_t pageno,pageoffset;
+  struct ib_send_wr rdma_sq_wr_copy;	/* rdma work request record prototype for copy*/
+	struct ib_sge rdma_sgl_new;		/* rdma single SGE ptototype for copy*/
+  struct semaphore sem_write;
+	if(((local_offset%RPING_BUFSIZE+size>RPING_BUFSIZE)||(remote_offset%RPING_BUFSIZE+size>RPING_BUFSIZE))){ //chk misalignment
+    DEBUG_LOG("\nALERT, BUFFER MISALIGNMENT FOUND\n\n\n");
+    return 1;
+  }else{
+	  //DEBUG_LOG("\nabout to sleep");
+  sema_init(&sem_write,0);  
+  memcpy(&rdma_sq_wr_copy,&cb->rdma_sq_wr_proto,sizeof(struct ib_send_wr));
+  rdma_sq_wr_copy.opcode = IB_WR_RDMA_WRITE;
+  rdma_sq_wr_copy.sg_list=&rdma_sgl_new; 
+  rdma_sgl_new.lkey = cb->dma_mr->rkey;
+  rdma_sq_wr_copy.sg_list->length = size; //
+  rdma_sgl_new.addr = cb->bigspace->dmapages[local_offset/RPING_BUFSIZE]+(local_offset%RPING_BUFSIZE); //
+	rdma_sq_wr_copy.wr.rdma.remote_addr = cb->remote_addr[remote_offset/RPING_BUFSIZE]+(remote_offset%RPING_BUFSIZE); //
+  rdma_sq_wr_copy.wr_id = (uint64_t)&sem_write;
+  
   ret=down_killable(&cb->sem_write_able);
-//  DEBUG_LOG("RDMA WRITE\n");
-//  printk("localoffset=%lld remoteoffset=%lld\n",local_offset,remote_offset);
-	cb->rdma_sgl_write.lkey = cb->dma_mr->rkey; //no lkey?
-  //change
-  cb->rdma_sq_wr_write.opcode = IB_WR_RDMA_WRITE;
-  pageno=local_offset/RPING_BUFSIZE;
-  pageoffset=local_offset%RPING_BUFSIZE;
-  if(pageoffset+size>RPING_BUFSIZE){
-    DEBUG_LOG("\nALERT, BUFFER MISALIGNMENT FOUND\n\n\n");
-  }
-  cb->rdma_sgl_write.addr = cb->bigspace->dmapages[pageno]+pageoffset;
-	cb->rdma_sq_wr_write.sg_list->length = size;
-  //
-  pageno=remote_offset/RPING_BUFSIZE;
-  pageoffset=remote_offset%RPING_BUFSIZE;
-  if(pageoffset+size>RPING_BUFSIZE){
-    DEBUG_LOG("\nALERT, BUFFER MISALIGNMENT FOUND\n\n\n");
-  }
-	cb->rdma_sq_wr_write.wr.rdma.remote_addr = cb->remote_addr[pageno]+pageoffset; 
-  //
-//  printk("pageno=%lld pageoffset=%lld\n",pageno,pageoffset);
-  ret = ib_post_send(cb->qp, &cb->rdma_sq_wr_write, &bad_wr);
+  //DEBUG_LOG("RDMA WRITE localoffset=%lld remoteoffset=%lld\n",local_offset,remote_offset);
+  ret = ib_post_send(cb->qp, &rdma_sq_wr_copy, &bad_wr);
 		if (ret) {
-			DEBUG_LOG("post read err %d\n", ret);
+			printk(KERN_ERR PFX "post read err %d\n", ret);
 			return ret;
 		}
-			ret=down_killable(&cb->sem_write);
+  ret=down_killable(&sem_write);
+  up(&cb->sem_write_able);
   return 0;
+  }
 }
 //NOT atomic, must check sem_read if it finish reading
 static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 size){
   int ret;
   struct ib_send_wr *bad_wr;
-  uint32_t pageno,pageoffset;
+  struct ib_send_wr rdma_sq_wr_copy;	/* rdma work request record prototype for copy*/
+	struct ib_sge rdma_sgl_new;		/* rdma single SGE ptototype for copy*/
+
+	if(((local_offset%RPING_BUFSIZE+size>RPING_BUFSIZE)||(remote_offset%RPING_BUFSIZE+size>RPING_BUFSIZE))){ //chk misalignment
+    DEBUG_LOG("\nALERT, BUFFER MISALIGNMENT FOUND\n\n\n");
+    return 1;
+  }else{
+    
+  memcpy(&rdma_sq_wr_copy,&cb->rdma_sq_wr_proto,sizeof(struct ib_send_wr));
+  rdma_sq_wr_copy.opcode = IB_WR_RDMA_READ;
+  rdma_sq_wr_copy.sg_list=&rdma_sgl_new; 
+  rdma_sgl_new.lkey = cb->dma_mr->rkey;
+  rdma_sq_wr_copy.sg_list->length = size; //
+  rdma_sgl_new.addr = cb->bigspace->dmapages[local_offset/RPING_BUFSIZE]+(local_offset%RPING_BUFSIZE); //
+	rdma_sq_wr_copy.wr.rdma.remote_addr = cb->remote_addr[remote_offset/RPING_BUFSIZE]+(remote_offset%RPING_BUFSIZE); //
+  rdma_sq_wr_copy.wr_id = (uint64_t)&cb->sem_read;
+    
   ret=down_killable(&cb->sem_read_able);
-//  DEBUG_LOG("RDMA READ\n");
-	cb->rdma_sgl_read.lkey = cb->dma_mr->rkey; //no lkey?
-  //change
-  cb->rdma_sq_wr_read.opcode = IB_WR_RDMA_READ;
-  pageno=local_offset/RPING_BUFSIZE;
-  pageoffset=local_offset%RPING_BUFSIZE;
-  if(pageoffset+size>RPING_BUFSIZE){
-    printk("\nALERT, BUFFER MISALIGNMENT FOUND\n\n\n");
-  }
-  cb->rdma_sgl_read.addr = cb->bigspace->dmapages[pageno]+pageoffset;
-	cb->rdma_sq_wr_read.sg_list->length = size;
-  //
-  pageno=remote_offset/RPING_BUFSIZE;
-  pageoffset=remote_offset%RPING_BUFSIZE;
-  if(pageoffset+size>RPING_BUFSIZE){
-    printk("\nALERT, BUFFER MISALIGNMENT FOUND\n\n\n");
-  }
-  cb->rdma_sq_wr_read.wr.rdma.remote_addr = cb->remote_addr[pageno]+pageoffset; 
-  //
-//printk("pageno=%d pageoffset=%d\n",pageno,pageoffset);
-  ret = ib_post_send(cb->qp, &cb->rdma_sq_wr_read, &bad_wr);
+  //DEBUG_LOG("RDMA WRITE localoffset=%lld remoteoffset=%lld\n",local_offset,remote_offset);
+  ret = ib_post_send(cb->qp, &rdma_sq_wr_copy, &bad_wr);
 		if (ret) {
 			printk(KERN_ERR PFX "post read err %d\n", ret);
 			return ret;
 		}
-	ret=down_killable(&cb->sem_read);	
+  ret=down_killable(&cb->sem_read);
+  up(&cb->sem_read_able);
   return 0;
+  }
 }
 // internal call,
 static int do_read_bufferptr(struct krping_cb *cb,uint64_t theirptrs,int numpages){
   int ret;
   struct ib_send_wr *bad_wr;
-  ret=down_killable(&cb->sem_read_able);
+  struct ib_send_wr rdma_sq_wr_copy;	/* rdma work request record prototype for copy*/
+	struct ib_sge rdma_sgl_new;		/* rdma single SGE ptototype for copy*/
   printk("theirptrs=%llx numpages=%d\n",theirptrs,numpages);
-  cb->rdma_sgl_read.lkey = cb->dma_mr->rkey; //no lkey?
-  cb->rdma_sq_wr_read.opcode = IB_WR_RDMA_READ;
-  cb->rdma_sgl_read.addr = (uint64_t)cb->remote_dmabuf_addr; //at offset 0
-  cb->rdma_sq_wr_read.sg_list->length = sizeof(char*)*numpages;
-  cb->rdma_sq_wr_read.wr.rdma.remote_addr =theirptrs;
+  memcpy(&rdma_sq_wr_copy,&cb->rdma_sq_wr_proto,sizeof(struct ib_send_wr));
+  rdma_sq_wr_copy.sg_list=&rdma_sgl_new; 
+  rdma_sgl_new.lkey = cb->dma_mr->rkey;
+  rdma_sq_wr_copy.opcode = IB_WR_RDMA_READ;
   
-  ret = ib_post_send(cb->qp, &cb->rdma_sq_wr_read, &bad_wr);
+  rdma_sgl_new.addr = (uint64_t)cb->remote_dmabuf_addr; //at offset 0
+  rdma_sq_wr_copy.sg_list->length = sizeof(char*)*numpages; //
+  rdma_sq_wr_copy.wr.rdma.remote_addr =theirptrs; //
+  rdma_sq_wr_copy.wr_id = (uint64_t)&cb->sem_read;
+    
+  ret=down_killable(&cb->sem_read_able);
+  ret = ib_post_send(cb->qp, &rdma_sq_wr_copy, &bad_wr);
 		if (ret) {
 			printk(KERN_ERR PFX "post read err %d\n", ret);
 			return ret;
 		}
-	ret=down_killable(&cb->sem_read);	
+  ret=down_killable(&cb->sem_read);
+  up(&cb->sem_read_able);
   return 0;
 }
 // internal call, will improve
@@ -436,7 +435,7 @@ static int deep_send(struct krping_cb *cb, u64 imm){
   int ret;
   
   
-cb->send_sgl.addr = &cb->send_buf;
+  cb->send_sgl.addr = (uint64_t)&cb->send_buf;
 	//cb->send_sgl.addr = cb->send_dma_addr;
 	//cb->send_sgl.length = sizeof cb->send_buf;
  //cb->send_sgl.lkey = cb->dma_mr->lkey; //
@@ -464,7 +463,7 @@ static int universal_send(struct krping_cb *cb, u64 imm, char* addr, u64 size){
 //called by work queue
 static void work_queue_send(struct work_struct *work_arg){
   struct work_data * data = container_of(work_arg, struct work_data, real_work);
-  universal_send(data->cb,data->imm,&data->payload,data->size);
+  universal_send(data->cb,data->imm,(char*)&data->payload,data->size);
   //DEBUG_LOG(" %lld %d \n",data->imm,data->size);
   kfree(data);
 }
@@ -474,7 +473,6 @@ static void work_queue_send(struct work_struct *work_arg){
 // http://www.makelinux.net/ldd3/chp-7-sect-6
 static void universal_queue_send(struct krping_cb *cb, u64 imm, char* addr, u64 size)
 {
-	int ret; 
 	struct work_data *data = kmalloc(sizeof(struct work_data), GFP_ATOMIC);
   
 //init params
@@ -514,8 +512,6 @@ static void universal_recv_handlerQ(struct work_struct *work_arg){
   struct workr_data * data = container_of(work_arg, struct workr_data, real_work);
   struct krping_cb *cb=data->cb;
   uint64_t imm=data->imm;
-  //int slot=data->slot; //not needed
-  struct ib_recv_wr *bad_wr;
   union bufferx *saved_buff=&data->savedbuffer;
   int ret;
   //DEBUG_LOG("%d: recv slot:%d\n",cb->cbindex,slot);
@@ -524,7 +520,8 @@ static void universal_recv_handlerQ(struct work_struct *work_arg){
         case 2: //set buffers info
           cb->remote_len  = ntohl(saved_buff->buffer_info.size)*RPING_BUFSIZE; //checkback, need hll? , do we really send big data
           cb->remote_rkey = ntohl(saved_buff->buffer_info.rkey);
-          cb->rdma_sq_wr_read.wr.rdma.rkey=cb->rdma_sq_wr_write.wr.rdma.rkey = cb->remote_rkey;
+          cb->rdma_sq_wr_proto.wr.rdma.rkey = cb->remote_rkey;
+          
           cb->remotenodeID = ntohl(saved_buff->buffer_info.instanceno);
         
           ret=do_read_bufferptr(cb,ntohll(saved_buff->buffer_info.buf),ntohl(saved_buff->buffer_info.size));
@@ -541,7 +538,7 @@ static void universal_recv_handlerQ(struct work_struct *work_arg){
 			DEBUG_LOG("recv exit");
 			break;
         case 99: //set buffers info
-			printk("unexpected,unhandled immediate received=%d %s\n",imm,saved_buff->piggy);
+			printk("unexpected,unhandled immediate received=%lld %s\n",imm,saved_buff->piggy);
 			break;
         default:
 			COMEX_do_verb( imm, saved_buff);
@@ -586,14 +583,14 @@ static void krping_cq_event_handler_send(struct ib_cq *cq, void *ctx)
 
 		case IB_WC_RDMA_WRITE:
 			//DEBUG_LOG("rdma write completion\n");
-			up(&cb->sem_write);
-      up(&cb->sem_write_able);
+			up((struct semaphore*)wc.wr_id);
+      //up(&cb->sem_write);
 			break;
 
 		case IB_WC_RDMA_READ:
 			//DEBUG_LOG("rdma read completion\n");
-			up(&cb->sem_read);
-      up(&cb->sem_read_able);
+			up((struct semaphore*)wc.wr_id);
+      //up(&cb->sem_read);
 			break;
 		default:
 			printk(KERN_ERR PFX
@@ -729,18 +726,11 @@ static void krping_setup_wr(struct krping_cb *cb)
   cb->sq_wr.sg_list = &cb->send_sgl;
 	cb->sq_wr.num_sge = 1;
     
+  cb->rdma_sq_wr_proto.next = NULL;
+  cb->rdma_sq_wr_proto.send_flags = IB_SEND_SIGNALED;
+  cb->rdma_sq_wr_proto.num_sge = 1;
   
-  cb->rdma_sq_wr_write.sg_list = &cb->rdma_sgl_write;
-  cb->rdma_sq_wr_write.next = NULL;
-  //cb->rdma_sgl.lkey = cb->rdma_mr->lkey;
-  cb->rdma_sq_wr_write.send_flags = IB_SEND_SIGNALED;
-  cb->rdma_sq_wr_write.num_sge = 1;
-  //////
-    cb->rdma_sq_wr_read.sg_list = &cb->rdma_sgl_read;
-  cb->rdma_sq_wr_read.next = NULL;
-  //cb->rdma_sgl.lkey = cb->rdma_mr->lkey;
-  cb->rdma_sq_wr_read.send_flags = IB_SEND_SIGNALED;
-  cb->rdma_sq_wr_read.num_sge = 1;
+  
   DEBUG_LOG("setup_wr done\n");
 }
 
@@ -767,17 +757,6 @@ static int krping_setup_buffers(struct krping_cb *cb)
   }
   DEBUG_LOG("done creating verb buffers\n");
   //////////////// rdma part
-  
-  cb->rdma_buf = kmalloc(cb->size, GFP_KERNEL); 
-	if (!cb->rdma_buf) {
-		DEBUG_LOG(PFX "rdma_buf malloc failed\n");
-		ret = -ENOMEM;
-		goto bail;
-	}
-  cb->rdma_dma_addr = dma_map_single(cb->pd->device->dma_device, 
-			       cb->rdma_buf, cb->size, 
-			       DMA_BIDIRECTIONAL);
-	pci_unmap_addr_set(cb, rdma_mapping, cb->rdma_dma_addr);
   
   //set dma mask to 64, so more mem can be registerd
   if(dma_set_mask(cb->pd->device->dma_device, 64)){
@@ -841,9 +820,6 @@ static void krping_free_buffers(struct krping_cb *cb)
 	dma_unmap_single(cb->pd->device->dma_device,
 			 pci_unmap_addr(cb, send_mapping),
 			 sizeof(cb->send_buf), DMA_BIDIRECTIONAL);
-	dma_unmap_single(cb->pd->device->dma_device,
-			 pci_unmap_addr(cb, rdma_mapping),
-			 cb->size, DMA_BIDIRECTIONAL);
   dma_unmap_single(cb->pd->device->dma_device,
 			 pci_unmap_addr(cb, ptable_mapping),
 			 sizeof(char*)*PAGESCOUNT, DMA_BIDIRECTIONAL);
@@ -957,7 +933,7 @@ static void krping_test_server(struct krping_cb *cb)
   
   //test read
   //DEBUG_LOG("%d:issue read\n",cb->cbindex);
-  //CHK(do_read(cb,0,0,24))
+  //CHK(do_read(cb,0,0,24) )
   //DEBUG_LOG("%d:wait sem read\n",cb->cbindex);
   //ret=down_killable(&cb->sem_read);
   //dma_sync_single_for_cpu(cb->pd->device->dma_device, cb->rdma_dma_addr, sizeof(cb->rdma_buf), DMA_FROM_DEVICE);
@@ -969,7 +945,7 @@ static void krping_test_server(struct krping_cb *cb)
   sprintf(cb->rdma_buf+16,"whataburger11 ");
    //dma_sync_single_for_device(cb->pd->device->dma_device, cb->rdma_dma_addr, sizeof(cb->rdma_buf), DMA_TO_DEVICE);
   
-  CHK(do_write(cb,16,16,24))
+  CHK(do_write(cb,16,16,24) )
   ret=down_killable(&cb->sem_write);
   DEBUG_LOG("%d:done\n",cb->cbindex);
   */
@@ -1200,7 +1176,7 @@ int krping_doit(char *cmd)
 	char stri[] = "responsethread  ";
 	
 	// for debug
-	int j,k;
+	int j;
 	char t[170] = "zxg   ";
 	
 	sema_init(&sem_killsw,0);
@@ -1220,7 +1196,7 @@ int krping_doit(char *cmd)
 		}
 		if(!cbs[i]->wq){ //no chance it exist, but just in case
 			cbs[i]->wq=create_singlethread_workqueue("COMEX RECV wq");
-			cbs[i]->wq2=create_singlethread_workqueue("COMEX VERB wq");
+		cbs[i]->wq2=create_singlethread_workqueue("COMEX VERB wq");
 		}
 		
 		cbs[i]->cbindex=i;
@@ -1236,8 +1212,7 @@ int krping_doit(char *cmd)
 		sema_init(&cbs[i]->sem_verb,1);
 		sema_init(&cbs[i]->sem_read_able,1);
 		sema_init(&cbs[i]->sem_read,0);
-		sema_init(&cbs[i]->sem_write_able,1);
-		sema_init(&cbs[i]->sem_write,0);
+		sema_init(&cbs[i]->sem_write_able,5);
 		sema_init(&cbs[i]->sem_ready,0);
 		
 		// IP
@@ -1300,7 +1275,7 @@ int krping_doit(char *cmd)
 			cbs[0]->verbose++;
 			DEBUG_LOG("verbose\n");
 			break;
-       //COMEX
+		//COMEX
 		case 't':
 			total_pages = (int)optint;
 			break;
@@ -1360,7 +1335,7 @@ int krping_doit(char *cmd)
 	DEBUG_LOG("Allthread ready to operate\n");
 	DEBUG_LOG("===========================\n");
   //verb test
- 
+ /*
     for(i=0;i<totalcb;i++){
       for(j=0;j<50;j++){
         //DEBUG_LOG("sending %d %d\n",i,j);
@@ -1369,7 +1344,7 @@ int krping_doit(char *cmd)
          universal_queue_send(cbs[i], 99,t, 14); 
       }
     }
-  
+  */
 //// ready to operate!  
 	COMEX_init();	// for COMEX
 	ret = down_interruptible(&sem_killsw); //never get unlocked naturally
