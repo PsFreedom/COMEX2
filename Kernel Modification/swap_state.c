@@ -387,7 +387,7 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				unlock_page(new_page);
 				
 //				if(checkSum_page(new_page) != 0)
-//					printk(KERN_INFO "READ: %d %lu - %lu\n", NodeID, offsetField, checkSum_page(new_page));
+//					printk(KERN_INFO "READ: %d %lu - %lu\n", NodeID, offsetField/X86PageSize, checkSum_page(new_page));
 			}
 			else if(swp_type(entry) == 9)
 			{

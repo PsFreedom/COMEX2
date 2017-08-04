@@ -49,7 +49,7 @@ void COMEX_RDMA_fn(int target, int CMD_num, void *ptr, int struct_size)
 	else if(CMD_num == CODE_COMEX_PAGE_WRTE){
 		COMEX_address_t *myStruct = ptr;
 //		if(checkSum_Vpage(COMEX_offset_to_addr_fn(myStruct->local)) != 0)
-			printk(KERN_INFO "PAGE_WRTE: %d | L %lu R %lu %d - %lu\n", target, myStruct->local, myStruct->remote, myStruct->size, checkSum_Vpage(COMEX_offset_to_addr_fn(myStruct->local)));
+			printk(KERN_INFO "PAGE_WRTE: %d | L %lu R %lu %d - %lu\n", target, myStruct->local/X86PageSize, myStruct->remote/X86PageSize, myStruct->size, checkSum_Vpage(COMEX_offset_to_addr_fn(myStruct->local)));
 		CHK(do_write(cbs[target], myStruct->local, myStruct->remote, myStruct->size))
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_READ){
