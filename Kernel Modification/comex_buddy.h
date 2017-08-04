@@ -1,4 +1,3 @@
-#define COMEX_MAX_ORDER 11
 #define Biggest_Group 1024
 
 #define COMEX_list_entry(ptr, type, member) ({                      \

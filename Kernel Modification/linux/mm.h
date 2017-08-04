@@ -1198,6 +1198,7 @@ static inline void sync_mm_rss(struct mm_struct *mm)
 
 ////////// 	Begin COMEX Section //////////
 
+#define COMEX_MAX_ORDER 11
 #define X86PageSize 4096
 #define MAX_FREE 16
 

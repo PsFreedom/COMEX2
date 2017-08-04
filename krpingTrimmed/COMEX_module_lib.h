@@ -83,12 +83,27 @@ void COMEX_do_verb(int CMD_num, void *piggy)
 		printk(KERN_INFO "PAGE_CKSM: %lu - %lu\n", *(unsigned long *)piggy, checkSum_Vpage(COMEX_offset_to_addr_fn(*(unsigned long *)piggy)));
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_FREE){
-		int i, pow = 10;
-		free_struct_t *myStruct = ptr;
+		int i, pow, page_idx;
+		free_struct_t *myStruct = piggy;
 		
-		printk(KERN_INFO "PAGE_FREE: ##################", ptr, struct_size);
+		printk(KERN_INFO "PAGE_FREE: ##################\n");
 		for(i=0; i<MAX_FREE; i++){
 			printk(" >>> %d %hd\n", myStruct->pageNO[i], myStruct->count[i]);
+			
+			while(myStruct->count[i] > 0)
+			{
+				pow		 = COMEX_MAX_ORDER-1;
+				page_idx = myStruct->pageNO[i] & ((1 << (COMEX_MAX_ORDER-1)) - 1);
+				
+				while((1<<pow) > myStruct->count[i] || page_idx%(1<<pow) != 0){
+					pow--;
+				}
+				
+				COMEX_free_page(myStruct->pageNO[i], pow);
+				myStruct->pageNO[i] += (1<<pow);
+				myStruct->count[i]  -= (1<<pow);
+				printk(" ------ %d - %d | %d %hd\n", page_idx, (1<<pow), myStruct->pageNO[i], myStruct->count[i]);
+			}
 		}		
 	}
 	else{
