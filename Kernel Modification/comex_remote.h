@@ -18,10 +18,18 @@ typedef struct{
 } free_group_t;
 
 typedef struct{
-	int head;
-	int tail;
-} buffer_desc_t;
-buffer_desc_t *COMEX_writeOut_desc;
+	char status;
+	int  nodeID;
+	int  pageNO;
+} buff_desc_t;
+buff_desc_t **COMEX_writeOut_buff;
+buff_desc_t *COMEX_readIn_buff;
+
+typedef struct{
+	short  head;
+	short  tail;
+} buff_pos_t;
+buff_pos_t *buff_pos;
 
 free_struct_t *COMEX_free_struct;
 
@@ -46,7 +54,7 @@ uint64_t get_writeOut_buff(int node_ID, int buff_slot){
 	uint64_t address;
 
 	address  = COMEX_total_pages;
-	address += node_ID*COMEX_writeOut;
+	address += node_ID*COMEX_total_writeOut;
 	address += buff_slot;
 	address *= X86PageSize;
 	return address;
@@ -55,7 +63,7 @@ uint64_t get_writeOut_buff(int node_ID, int buff_slot){
 uint64_t get_readIn_buff(int buff_slot){
 	uint64_t address;
 
-	address  = COMEX_total_pages + (COMEX_writeOut*COMEX_total_nodes);
+	address  = COMEX_total_pages + (COMEX_total_writeOut*COMEX_total_nodes);
 	address += buff_slot;
 	address *= X86PageSize;
 	return address;
@@ -84,11 +92,14 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, unsigned long *r
 			}
 		}
 		
-		if(COMEX_free_group[dest_node].total_group > 0)
+		if(COMEX_free_group[dest_node].total_group > 0 && COMEX_writeOut_buff[dest_node][buff_pos[dest_node].tail].status == -1)
 		{
 			*retOffset = COMEX_freelist_getpage(dest_node);
-			buf_vAddr  = (char *)get_writeOut_buff(0, 0);
+			buf_vAddr  = (char *)get_writeOut_buff(dest_node, buff_pos[dest_node].tail);
 			old_vAddr  = (char *)kmap(old_page);
+			
+			COMEX_writeOut_buff[dest_node][buff_pos[dest_node].tail].status = 1;
+			buff_pos[dest_node].tail++;
 			
 			memcpy(COMEX_offset_to_addr(buf_vAddr), old_vAddr, X86PageSize);
 			kunmap(old_page);

@@ -16,8 +16,29 @@ void COMEX_init_Remote()
 			printk(KERN_INFO "%d... list_empty!\n", i);
 	}
 	
-	COMEX_writeOut_desc = (buffer_desc_t *)vmalloc(sizeof(buffer_desc_t)*COMEX_total_nodes);
-	memset(COMEX_writeOut_desc, 0, sizeof(buffer_desc_t)*COMEX_total_nodes);
+	buff_pos = (buff_pos_t *)vmalloc(sizeof(buff_pos_t)*COMEX_total_nodes);
+	memset(buff_pos, 0, sizeof(buff_pos_t)*COMEX_total_nodes);
+
+	COMEX_writeOut_buff = (buff_desc_t **)vmalloc(sizeof(buff_desc_t *)*COMEX_total_nodes);
+	for(i=0; i<COMEX_total_nodes; i++){
+		COMEX_writeOut_buff[i] = (buff_desc_t *)vmalloc(sizeof(buff_desc_t)*COMEX_total_writeOut);
+		for(j=0; j<COMEX_total_writeOut; j++){
+			COMEX_writeOut_buff[i][j].status = -1;
+			COMEX_writeOut_buff[i][j].nodeID = -1;
+			COMEX_writeOut_buff[i][j].pageNO = -1;
+			
+			printk(KERN_INFO "writeOut %d %d: %hhd %d %d\n", i, j, COMEX_writeOut_buff[i][j].status, COMEX_writeOut_buff[i][j].nodeID, COMEX_writeOut_buff[i][j].pageNO);
+		}
+	}
+	
+	COMEX_readIn_buff = (buff_desc_t *)vmalloc(sizeof(buff_desc_t)*COMEX_total_readIn);
+	for(i=0; i<COMEX_total_readIn; i++){
+		COMEX_readIn_buff[i].status = -1;
+		COMEX_readIn_buff[i].nodeID = -1;
+		COMEX_readIn_buff[i].pageNO = -1;
+		
+		printk(KERN_INFO "readIn %d: %x %d %d\n", i, COMEX_readIn_buff[i].status, COMEX_readIn_buff[i].nodeID, COMEX_readIn_buff[i].pageNO);
+	}
 	
 	COMEX_free_struct = (free_struct_t *)vmalloc(sizeof(free_struct_t)*COMEX_total_nodes);
 	for(i=0; i<COMEX_total_nodes; i++){
@@ -33,11 +54,15 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 	char initMSG[50];
 	int i, ret=0;
 	
-	COMEX_ID = node_ID;
-	COMEX_total_nodes = n_nodes;
-	COMEX_total_pages = total_pages;
-	COMEX_writeOut = writeOut_buff;
-	COMEX_readIn   = readIn_buff;
+	COMEX_ID			 = node_ID;
+	COMEX_total_nodes	 = n_nodes;
+	COMEX_total_pages	 = total_pages;
+	COMEX_total_writeOut = writeOut_buff;
+	COMEX_total_readIn   = readIn_buff;
+	
+//	COMEX_total_nodes	 = 4;
+//	COMEX_total_writeOut = 64;
+//	COMEX_total_readIn   = 256;
 	
 	strcpy(proc_name, namePtr);
 	printk(KERN_INFO "COMEX Kernel v.2 --> %s\n", proc_name);

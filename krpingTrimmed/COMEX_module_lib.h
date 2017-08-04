@@ -48,7 +48,7 @@ void COMEX_RDMA_fn(int target, int CMD_num, void *ptr, int struct_size)
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_WRTE){
 		COMEX_address_t *myStruct = ptr;
-		if(checkSum_Vpage(COMEX_offset_to_addr_fn(myStruct->local)) != 0)
+//		if(checkSum_Vpage(COMEX_offset_to_addr_fn(myStruct->local)) != 0)
 			printk(KERN_INFO "PAGE_WRTE: %d | L %lu R %lu %d - %lu\n", target, myStruct->local, myStruct->remote, myStruct->size, checkSum_Vpage(COMEX_offset_to_addr_fn(myStruct->local)));
 		CHK(do_write(cbs[target], myStruct->local, myStruct->remote, myStruct->size))
 	}
@@ -86,9 +86,9 @@ void COMEX_do_verb(int CMD_num, void *piggy)
 		int i, pow, page_idx;
 		free_struct_t *myStruct = piggy;
 		
-		printk(KERN_INFO "PAGE_FREE: ##################\n");
+//		printk(KERN_INFO "PAGE_FREE: ##################\n");
 		for(i=0; i<MAX_FREE; i++){
-			printk(" >>> %d %hd\n", myStruct->pageNO[i], myStruct->count[i]);
+//			printk(" >>> %d %hd\n", myStruct->pageNO[i], myStruct->count[i]);
 			
 			while(myStruct->count[i] > 0)
 			{
@@ -102,7 +102,7 @@ void COMEX_do_verb(int CMD_num, void *piggy)
 				COMEX_free_page(myStruct->pageNO[i], pow);
 				myStruct->pageNO[i] += (1<<pow);
 				myStruct->count[i]  -= (1<<pow);
-				printk(" ------ %d - %d | %d %hd\n", page_idx, (1<<pow), myStruct->pageNO[i], myStruct->count[i]);
+//				printk(" ------ %d - %d | %d %hd\n", page_idx, (1<<pow), myStruct->pageNO[i], myStruct->count[i]);
 			}
 		}		
 	}
