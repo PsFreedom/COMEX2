@@ -396,7 +396,9 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				SetPageDirty(new_page);
 				SetPageUptodate(new_page);
 				unlock_page(new_page);
-				printk(KERN_INFO "LOCAL: %lu - %lu\n", swp_offset(entry), checkSum_page(new_page));
+				
+				if(checkSum_page(new_page) != 0)
+					printk(KERN_INFO "LOCAL: %lu - %lu\n", swp_offset(entry), checkSum_page(new_page));
 			}
 			else{
 				swap_readpage(new_page);

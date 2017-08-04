@@ -39,7 +39,7 @@ void COMEX_RDMA_fn(int target, int CMD_num, void *ptr, int struct_size)
 {
 	if(CMD_num == CODE_COMEX_PAGE_RQST){
 //		printk(KERN_INFO "PAGE_RQST: %d %p %d | %d\n", target, ptr, struct_size, *(int*)ptr);
-		universal_queue_send(cbs[target], CMD_num, ptr, struct_size);
+		CHK(universal_send(cbs[target], CMD_num, ptr, struct_size))
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_RPLY){
 		reply_pages_t *myStruct = ptr;
@@ -58,13 +58,7 @@ void COMEX_RDMA_fn(int target, int CMD_num, void *ptr, int struct_size)
 		CHK(do_read(cbs[target], myStruct->local, myStruct->remote, myStruct->size))
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_FREE){
-		int i;
-		free_struct_t *myStruct = ptr;
-		
-		printk(KERN_INFO "PAGE_FREE: ##################", ptr, struct_size);
-		for(i=0; i<MAX_FREE; i++){
-			printk(" >>> %d %hd\n", myStruct->pageNO[i], myStruct->count[i]);
-		}		
+		CHK(universal_send(cbs[target], CMD_num, ptr, struct_size))		
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_CKSM){
 		universal_queue_send(cbs[target], CMD_num, ptr, struct_size);
@@ -87,6 +81,15 @@ void COMEX_do_verb(int CMD_num, void *piggy)
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_CKSM){
 		printk(KERN_INFO "PAGE_CKSM: %lu - %lu\n", *(unsigned long *)piggy, checkSum_Vpage(COMEX_offset_to_addr_fn(*(unsigned long *)piggy)));
+	}
+	else if(CMD_num == CODE_COMEX_PAGE_FREE){
+		int i, pow = 10;
+		free_struct_t *myStruct = ptr;
+		
+		printk(KERN_INFO "PAGE_FREE: ##################", ptr, struct_size);
+		for(i=0; i<MAX_FREE; i++){
+			printk(" >>> %d %hd\n", myStruct->pageNO[i], myStruct->count[i]);
+		}		
 	}
 	else{
 		printk(KERN_INFO "%s: %d | ERROR Unknown CMD_num %d\n", __FUNCTION__, *(int *)piggy, CMD_num);
