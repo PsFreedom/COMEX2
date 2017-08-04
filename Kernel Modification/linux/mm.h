@@ -1221,10 +1221,11 @@ typedef struct{
 	unsigned long local;
 	unsigned long remote;
 	int size;
+	short bufIDX;
 } COMEX_address_t;
 
 typedef struct{
-	int pageNO[MAX_FREE];
+	int  pageNO[MAX_FREE];
 	short count[MAX_FREE];
 } free_struct_t;
 
@@ -1247,6 +1248,7 @@ extern unsigned long checkSum_page(struct page *page);
 extern unsigned long checkSum_Vpage(unsigned char *chrPtr);
 
 extern void COMEX_free_page(int inPageNO, int order);
+extern void COMEX_free_buff(int nodeID, int pageNO, int con_page);
 
 //	Global Private Function		// Only for kernel use.
 extern void COMEX_read_from_local(struct page *new_page, unsigned long pageNO);
