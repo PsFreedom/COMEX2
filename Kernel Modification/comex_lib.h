@@ -17,8 +17,12 @@ void COMEX_init_Remote()
 	}
 	
 	buff_pos = (buff_pos_t *)vmalloc(sizeof(buff_pos_t)*COMEX_total_nodes);
-	memset(buff_pos, 0, sizeof(buff_pos_t)*COMEX_total_nodes);
-
+	for(i=0; i<COMEX_total_nodes; i++){
+		buff_pos[i].head = 0;
+		buff_pos[i].tail = 0;
+		spin_lock_init(&buff_pos[i].pos_lock);
+	}
+	
 	COMEX_writeOut_buff = (buff_desc_t **)vmalloc(sizeof(buff_desc_t *)*COMEX_total_nodes);
 	for(i=0; i<COMEX_total_nodes; i++){
 		COMEX_writeOut_buff[i] = (buff_desc_t *)vmalloc(sizeof(buff_desc_t)*COMEX_total_writeOut);

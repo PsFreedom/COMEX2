@@ -1315,7 +1315,7 @@ int krping_doit(char *cmd)
 		}
 	}
 	printk("going to sleep\n\n"); //5 sec before any client start
-	ssleep(10);
+	ssleep(20);
 
 
 //run all server first, then all client, just in case
