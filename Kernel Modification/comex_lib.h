@@ -30,6 +30,7 @@ void COMEX_init_Remote()
 			COMEX_writeOut_buff[i][j].status = -1;
 			COMEX_writeOut_buff[i][j].nodeID = -1;
 			COMEX_writeOut_buff[i][j].pageNO = -1;
+			COMEX_writeOut_buff[i][j].remote = 200;
 		}
 	}
 	
@@ -120,7 +121,7 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, unsigned long *re
 //		printk(KERN_INFO "%s: Wrong pageNO %ld\n", __FUNCTION__, COMEX_pageNO);
 		return -1;
 	}
-	new_vAddr  = (char *)COMEX_offset_to_addr(COMEX_pageNO*X86PageSize);
+	new_vAddr  = (char *)COMEX_offset_to_addr((uint64_t)COMEX_pageNO*X86PageSize);
 	old_vAddr  = (char *)kmap(old_page);
 	
 	memcpy(new_vAddr, old_vAddr, X86PageSize);
@@ -144,8 +145,7 @@ void COMEX_read_from_local(struct page *new_page, unsigned long pageNO)
 		printk(KERN_INFO "%s: Wrong pageNO %ld\n", __FUNCTION__, pageNO);
 		return;
 	}
-	
-	old_vAddr = (char *)COMEX_offset_to_addr(pageNO*X86PageSize);
+	old_vAddr = (char *)COMEX_offset_to_addr((uint64_t)pageNO*X86PageSize);
 	new_vAddr = (char *)kmap(new_page);
 	
 	memcpy(new_vAddr, old_vAddr, X86PageSize);

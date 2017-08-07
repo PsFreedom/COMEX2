@@ -111,16 +111,16 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, unsigned long *r
 			COMEX_writeOut_buff[dest_node][buff_slot].status = 1;
 			spin_unlock(&COMEX_free_group[dest_node].list_lock);
 			
-			memcpy(COMEX_offset_to_addr(buf_vAddr), old_vAddr, X86PageSize);
+			memcpy((char *)COMEX_offset_to_addr((uint64_t)buf_vAddr), old_vAddr, X86PageSize);
 			COMEX_writeOut_buff[dest_node][buff_slot].nodeID = dest_node;
 			COMEX_writeOut_buff[dest_node][buff_slot].pageNO = (int)((*retOffset)/X86PageSize);
 			COMEX_writeOut_buff[dest_node][buff_slot].status = 2;
 			COMEX_writeOut_buff[dest_node][buff_slot].remote = *retOffset;
 			kunmap(old_page);
 			
-			COMEX_flush_one(dest_node, buff_slot);
-//			if(buff_slot%FLUSH == 0 && buff_slot != 0)
-//				COMEX_flush_buff(dest_node);
+//			COMEX_flush_one(dest_node, buff_slot);
+			if(buff_slot%FLUSH == 0 && buff_slot != 0)
+				COMEX_flush_buff(dest_node);
 			*retNodeID = dest_node;
 			return 1;
 		}
@@ -144,10 +144,33 @@ void COMEX_read_from_remote(struct page *new_page, int node_ID, unsigned long re
 	COMEX_RDMA(node_ID, CODE_COMEX_PAGE_READ, &addr_struct, sizeof(addr_struct));
 	COMEX_free_to_remote(node_ID, remote_addr);
 	
-	memcpy(new_vAddr, COMEX_offset_to_addr(buf_vAddr), X86PageSize);	
+	memcpy(new_vAddr, (char *)COMEX_offset_to_addr((uint64_t)buf_vAddr), X86PageSize);	
 	kunmap(new_page);
 }
 EXPORT_SYMBOL(COMEX_read_from_remote);
+
+int COMEX_read_from_buffer(struct page *new_page, int nodeID, unsigned long remote_offset)
+{
+	int i;
+	char *buf_vAddr;
+	char *new_vAddr;
+	
+	for(i=0; i<COMEX_total_writeOut; i++){
+		if(COMEX_writeOut_buff[nodeID][i].remote == remote_offset)
+		{
+			buf_vAddr = (char *)get_writeOut_buff(nodeID, i);
+			new_vAddr = (char *)kmap(new_page);
+			
+			memcpy(new_vAddr, (char *)COMEX_offset_to_addr((uint64_t)buf_vAddr), X86PageSize);
+			kunmap(new_page);
+			
+			printk(KERN_INFO "%s: Hit Buffer!... %d %d\n", __FUNCTION__, nodeID, i);
+			COMEX_free_to_remote(nodeID, remote_offset);
+			return 1;
+		}
+	}
+	return 0;
+}
 
 void COMEX_page_receive(int nodeID, int pageNO, int group_size)
 {	

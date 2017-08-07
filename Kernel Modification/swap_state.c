@@ -305,7 +305,7 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 	struct page *found_page, *new_page = NULL;
 	int err;
 
-	int	NodeID;
+	int	NodeID, i;
 	unsigned long offsetField;
 	do {
 		/*
@@ -380,7 +380,10 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				offsetField = offsetField >> 10;
 				offsetField = offsetField * X86PageSize;
 
-				COMEX_read_from_remote(new_page, NodeID, offsetField);
+				if(COMEX_read_from_buffer(new_page, NodeID, offsetField) == 0){
+					COMEX_read_from_remote(new_page, NodeID, offsetField);
+				}
+				
 				count_vm_event(PSWPIN);
 				SetPageDirty(new_page);
 				SetPageUptodate(new_page);
