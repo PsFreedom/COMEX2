@@ -26,8 +26,6 @@ void COMEX_init_Remote()
 			COMEX_writeOut_buff[i][j].status = -1;
 			COMEX_writeOut_buff[i][j].nodeID = -1;
 			COMEX_writeOut_buff[i][j].pageNO = -1;
-			
-			printk(KERN_INFO "writeOut %d %d: %hhd %d %d\n", i, j, COMEX_writeOut_buff[i][j].status, COMEX_writeOut_buff[i][j].nodeID, COMEX_writeOut_buff[i][j].pageNO);
 		}
 	}
 	
@@ -36,8 +34,6 @@ void COMEX_init_Remote()
 		COMEX_readIn_buff[i].status = -1;
 		COMEX_readIn_buff[i].nodeID = -1;
 		COMEX_readIn_buff[i].pageNO = -1;
-		
-		printk(KERN_INFO "readIn %d: %hhd %d %d\n", i, COMEX_readIn_buff[i].status, COMEX_readIn_buff[i].nodeID, COMEX_readIn_buff[i].pageNO);
 	}
 	
 	COMEX_free_struct = (free_struct_t *)vmalloc(sizeof(free_struct_t)*COMEX_total_nodes);

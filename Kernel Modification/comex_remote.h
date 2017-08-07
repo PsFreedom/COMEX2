@@ -245,7 +245,7 @@ EXPORT_SYMBOL(COMEX_pages_request);
 void COMEX_free_buff(int nodeID, int pageNO, int con_page)
 {
 	while(con_page > 0){
-		printk(KERN_INFO "Free Buff: %d %d\n", nodeID, pageNO);
+//		printk(KERN_INFO "Free Buff: %d %d\n", nodeID, pageNO);
 		COMEX_writeOut_buff[nodeID][pageNO].status = -1;
 		COMEX_writeOut_buff[nodeID][pageNO].nodeID = -1;
 		COMEX_writeOut_buff[nodeID][pageNO].pageNO = -1;
