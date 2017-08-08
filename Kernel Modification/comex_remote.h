@@ -329,7 +329,6 @@ void COMEX_flush_buff(int nodeID)
 	while(COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].status == 2){
 		COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].status = 3;
 		count++;
-		
 		if(buff_pos[nodeID].head + count == COMEX_total_writeOut)
 			break;
 	}
@@ -348,13 +347,11 @@ void COMEX_flush_buff(int nodeID)
 void COMEX_flush_one(int nodeID, int slot)
 {
 	COMEX_address_t addr_struct;
-	spin_lock(&buff_pos[nodeID].pos_lock);
 	
 	addr_struct.local  = (unsigned long)get_writeOut_buff(nodeID, slot);
 	addr_struct.remote = (unsigned long)COMEX_writeOut_buff[nodeID][slot].remote;
 	addr_struct.size   = X86PageSize;
 	addr_struct.bufIDX = slot;
 	
-	spin_unlock(&buff_pos[nodeID].pos_lock);
 	COMEX_RDMA(nodeID, CODE_COMEX_PAGE_WRTE, &addr_struct, sizeof(addr_struct));
 }
