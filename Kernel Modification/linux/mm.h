@@ -1252,8 +1252,9 @@ extern void COMEX_free_buff(int nodeID, int pageNO, int con_page);
 
 //	Global Private Function		// Only for kernel use.
 extern void COMEX_read_from_local(struct page *new_page, unsigned long pageNO);
-extern void COMEX_read_from_remote(struct page *new_page, int node_ID, unsigned long remote_addr);
-extern int COMEX_read_from_buffer(struct page *new_page, int nodeID, unsigned long remote_offset);
+extern void COMEX_read_from_remote(struct page *new_page, int node_ID, int pageNO);
+extern int COMEX_read_from_buffer(struct page *new_page, int nodeID, int pageNO);
+extern int COMEX_read_from_preFetch(struct page *new_page, int nodeID, int pageNO);
 
 ////////// 	End COMEX Section 	//////////
 

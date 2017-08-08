@@ -39,6 +39,7 @@ void COMEX_init_Remote()
 		COMEX_readIn_buff[i].status = -1;
 		COMEX_readIn_buff[i].nodeID = -1;
 		COMEX_readIn_buff[i].pageNO = -1;
+		COMEX_readIn_buff[i].remote = 200;
 	}
 	
 	COMEX_free_struct = (free_struct_t *)vmalloc(sizeof(free_struct_t)*COMEX_total_nodes);
