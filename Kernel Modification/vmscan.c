@@ -791,7 +791,7 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 			if(COMEX_Ready == 1 && page_mapcount(page) == 1 && COMEX_task != NULL && strcmp(COMEX_task->comm, proc_name) == 0){
 				nodeID = -1;
 				remoteOffset = 200;
-/*				if(COMEX_move_to_COMEX(page, &nodeID, &remoteOffset) == 1)
+				if(COMEX_move_to_COMEX(page, &nodeID, &remoteOffset) == 1)
 				{
 //					printk(KERN_INFO "%s: nodeID %d Offset %lu\n", __FUNCTION__, nodeID, remoteOffset);
 					try_to_unmap_COMEX(page, ttu_flags, nodeID, remoteOffset);
@@ -800,7 +800,7 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 					unlock_page(page);
 					goto free_it;
 				}	
-*/				if(COMEX_move_to_Remote(page, &nodeID, &remoteOffset) == 1)
+				if(COMEX_move_to_Remote(page, &nodeID, &remoteOffset) == 1)
 				{
 //					printk(KERN_INFO "%s: nodeID %d Offset %lu\n", __FUNCTION__, nodeID, remoteOffset);
 					try_to_unmap_COMEX(page, ttu_flags, nodeID, remoteOffset);
