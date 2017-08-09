@@ -8,7 +8,6 @@ void COMEX_init_Remote()
 		COMEX_free_group[i].mssg_qouta  = MAX_MSSG;
 		COMEX_free_group[i].total_group = 0;
 		COMEX_free_group[i].back_off 	= 0;
-		
 		spin_lock_init(&COMEX_free_group[i].list_lock);
 		INIT_LIST_HEAD(&COMEX_free_group[i].free_group);
 		
@@ -30,7 +29,6 @@ void COMEX_init_Remote()
 			COMEX_writeOut_buff[i][j].status = -1;
 			COMEX_writeOut_buff[i][j].nodeID = -1;
 			COMEX_writeOut_buff[i][j].pageNO = -1;
-			COMEX_writeOut_buff[i][j].remote = 200;
 		}
 	}
 	
@@ -39,7 +37,6 @@ void COMEX_init_Remote()
 		COMEX_readIn_buff[i].status = -1;
 		COMEX_readIn_buff[i].nodeID = -1;
 		COMEX_readIn_buff[i].pageNO = -1;
-		COMEX_readIn_buff[i].remote = 200;
 	}
 	
 	COMEX_free_struct = (free_struct_t *)vmalloc(sizeof(free_struct_t)*COMEX_total_nodes);
@@ -70,7 +67,6 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 	printk(KERN_INFO "COMEX Kernel v.2 --> %s\n", proc_name);
 	printk(KERN_INFO "ID %d n_nodes %d total_pages %d\n", node_ID, n_nodes, total_pages);
 	printk(KERN_INFO "writeOut_buff %d readIn_buff %d\n", writeOut_buff, readIn_buff);
-	
 //	for(i=0; i<total_pages; i++){
 //		printk(KERN_INFO "%d %lu --> %lu\n", i, (uint64_t)i*X86PageSize, COMEX_offset_to_addr((uint64_t)i*X86PageSize));
 //	}
@@ -112,9 +108,9 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 }
 EXPORT_SYMBOL(COMEX_init_ENV);
 
-int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, unsigned long *retPageNO)
+int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 {
-	long COMEX_pageNO = (long)COMEX_rmqueue_smallest(0);
+	int COMEX_pageNO = COMEX_rmqueue_smallest(0);
 	char *new_vAddr;
 	char *old_vAddr;
 	
@@ -122,7 +118,7 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, unsigned long *re
 //		printk(KERN_INFO "%s: Wrong pageNO %ld\n", __FUNCTION__, COMEX_pageNO);
 		return -1;
 	}
-	new_vAddr  = (char *)COMEX_offset_to_addr((uint64_t)COMEX_pageNO*X86PageSize);
+	new_vAddr  = (char *)COMEX_offset_to_addr((uint64_t)COMEX_pageNO<<SHIFT_PAGE);
 	old_vAddr  = (char *)kmap(old_page);
 	
 	memcpy(new_vAddr, old_vAddr, X86PageSize);
@@ -137,16 +133,16 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, unsigned long *re
 	return 1;
 }
 
-void COMEX_read_from_local(struct page *new_page, unsigned long pageNO)
+void COMEX_read_from_local(struct page *new_page, int pageNO)
 {
 	char *old_vAddr;
 	char *new_vAddr;
 	
 	if(pageNO < 0 || pageNO >= COMEX_total_pages){	// No page available
-		printk(KERN_INFO "%s: Wrong pageNO %ld\n", __FUNCTION__, pageNO);
+		printk(KERN_INFO "%s: Wrong pageNO %d\n", __FUNCTION__, pageNO);
 		return;
 	}
-	old_vAddr = (char *)COMEX_offset_to_addr((uint64_t)pageNO*X86PageSize);
+	old_vAddr = (char *)COMEX_offset_to_addr((uint64_t)pageNO<<SHIFT_PAGE);
 	new_vAddr = (char *)kmap(new_page);
 	
 	memcpy(new_vAddr, old_vAddr, X86PageSize);

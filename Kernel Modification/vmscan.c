@@ -694,8 +694,8 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 	unsigned long nr_reclaimed = 0;
 	unsigned long nr_writeback = 0;
 	
-	int nodeID;
-	unsigned long remoteOffset;
+	int COMEX_nodeID;
+	int COMEX_pageNO;
 	struct task_struct *COMEX_task;
 
 	cond_resched();
@@ -789,21 +789,21 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 			
 			COMEX_task = get_taskStruct(page);
 			if(COMEX_Ready == 1 && page_mapcount(page) == 1 && COMEX_task != NULL && strcmp(COMEX_task->comm, proc_name) == 0){
-				nodeID = -1;
-				remoteOffset = 200;
-				if(COMEX_move_to_COMEX(page, &nodeID, &remoteOffset) == 1)
+				COMEX_nodeID = -1;
+				COMEX_pageNO = 200;
+				if(COMEX_move_to_COMEX(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
 				{
-//					printk(KERN_INFO "%s: nodeID %d Offset %lu\n", __FUNCTION__, nodeID, remoteOffset);
-					try_to_unmap_COMEX(page, ttu_flags, nodeID, remoteOffset);
+//					printk(KERN_INFO "%s: nodeID %d pageNO %d\n", __FUNCTION__, COMEX_nodeID, COMEX_pageNO);
+					try_to_unmap_COMEX(page, ttu_flags, COMEX_nodeID, COMEX_pageNO);
 					ClearPageDirty(page);
 					atomic_set(&page->_count,0);
 					unlock_page(page);
 					goto free_it;
 				}	
-				if(COMEX_move_to_Remote(page, &nodeID, &remoteOffset) == 1)
+				if(COMEX_move_to_Remote(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
 				{
-//					printk(KERN_INFO "%s: nodeID %d Offset %lu\n", __FUNCTION__, nodeID, remoteOffset);
-					try_to_unmap_COMEX(page, ttu_flags, nodeID, remoteOffset);
+//					printk(KERN_INFO "%s: nodeID %d pageNO %d\n", __FUNCTION__, COMEX_nodeID, COMEX_pageNO);
+					try_to_unmap_COMEX(page, ttu_flags, COMEX_nodeID, COMEX_pageNO);
 					ClearPageDirty(page);
 					atomic_set(&page->_count,0);
 					unlock_page(page);

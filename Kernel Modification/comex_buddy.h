@@ -102,9 +102,9 @@ static inline void COMEX_expand(COMEX_page *page, int low, int high, COMEX_free_
 	}
 }
 
-static inline int COMEX_rmqueue_smallest(unsigned int order)
+static inline int COMEX_rmqueue_smallest(int order)
 {
-	unsigned int current_order;
+	int current_order;
 	COMEX_free_area_t *area;
 	COMEX_page *page;
 	

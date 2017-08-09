@@ -306,7 +306,7 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 	int err;
 
 	int	NodeID, i;
-	unsigned long offsetField;
+	unsigned long COMEX_pageNO;
 	do {
 		/*
 		 * First check the swap cache.  Since this is normally
@@ -375,13 +375,13 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 			lru_cache_add_anon(new_page);
 			if(swp_type(entry) == 8)
 			{
-				offsetField = (unsigned long)swp_offset(entry);
-				NodeID = (int)offsetField & 1023;
-				offsetField = offsetField >> 10;
+				COMEX_pageNO = (unsigned long)swp_offset(entry);
+				NodeID = (int)COMEX_pageNO & 1023;
+				COMEX_pageNO = COMEX_pageNO >> 10;
 				
-				if(COMEX_read_from_buffer(new_page, NodeID, offsetField) == 0){
-					if(COMEX_read_from_preFetch(new_page, NodeID, offsetField) == 0){
-						COMEX_read_from_remote(new_page, NodeID, offsetField);
+				if(COMEX_read_from_buffer(new_page, NodeID, (int)COMEX_pageNO) == 0){
+					if(COMEX_read_from_preFetch(new_page, NodeID, (int)COMEX_pageNO) == 0){
+						COMEX_read_from_remote(new_page, NodeID, (int)COMEX_pageNO);
 					}
 				}
 				count_vm_event(PSWPIN);
@@ -390,18 +390,18 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				unlock_page(new_page);
 				
 //				if(checkSum_page(new_page) != 0)
-//					printk(KERN_INFO "READ: %d %lu - %lu\n", NodeID, offsetField/X86PageSize, checkSum_page(new_page));
+//					printk(KERN_INFO "READ: %d %d - %lu\n", NodeID, COMEX_pageNO, checkSum_page(new_page));
 			}
 			else if(swp_type(entry) == 9)
 			{
-				COMEX_read_from_local(new_page, swp_offset(entry));
+				COMEX_read_from_local(new_page, (int)swp_offset(entry));
 				count_vm_event(PSWPIN);
 				SetPageDirty(new_page);
 				SetPageUptodate(new_page);
 				unlock_page(new_page);
 				
 //				if(checkSum_page(new_page) != 0)
-//					printk(KERN_INFO "LOCAL: %lu - %lu\n", swp_offset(entry), checkSum_page(new_page));
+//					printk(KERN_INFO "LOCAL: %d - %lu\n", (int)swp_offset(entry), checkSum_page(new_page));
 			}
 			else{
 				swap_readpage(new_page);

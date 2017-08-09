@@ -1201,6 +1201,7 @@ static inline void sync_mm_rss(struct mm_struct *mm)
 #define COMEX_MAX_ORDER 11
 #define X86PageSize 4096
 #define MAX_FREE 16
+#define SHIFT_PAGE 12
 
 #define CODE_COMEX_PAGE_RQST 10010
 #define CODE_COMEX_PAGE_RPLY 10011
@@ -1251,7 +1252,7 @@ extern void COMEX_free_page(int inPageNO, int order);
 extern void COMEX_free_buff(int nodeID, int pageNO, int con_page);
 
 //	Global Private Function		// Only for kernel use.
-extern void COMEX_read_from_local(struct page *new_page, unsigned long pageNO);
+extern void COMEX_read_from_local(struct page *new_page, int pageNO);
 extern void COMEX_read_from_remote(struct page *new_page, int node_ID, int pageNO);
 extern int COMEX_read_from_buffer(struct page *new_page, int nodeID, int pageNO);
 extern int COMEX_read_from_preFetch(struct page *new_page, int nodeID, int pageNO);

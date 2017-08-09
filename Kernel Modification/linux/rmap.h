@@ -189,7 +189,7 @@ int page_referenced_one(struct page *, struct vm_area_struct *,
 #define TTU_ACTION(x) ((x) & TTU_ACTION_MASK)
 
 int try_to_unmap(struct page *, enum ttu_flags flags);
-int try_to_unmap_COMEX(struct page *page, enum ttu_flags flags, int NodeID, unsigned long RemoteOffset);
+int try_to_unmap_COMEX(struct page *page, enum ttu_flags flags, int COMEX_nodeID, int COMEX_pageNO);
 int try_to_unmap_one(struct page *, struct vm_area_struct *,
 			unsigned long address, enum ttu_flags flags);
 

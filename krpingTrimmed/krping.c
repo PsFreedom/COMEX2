@@ -196,8 +196,6 @@ struct krping_cb {
 	u64 send_dma_addr;
 	DECLARE_PCI_UNMAP_ADDR(send_mapping)
 	struct ib_mr *send_mr;
-
-	struct ib_send_wr rdma_sq_wr_proto;	/* rdma work request record prototype for copy*/
 	char *rdma_buf;			/* used as rdma sink */
   DECLARE_PCI_UNMAP_ADDR(dmabuf_mapping)
   DECLARE_PCI_UNMAP_ADDR(ptable_mapping)
@@ -348,7 +346,11 @@ static int do_write(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 
   }else{
 	  //DEBUG_LOG("\nabout to sleep");
   sema_init(&sem_write,0);  
-  memcpy(&rdma_sq_wr_copy,&cb->rdma_sq_wr_proto,sizeof(struct ib_send_wr));
+  rdma_sq_wr_copy.wr.rdma.rkey = cb->remote_rkey;
+  rdma_sq_wr_copy.next = NULL;
+  rdma_sq_wr_copy.send_flags = IB_SEND_SIGNALED;
+  rdma_sq_wr_copy.num_sge = 1;
+  
   rdma_sq_wr_copy.opcode = IB_WR_RDMA_WRITE;
   rdma_sq_wr_copy.sg_list=&rdma_sgl_new; 
   rdma_sgl_new.lkey = cb->dma_mr->rkey;
@@ -380,8 +382,11 @@ static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 s
     DEBUG_LOG("\nALERT, BUFFER MISALIGNMENT FOUND\n\n\n");
     return 1;
   }else{
-    
-  memcpy(&rdma_sq_wr_copy,&cb->rdma_sq_wr_proto,sizeof(struct ib_send_wr));
+    rdma_sq_wr_copy.wr.rdma.rkey = cb->remote_rkey;
+  rdma_sq_wr_copy.next = NULL;
+  rdma_sq_wr_copy.send_flags = IB_SEND_SIGNALED;
+  rdma_sq_wr_copy.num_sge = 1;
+  
   rdma_sq_wr_copy.opcode = IB_WR_RDMA_READ;
   rdma_sq_wr_copy.sg_list=&rdma_sgl_new; 
   rdma_sgl_new.lkey = cb->dma_mr->rkey;
@@ -409,7 +414,12 @@ static int do_read_bufferptr(struct krping_cb *cb,uint64_t theirptrs,int numpage
   struct ib_send_wr rdma_sq_wr_copy;	/* rdma work request record prototype for copy*/
 	struct ib_sge rdma_sgl_new;		/* rdma single SGE ptototype for copy*/
   printk("theirptrs=%llx numpages=%d\n",theirptrs,numpages);
-  memcpy(&rdma_sq_wr_copy,&cb->rdma_sq_wr_proto,sizeof(struct ib_send_wr));
+  
+  rdma_sq_wr_copy.wr.rdma.rkey = cb->remote_rkey;
+  rdma_sq_wr_copy.next = NULL;
+  rdma_sq_wr_copy.send_flags = IB_SEND_SIGNALED;
+  rdma_sq_wr_copy.num_sge = 1;
+  
   rdma_sq_wr_copy.sg_list=&rdma_sgl_new; 
   rdma_sgl_new.lkey = cb->dma_mr->rkey;
   rdma_sq_wr_copy.opcode = IB_WR_RDMA_READ;
@@ -520,7 +530,6 @@ static void universal_recv_handlerQ(struct work_struct *work_arg){
         case 2: //set buffers info
           cb->remote_len  = ntohl(saved_buff->buffer_info.size)*RPING_BUFSIZE; //checkback, need hll? , do we really send big data
           cb->remote_rkey = ntohl(saved_buff->buffer_info.rkey);
-          cb->rdma_sq_wr_proto.wr.rdma.rkey = cb->remote_rkey;
           
           cb->remotenodeID = ntohl(saved_buff->buffer_info.instanceno);
         
@@ -726,9 +735,6 @@ static void krping_setup_wr(struct krping_cb *cb)
   cb->sq_wr.sg_list = &cb->send_sgl;
 	cb->sq_wr.num_sge = 1;
     
-  cb->rdma_sq_wr_proto.next = NULL;
-  cb->rdma_sq_wr_proto.send_flags = IB_SEND_SIGNALED;
-  cb->rdma_sq_wr_proto.num_sge = 1;
   
   
   DEBUG_LOG("setup_wr done\n");

@@ -1312,7 +1312,7 @@ out_mlock:
 	return ret;
 }
 int try_to_unmap_one_COMEX(struct page *page, struct vm_area_struct *vma,
-		     unsigned long address, enum ttu_flags flags, int NodeID, unsigned long RemoteOffset)
+		     unsigned long address, enum ttu_flags flags, int COMEX_nodeID, int COMEX_pageNO)
 {
 	struct mm_struct *mm = vma->vm_mm;
 	pte_t *pte;
@@ -1350,13 +1350,12 @@ int try_to_unmap_one_COMEX(struct page *page, struct vm_area_struct *vma,
 	dec_mm_counter(mm, MM_ANONPAGES);
 	inc_mm_counter(mm, MM_SWAPENTS);
 	
-	if(NodeID == -11){
-		entry = swp_entry(9, RemoteOffset);
-//		printk(KERN_INFO "%s: NodeID %d swp_type %d Offset %lu\n", __FUNCTION__, NodeID, swp_type(entry), RemoteOffset);
+	if(COMEX_nodeID == -11){
+		entry = swp_entry(9, COMEX_pageNO);
+//		printk(KERN_INFO "%s: NodeID %d swp_type %d pageNO %lu\n", __FUNCTION__, COMEX_nodeID, swp_type(entry), swp_offset(entry));
 	}
 	else{
-		RemoteOffset = RemoteOffset/X86PageSize;
-		offsetField = NodeID + (RemoteOffset<<10);
+		offsetField = COMEX_nodeID + (COMEX_pageNO<<10);
 		entry = swp_entry(8, offsetField);
 	}
 	
@@ -1584,7 +1583,7 @@ static int try_to_unmap_anon(struct page *page, enum ttu_flags flags)
 	page_unlock_anon_vma_read(anon_vma);
 	return ret;
 }
-static int try_to_unmap_anon_COMEX(struct page *page, enum ttu_flags flags, int NodeID, unsigned long RemoteOffset)
+static int try_to_unmap_anon_COMEX(struct page *page, enum ttu_flags flags, int COMEX_nodeID, int COMEX_pageNO)
 {
 	struct anon_vma *anon_vma;
 	pgoff_t pgoff;
@@ -1613,7 +1612,7 @@ static int try_to_unmap_anon_COMEX(struct page *page, enum ttu_flags flags, int 
 			continue;
 
 		address = vma_address(page, vma);
-		ret = try_to_unmap_one_COMEX(page, vma, address, flags, NodeID, RemoteOffset);
+		ret = try_to_unmap_one_COMEX(page, vma, address, flags, COMEX_nodeID, COMEX_pageNO);
 		if (ret != SWAP_AGAIN || !page_mapped(page))
 			break;
 	}
@@ -1764,14 +1763,14 @@ int try_to_unmap(struct page *page, enum ttu_flags flags)
 		ret = SWAP_SUCCESS;
 	return ret;
 }
-int try_to_unmap_COMEX(struct page *page, enum ttu_flags flags, int NodeID, unsigned long RemoteOffset)
+int try_to_unmap_COMEX(struct page *page, enum ttu_flags flags, int COMEX_nodeID, int COMEX_pageNO)
 {
 	int ret;
 
 	BUG_ON(!PageLocked(page));
 	VM_BUG_ON(!PageHuge(page) && PageTransHuge(page));
 
-	ret = try_to_unmap_anon_COMEX(page, flags, NodeID, RemoteOffset);
+	ret = try_to_unmap_anon_COMEX(page, flags, COMEX_nodeID, COMEX_pageNO);
 
 	if (ret != SWAP_MLOCK && !page_mapped(page))
 		ret = SWAP_SUCCESS;
