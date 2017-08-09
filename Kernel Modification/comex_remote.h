@@ -225,10 +225,10 @@ void COMEX_page_receive(int nodeID, int pageNO, int group_size)
 		list_add_tail(&group_ptr->link, &COMEX_free_group[nodeID].free_group);
 		COMEX_free_group[nodeID].mssg_qouta++;
 		COMEX_free_group[nodeID].total_group++;
-		printk(KERN_INFO "%s: >>> %d %d %d - %d %d (%d | %d)\n", __FUNCTION__, nodeID, pageNO, group_size, 
-																group_ptr->page_start, group_ptr->page_end, 
-																COMEX_free_group[nodeID].mssg_qouta, 
-																COMEX_free_group[nodeID].back_off);
+//		printk(KERN_INFO "%s: >>> %d %d %d - %d %d (%d | %d)\n", __FUNCTION__, nodeID, pageNO, group_size, 
+//																group_ptr->page_start, group_ptr->page_end, 
+//																COMEX_free_group[nodeID].mssg_qouta, 
+//																COMEX_free_group[nodeID].back_off);
 	}
 	else{
 		COMEX_free_group[nodeID].mssg_qouta++;
@@ -246,9 +246,6 @@ int COMEX_freelist_getpage(int list_ID)
 	
 	myPtr      = list_entry(COMEX_free_group[list_ID].free_group.next, free_group_t, link);
 	ret_pageNO = myPtr->page_start++;
-	
-	if(ret_pageNO == 0)
-		printk(KERN_INFO "%s: %d Check Zero\n", __FUNCTION__, list_ID);
 	
 	if(myPtr->page_start > myPtr->page_end){
 		list_del(&myPtr->link);
