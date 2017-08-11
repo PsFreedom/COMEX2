@@ -44,7 +44,7 @@ void COMEX_RDMA_fn(int target, int CMD_num, void *ptr, int struct_size)
 	else if(CMD_num == CODE_COMEX_PAGE_RPLY){
 		reply_pages_t *myStruct = ptr;
 		printk(KERN_INFO "PAGE_RPLY: %d->%d | %d %d %d\n", target, ID_to_CB(target), myStruct->src_node, myStruct->page_no, myStruct->size);
-		universal_queue_send(cbs[ID_to_CB(target)], CMD_num, ptr, struct_size);
+		CHK(universal_send(cbs[ID_to_CB(target)], CMD_num, ptr, struct_size))
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_WRTE){
 		COMEX_address_t *myStruct = ptr;
@@ -55,7 +55,7 @@ void COMEX_RDMA_fn(int target, int CMD_num, void *ptr, int struct_size)
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_READ){
 		COMEX_address_t *myStruct = ptr;
-//		printk(KERN_INFO "PAGE_READ: %d | L %lu R %lu %d\n", target, myStruct->local, myStruct->remote, myStruct->size);
+		printk(KERN_INFO "PAGE_READ: %d | L %lu R %lu %d\n", target, myStruct->local, myStruct->remote, myStruct->size);
 		CHK(do_read(cbs[target], myStruct->local, myStruct->remote, myStruct->size))
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_FREE){
@@ -77,7 +77,7 @@ void COMEX_do_verb(int CMD_num, void *piggy)
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_RPLY){
 		reply_pages_t *myStruct = piggy;
-//		printk(KERN_INFO "PAGE_RPLY: %d %p | %d %d %d\n", CMD_num, piggy, myStruct->src_node, myStruct->page_no, myStruct->size);
+		printk(KERN_INFO "PAGE_RPLY: %d %p | %d %d %d\n", CMD_num, piggy, myStruct->src_node, myStruct->page_no, myStruct->size);
 		COMEX_page_receive(ID_to_CB(myStruct->src_node), myStruct->page_no, myStruct->size);
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_CKSM){

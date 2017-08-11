@@ -246,7 +246,6 @@ int COMEX_freelist_getpage(int list_ID)
 	
 	myPtr      = list_entry(COMEX_free_group[list_ID].free_group.next, free_group_t, link);
 	ret_pageNO = myPtr->page_start++;
-	
 	if(myPtr->page_start > myPtr->page_end){
 		list_del(&myPtr->link);
 		COMEX_free_group[list_ID].total_group--;

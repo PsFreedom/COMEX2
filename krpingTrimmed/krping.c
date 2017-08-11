@@ -80,7 +80,7 @@ MODULE_LICENSE("Dual BSD/GPL");
  */
 #define RPING_SQ_DEPTH 128
 #define MAX_INLINE_PAYLOAD 162 //also say how big is the piggy
-#define PAGESCOUNT 2060
+#define PAGESCOUNT 520
 #define RPING_BUFSIZE (4*1024*1024)
 #define VERB_RECV_SLOT 64
 
