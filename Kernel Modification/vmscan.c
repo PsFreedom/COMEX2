@@ -797,7 +797,8 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 					try_to_unmap_COMEX(page, ttu_flags, COMEX_nodeID, COMEX_pageNO);
 					ClearPageDirty(page);
 					atomic_set(&page->_count,0);
-//					atomic_set(&page->_mapcount, 0);
+					atomic_set(&page->_mapcount, -1);
+					page->flags = 0;
 					unlock_page(page);
 					goto free_it;
 				}	
@@ -807,7 +808,8 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 					try_to_unmap_COMEX(page, ttu_flags, COMEX_nodeID, COMEX_pageNO);
 					ClearPageDirty(page);
 					atomic_set(&page->_count, 0);
-//					atomic_set(&page->_mapcount, 0);
+					atomic_set(&page->_mapcount, -1);
+					page->flags = 0;
 					unlock_page(page);
 					goto free_it;
 				}

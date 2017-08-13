@@ -1,5 +1,6 @@
 int CONF_totalCB = 4;
 int CONF_nodeID  = 3;
+int CONF_localpagecount=2060;
 
 int CONF_isServer[] = {0, 0, 1, 1};
 
