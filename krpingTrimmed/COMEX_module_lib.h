@@ -10,7 +10,6 @@ static int readIn_buff;
 
 static uint64_t translate_useraddr(struct krping_cb *, uint64_t);
 static int universal_send(struct krping_cb *cb, u64 imm, char* addr, u64 size);
-static void universal_queue_send(struct krping_cb *cb, u64 imm, char* addr, u64 size);
 static int do_write(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 size);
 static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 size);
 
@@ -30,8 +29,8 @@ int ID_to_CB(int nodeID){
 }
 
 uint64_t COMEX_offset_to_addr_fn(uint64_t offset){
-	if(offset >= ((uint64_t)PAGESCOUNT*1024*4096))
-		printk(KERN_INFO "%s: Wrong addr %llu >= %llu\n", __FUNCTION__, offset, ((uint64_t)PAGESCOUNT*1024*4096));
+	if(offset >= ((uint64_t)CONF_localpagecount*1024*4096))
+		printk(KERN_INFO "%s: Wrong addr %llu >= %llu\n", __FUNCTION__, offset, ((uint64_t)CONF_localpagecount*1024*4096));
 	return translate_useraddr(cbs[0], offset);
 }
 
@@ -59,10 +58,10 @@ void COMEX_RDMA_fn(int target, int CMD_num, void *ptr, int struct_size)
 		CHK(do_read(cbs[target], myStruct->local, myStruct->remote, myStruct->size))
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_FREE){
-		CHK(universal_send(cbs[target], CMD_num, ptr, struct_size))		
+		CHK(universal_send(cbs[target], CMD_num, ptr, struct_size))
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_CKSM){
-		universal_queue_send(cbs[target], CMD_num, ptr, struct_size);
+		CHK(universal_send(cbs[target], CMD_num, ptr, struct_size))
 	}
 	else{
 		printk(KERN_INFO "%s... called: ERROR Unknown CMD_num %d\n", __FUNCTION__, CMD_num);
@@ -77,7 +76,7 @@ void COMEX_do_verb(int CMD_num, void *piggy)
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_RPLY){
 		reply_pages_t *myStruct = piggy;
-		printk(KERN_INFO "PAGE_RPLY: %d %p | %d %d %d\n", CMD_num, piggy, myStruct->src_node, myStruct->page_no, myStruct->size);
+//		printk(KERN_INFO "PAGE_RPLY: %d %p | %d %d %d\n", CMD_num, piggy, myStruct->src_node, myStruct->page_no, myStruct->size);
 		COMEX_page_receive(ID_to_CB(myStruct->src_node), myStruct->page_no, myStruct->size);
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_CKSM){
