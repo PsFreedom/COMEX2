@@ -78,11 +78,11 @@ MODULE_LICENSE("Dual BSD/GPL");
 /*
  * Default max buffer size for IO...
  */
-#define RPING_SQ_DEPTH 256
+#define RPING_SQ_DEPTH 128
 #define MAX_INLINE_PAYLOAD 162 //also say how big is the piggy
 //#define MAXPAGESCOUNT 4096 // maximum page counts support, for places like pagetable pre-defined
 #define RPING_BUFSIZE (4*1024*1024)
-#define VERB_RECV_SLOT 128
+#define VERB_RECV_SLOT 92
 
 enum mem_type {
 	DMA = 1,
@@ -528,7 +528,7 @@ static void universal_recv_handlerQ(struct work_struct *work_arg){
           if(!cb->remote_addr){
             DEBUG_LOG("kmalloc error\n");
           }
-          cb->remote_dmabuf_addr=dma_map_single(cb->pd->device->dma_device,cb->remote_addr,sizeof(char*)*cb->remote_pcount, DMA_FROM_DEVICE);
+          cb->remote_dmabuf_addr=dma_map_single(cb->pd->device->dma_device,cb->remote_addr,sizeof(char*)*cb->remote_pcount, DMA_BIDIRECTIONAL);
           pci_unmap_addr_set(cb, dmabuf_mapping, cb->remote_dmabuf_addr);
           //
         
@@ -845,8 +845,8 @@ static int krping_create_qp(struct krping_cb *cb)
 	memset(&init_attr, 0, sizeof(init_attr));
 	init_attr.cap.max_send_wr = cb->txdepth;
 	init_attr.cap.max_recv_wr = 128; //modified
-	init_attr.cap.max_recv_sge = 8;
-	init_attr.cap.max_send_sge = 8; 
+	init_attr.cap.max_recv_sge = 1;
+	init_attr.cap.max_send_sge = 1; 
   init_attr.cap.max_inline_data = 180;
 	init_attr.qp_type = IB_QPT_RC;
 	init_attr.send_cq = cb->cq_send;
@@ -1018,7 +1018,8 @@ static int krping_connect_client(struct krping_cb *cb)
 	memset(&conn_param, 0, sizeof conn_param);
 	conn_param.responder_resources = 1;
 	conn_param.initiator_depth = 1;
-	conn_param.retry_count = 63;
+	conn_param.retry_count = 6;
+	conn_param.rnr_retry_count = 6;
 
 	ret = rdma_connect(cb->cm_id, &conn_param);
 	if (ret) {
