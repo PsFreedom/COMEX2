@@ -89,7 +89,6 @@ void COMEX_do_verb(int CMD_num, void *piggy)
 //		printk(KERN_INFO "PAGE_FREE: ##################\n");
 		for(i=0; i<MAX_FREE; i++){
 //			printk(" >>> %d %hd\n", myStruct->pageNO[i], myStruct->count[i]);
-			
 			while(myStruct->count[i] > 0)
 			{
 				pow		 = COMEX_MAX_ORDER-1;
