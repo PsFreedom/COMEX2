@@ -8,10 +8,19 @@ static int total_pages;
 static int writeOut_buff;
 static int readIn_buff;
 
+struct workqueue_struct *COMEX_wq;
+
 static uint64_t translate_useraddr(struct krping_cb *, uint64_t);
 static int universal_send(struct krping_cb *cb, u64 imm, char* addr, u64 size);
 static int do_write(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 size);
 static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 size);
+void COMEX_do_work(struct work_struct *work);
+
+typedef struct{
+	struct work_struct my_work_struct;
+	int CMD_num;
+	char args[6*MAX_FREE];
+} work_content;
 
 void COMEX_module_echo_fn(char *str)
 {
@@ -70,6 +79,36 @@ void COMEX_RDMA_fn(int target, int CMD_num, void *ptr, int struct_size)
 
 void COMEX_do_verb(int CMD_num, void *piggy)
 {
+	work_content *myWork_cont = kzalloc(sizeof(work_content), GFP_ATOMIC);
+	
+	INIT_WORK(&myWork_cont->my_work_struct, COMEX_do_work);
+	myWork_cont->CMD_num = CMD_num;
+	switch(CMD_num){
+		case CODE_COMEX_PAGE_RQST:
+			memcpy( &myWork_cont->args[0], piggy, sizeof(int));
+			break;
+		case CODE_COMEX_PAGE_RPLY:
+			memcpy( &myWork_cont->args[0], piggy, sizeof(reply_pages_t));
+			break;
+		case CODE_COMEX_PAGE_CKSM:
+			memcpy( &myWork_cont->args[0], piggy, sizeof(unsigned long));
+			break;
+		case CODE_COMEX_PAGE_FREE:
+			memcpy( &myWork_cont->args[0], piggy, sizeof(free_struct_t));
+			break;
+		default:
+			printk(KERN_INFO "%s: %d | ERROR Unknown CMD_num %d\n", __FUNCTION__, *(int *)piggy, CMD_num);
+			return;
+	}
+	queue_work(COMEX_wq, &myWork_cont->my_work_struct);
+}
+
+void COMEX_do_work(struct work_struct *work)
+{
+	work_content *myWork_cont = (work_content *)work;
+	int CMD_num = myWork_cont->CMD_num;
+	void *piggy = &myWork_cont->args[0];
+	
 	if(CMD_num == CODE_COMEX_PAGE_RQST){
 //		printk(KERN_INFO "PAGE_RQST: %d %d\n", CMD_num, *(int *)piggy);
 		COMEX_pages_request(*(int *)piggy);
@@ -105,9 +144,7 @@ void COMEX_do_verb(int CMD_num, void *piggy)
 			}
 		}		
 	}
-	else{
-		printk(KERN_INFO "%s: %d | ERROR Unknown CMD_num %d\n", __FUNCTION__, *(int *)piggy, CMD_num);
-	}
+	kfree(myWork_cont);
 }
 
 void COMEX_init()
@@ -117,5 +154,6 @@ void COMEX_init()
 	COMEX_offset_to_addr = &COMEX_offset_to_addr_fn;
 	COMEX_RDMA 			 = &COMEX_RDMA_fn;
 	
+	COMEX_wq = alloc_workqueue("COMEX WorkQueue", WQ_MEM_RECLAIM | WQ_UNBOUND | WQ_NON_REENTRANT | WQ_HIGHPRI, 0);
 	COMEX_init_ENV(CONF_nodeID, CONF_totalCB, writeOut_buff, readIn_buff, total_pages, proc_name);
 }

@@ -18,10 +18,11 @@ yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/bu
 yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/
 dmesg -c && modprobe -r rdma_krping
 make clean && make && make install && modprobe rdma_krping
+echo "total_pages=524288,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping
+
+
 echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping
 
-
-echo "total_pages=524288,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping
 
 
 cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v ./bt.D.x 
