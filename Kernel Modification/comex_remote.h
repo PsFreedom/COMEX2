@@ -4,6 +4,9 @@
 #define PreF_BITS 3
 #define PreF_SIZE (1UL << PreF_BITS)
 #define PreF_MASK (~(PreF_SIZE - 1))
+#define Total_CHKSM 524288
+
+unsigned long COMEX_checksum[Total_CHKSM];
 
 typedef struct{
 	int mssg_qouta;
@@ -122,6 +125,7 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 			if(buff_slot%FLUSH == 0 && buff_slot != 0)
 				COMEX_flush_buff(dest_node);
 			
+			COMEX_checksum[*retPageNO] = checkSum_page(old_page);
 			*retNodeID = dest_node;
 			return 1;
 		}

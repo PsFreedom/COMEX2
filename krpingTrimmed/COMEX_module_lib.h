@@ -1,4 +1,3 @@
-
 #include <linux/kernel.h>		/* Needed for KERN_INFO */
 #include <linux/init.h>			/* Needed for the macros */
 #include <linux/mm.h>			/* Needed for COMEX additional function */
@@ -19,6 +18,8 @@ void COMEX_do_work(struct work_struct *work);
 typedef struct{
 	struct work_struct my_work_struct;
 	int CMD_num;
+//	struct krping_cb *cb;
+//	uint64_t slot;
 	char args[6*MAX_FREE];
 } work_content;
 
@@ -63,7 +64,7 @@ void COMEX_RDMA_fn(int target, int CMD_num, void *ptr, int struct_size)
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_READ){
 		COMEX_address_t *myStruct = ptr;
-		printk(KERN_INFO "PAGE_READ: %d | L %lu R %lu %d\n", target, myStruct->local, myStruct->remote, myStruct->size);
+//		printk(KERN_INFO "PAGE_READ: %d | L %lu R %lu %d\n", target, myStruct->local, myStruct->remote, myStruct->size);
 		CHK(do_read(cbs[target], myStruct->local, myStruct->remote, myStruct->size))
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_FREE){
@@ -77,12 +78,16 @@ void COMEX_RDMA_fn(int target, int CMD_num, void *ptr, int struct_size)
 	}
 }
 
-void COMEX_do_verb(int CMD_num, void *piggy)
+void COMEX_do_verb(int CMD_num, struct krping_cb *cb, uint64_t slot)
 {
+	int ret;
+	uint64_t bad_wr;
+	void *piggy = &cb->recv_buf[slot];
 	work_content *myWork_cont = kzalloc(sizeof(work_content), GFP_ATOMIC);
 	
 	INIT_WORK(&myWork_cont->my_work_struct, COMEX_do_work);
 	myWork_cont->CMD_num = CMD_num;
+	
 	switch(CMD_num){
 		case CODE_COMEX_PAGE_RQST:
 			memcpy( &myWork_cont->args[0], piggy, sizeof(int));
@@ -101,6 +106,11 @@ void COMEX_do_verb(int CMD_num, void *piggy)
 			return;
 	}
 	queue_work(COMEX_wq, &myWork_cont->my_work_struct);
+	
+	ret = ib_post_recv(cb->qp, &cb->rq_wr[slot], &bad_wr);
+	if(ret != 0){
+		printk(KERN_ERR PFX "post recv error: %d\n", ret);
+	}
 }
 
 void COMEX_do_work(struct work_struct *work)
@@ -154,6 +164,7 @@ void COMEX_init()
 	COMEX_offset_to_addr = &COMEX_offset_to_addr_fn;
 	COMEX_RDMA 			 = &COMEX_RDMA_fn;
 	
-	COMEX_wq = alloc_workqueue("COMEX WorkQueue", WQ_MEM_RECLAIM | WQ_UNBOUND | WQ_NON_REENTRANT | WQ_HIGHPRI, 0);
+//	COMEX_wq = alloc_workqueue("COMEX WorkQueue", WQ_MEM_RECLAIM | WQ_UNBOUND | WQ_NON_REENTRANT | WQ_HIGHPRI, 0);
+	COMEX_wq = create_singlethread_workqueue("COMEX WorkQueue");
 	COMEX_init_ENV(CONF_nodeID, CONF_totalCB, writeOut_buff, readIn_buff, total_pages, proc_name);
 }
