@@ -391,8 +391,8 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				
 //				if(checkSum_page(new_page) != 0)
 //					printk(KERN_INFO "READ: %d %d - %lu\n", NodeID, COMEX_pageNO, checkSum_page(new_page));
-				if(checkSum_page(new_page) != COMEX_checksum[COMEX_pageNO])
-					printk(KERN_INFO "READ: Checksum FAILED! %d %d - %lu != %lu\n", NodeID, COMEX_pageNO, COMEX_checksum[COMEX_pageNO], checkSum_page(new_page));
+//				if(checkSum_page(new_page) != COMEX_checksum[COMEX_pageNO])
+//					printk(KERN_INFO "READ: Checksum FAILED! %d %d - %lu != %lu\n", NodeID, COMEX_pageNO, COMEX_checksum[COMEX_pageNO], checkSum_page(new_page));
 			}
 			else if(swp_type(entry) == 9)
 			{

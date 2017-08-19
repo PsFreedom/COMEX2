@@ -6,7 +6,7 @@
 #define PreF_MASK (~(PreF_SIZE - 1))
 #define Total_CHKSM 524288
 
-unsigned long COMEX_checksum[Total_CHKSM];
+//unsigned long COMEX_checksum[Total_CHKSM];
 
 typedef struct{
 	int mssg_qouta;
@@ -125,9 +125,9 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 			if(buff_slot%FLUSH == 0 && buff_slot != 0)
 				COMEX_flush_buff(dest_node);
 			
-			COMEX_checksum[*retPageNO] = checkSum_page(old_page);
+//			COMEX_checksum[*retPageNO] = checkSum_page(old_page);
 			*retNodeID = dest_node;
-			return 1;
+			return -1;
 		}
 		spin_unlock(&COMEX_free_group[dest_node].list_lock);
 		dest_node = COMEX_hash(dest_node);
@@ -217,9 +217,9 @@ int COMEX_read_from_preFetch(struct page *new_page, int nodeID, int pageNO)
 }
 
 void COMEX_page_receive(int nodeID, int pageNO, int group_size)
-{	
+{
 	spin_lock(&COMEX_free_group[nodeID].list_lock);
-	if(pageNO >= 0){
+/*	if(pageNO >= 0){
 		free_group_t *group_ptr = (free_group_t *)kzalloc(sizeof(free_group_t), GFP_KERNEL);
 		
 		group_ptr->page_start = pageNO;
@@ -238,7 +238,7 @@ void COMEX_page_receive(int nodeID, int pageNO, int group_size)
 		COMEX_free_group[nodeID].mssg_qouta++;
 		COMEX_free_group[nodeID].back_off += 50000;
 //		printk(KERN_INFO "%s: >>> %d %d %d - (%d | %d)\n", __FUNCTION__, nodeID, pageNO, group_size, COMEX_free_group[nodeID].mssg_qouta, COMEX_free_group[nodeID].back_off);
-	}
+	}*/
 	spin_unlock(&COMEX_free_group[nodeID].list_lock);
 }
 EXPORT_SYMBOL(COMEX_page_receive);

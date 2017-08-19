@@ -458,7 +458,7 @@ static int universal_send(struct krping_cb *cb, u64 imm, char* addr, u64 size){
 	ret = down_killable(&cb->sem_verb_mutex);
 	slot = cb->vslotusing;
 	cb->vslotusing = (cb->vslotusing+1)%VERB_SEND_SLOT;
-	up(&cb->sem_verb_mutex); //if not up here, it's up in event_handler
+	//up(&cb->sem_verb_mutex); //if not up here, it's up in event_handler
   
 	cb->send_sgl[slot].length=size;
 	memcpy(&cb->send_buf[slot],addr,size);
@@ -469,11 +469,12 @@ static int universal_send(struct krping_cb *cb, u64 imm, char* addr, u64 size){
 	if(ret){
 		DEBUG_LOG("SEND VERB ISSUE ERROR\n");
 	}
-  
+/*
 	if(cb->sq_wr[slot].send_flags&IB_SEND_SIGNALED){
 		DEBUG_LOG("SEND VERB slot n-1, wait for ack\n");
 		ret=down_killable(&cb->sem_verb_ack);
 	}
+*/
 	return 0;
 }
 
@@ -487,7 +488,7 @@ static int send_buffer_info(struct krping_cb *cb)
 	ret = down_killable(&cb->sem_verb_mutex);
 		slot = cb->vslotusing;
 		cb->vslotusing=(cb->vslotusing+1)%VERB_SEND_SLOT;
-	up(&cb->sem_verb_mutex);
+	//up(&cb->sem_verb_mutex);
   
 	info = (struct buffer_info *) &(cb->send_buf[slot]);
 	DEBUG_LOG("about to send buffer info\n");
@@ -514,7 +515,7 @@ static int send_buffer_info(struct krping_cb *cb)
 	if(!cb->remote_addr){
 		DEBUG_LOG("kmalloc error\n");
 	}
-	cb->remote_dmabuf_addr=dma_map_single(cb->pd->device->dma_device,cb->remote_addr,sizeof(char*)*cb->remote_pcount, DMA_BIDIRECTIONAL);
+	cb->remote_dmabuf_addr = dma_map_single(cb->pd->device->dma_device,cb->remote_addr,sizeof(char*)*cb->remote_pcount, DMA_BIDIRECTIONAL);
 	pci_unmap_addr_set(cb, dmabuf_mapping, cb->remote_dmabuf_addr);
 	//
 
@@ -545,10 +546,7 @@ static void universal_recv_handler(struct krping_cb *cb, uint64_t imm, uint64_t 
 			
 			cb->state=RECV_INFO;
 			wake_up_interruptible(&cb->sem);
-			ret = ib_post_recv(cb->qp, &cb->rq_wr[slot], &bad_wr);
-			if(ret){
-				printk(KERN_ERR PFX "post recv error: %d\n", ret);
-			}
+
 			break;
 		case 4:
 			DEBUG_LOG("up verb slots\n");
@@ -558,15 +556,16 @@ static void universal_recv_handler(struct krping_cb *cb, uint64_t imm, uint64_t 
 			break;
 		case 99: //set buffers info
 			printk("unexpected,unhandled immediate received=%lld %s\n",imm,cb->recv_buf[slot].piggy);
-			ret = ib_post_recv(cb->qp, &cb->rq_wr[slot], &bad_wr);
-			if(ret){
-				printk(KERN_ERR PFX "post recv error: %d\n", ret);
-			}
+
 			break;
 		default:
-			DEBUG_LOG("bug default recv\n");
+			//DEBUG_LOG("bug default recv\n");
 			COMEX_do_verb( imm, cb, slot); // COMEX
 			break;
+	}			
+	ret = ib_post_recv(cb->qp, &cb->rq_wr[slot], &bad_wr);
+	if(ret){
+		printk(KERN_ERR PFX "post recv error: %d\n", ret);
 	}
 	return ;
 }
@@ -607,7 +606,8 @@ static void krping_cq_event_handler_send(struct ib_cq *cq, void *ctx)
 	
 				//if(wc.wr_id%4==3){ //already plus one from alignment
 					//DEBUG_LOG("unlock ");
-					up(&cb->sem_verb_ack); //send one by one for now, simple and slow baseline version first 
+					up(&cb->sem_verb_mutex); 
+					//up(&cb->sem_verb_ack); //send one by one for now, simple and slow baseline version first 
 				//}
 				break;
 			case IB_WC_RDMA_WRITE:
@@ -771,9 +771,9 @@ static void krping_setup_wr(struct krping_cb *cb)
 		cb->send_sgl[i].addr = cb->send_dma_addr+(sizeof(union bufferx)*i);
 		cb->send_sgl[i].lkey = cb->dma_mr->lkey; //cb->send_mr->lkey; //
 		cb->send_sgl[i].addr = (uint64_t)&cb->send_buf[i];
-		if(i%4 == 0){ //the +1
+		//if(i%4 == 0){ //the +1
 			cb->sq_wr[i].send_flags |= IB_SEND_SIGNALED; //last slot is fenced (+1 from above)
-		}
+		//}
 	}
   DEBUG_LOG("setup_wr done\n");
 }
@@ -1241,9 +1241,9 @@ int krping_doit(char *cmd)
 		sema_init(&cbs[i]->sem_signal_ack,0);
 		sema_init(&cbs[i]->sem_verb_ack,0);
 		sema_init(&cbs[i]->sem_verb_mutex,1);
-		sema_init(&cbs[i]->sem_read_able,1);
+		sema_init(&cbs[i]->sem_read_able, 1);
 		sema_init(&cbs[i]->sem_read,0);
-		sema_init(&cbs[i]->sem_write_able,5);
+		sema_init(&cbs[i]->sem_write_able, 5);
 		sema_init(&cbs[i]->sem_ready,0);
 		
 		// IP
@@ -1369,15 +1369,15 @@ int krping_doit(char *cmd)
 	DEBUG_LOG("===========================\n");
   //verb test
  
-    for(i=0;i<totalcb;i++){
-      for(j=0;j<511;j++){
-        //DEBUG_LOG("sending %d %d\n",i,j);
-        sprintf(t,"zxyf %d %d",cbs[i]->cbindex,j);
-        DEBUG_LOG("sending out %d\n",j);
-          CHK(universal_send(cbs[i], 99,t, 14)) 
-      }
+/*	for(i=0;i<totalcb;i++){
+		for(j=0;j<511;j++){
+			//DEBUG_LOG("sending %d %d\n",i,j);
+			sprintf(t,"zxyf %d %d",cbs[i]->cbindex,j);
+			DEBUG_LOG("sending out %d\n",j);
+			CHK(universal_send(cbs[i], 99,t, 14)) 
+		}
     }
-  
+*/  
 //// ready to operate!  
 	COMEX_init();	// for COMEX
 	ret = down_interruptible(&sem_killsw); //never get unlocked naturally
