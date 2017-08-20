@@ -47,7 +47,7 @@ uint64_t COMEX_offset_to_addr_fn(uint64_t offset){
 void COMEX_RDMA_fn(int target, int CMD_num, void *ptr, int struct_size)
 {
 	if(CMD_num == CODE_COMEX_PAGE_RQST){
-		printk(KERN_INFO "PAGE_RQST: %d %p %d | %d\n", target, ptr, struct_size, *(int*)ptr);
+//		printk(KERN_INFO "PAGE_RQST: %d %p %d | %d\n", target, ptr, struct_size, *(int*)ptr);
 		CHK(universal_send(cbs[target], CMD_num, ptr, struct_size))
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_RPLY){
@@ -87,11 +87,11 @@ void COMEX_do_verb(int CMD_num, struct krping_cb *cb, uint64_t slot)
 	myWork_cont->CMD_num = CMD_num;
 	switch(CMD_num){
 		case CODE_COMEX_PAGE_RQST:
-			printk(KERN_INFO "Received... PAGE_RQST\n");
+//			printk(KERN_INFO "Received... PAGE_RQST\n");
 			memcpy( &myWork_cont->args[0], piggy, sizeof(int));
 			break;
 		case CODE_COMEX_PAGE_RPLY:
-			printk(KERN_INFO "Received... PAGE_RPLY\n");
+//			printk(KERN_INFO "Received... PAGE_RPLY\n");
 			memcpy( &myWork_cont->args[0], piggy, sizeof(reply_pages_t));
 			break;
 		case CODE_COMEX_PAGE_CKSM:
@@ -109,7 +109,8 @@ void COMEX_do_verb(int CMD_num, struct krping_cb *cb, uint64_t slot)
 
 void COMEX_do_work(struct work_struct *work)
 {
-	work_content *myWork_cont = (work_content *)container_of(work, work_content, my_work_struct);
+//	work_content *myWork_cont = (work_content *)container_of(work, work_content, my_work_struct);
+	work_content *myWork_cont = (work_content *)work;
 	int CMD_num = myWork_cont->CMD_num;
 	void *piggy = &myWork_cont->args[0];
 	
@@ -119,7 +120,7 @@ void COMEX_do_work(struct work_struct *work)
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_RPLY){
 		reply_pages_t *myStruct = piggy;
-		printk(KERN_INFO "PAGE_RPLY: %d->%d | %d %d %d\n", myStruct->src_node, ID_to_CB(myStruct->src_node), myStruct->src_node, myStruct->page_no, myStruct->size);
+//		printk(KERN_INFO "PAGE_RPLY: %d->%d | %d %d %d\n", myStruct->src_node, ID_to_CB(myStruct->src_node), myStruct->src_node, myStruct->page_no, myStruct->size);
 		COMEX_page_receive(ID_to_CB(myStruct->src_node), myStruct->page_no, myStruct->size);
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_FREE){
