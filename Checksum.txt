@@ -3,6 +3,6 @@ FT - 1024*512*512
 	 T =    1     Checksum =    5.102470850749D+02    5.119971126300D+02
 
 	 
-FT  	Size                : 1024x1024x 512
-		Iterations          :              1
+FT  Size                : 1024x1024x 512
+	Iterations          :              1
 	 T =    1     Checksum =    5.100021384457D+02    5.102354099484D+02

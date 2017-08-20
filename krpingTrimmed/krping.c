@@ -498,7 +498,7 @@ static int universal_send(struct krping_cb *cb, u64 imm, char* addr, u64 size){
 	ret = down_killable(&cb->sem_verb_mutex);
 	slot = cb->vslotusing;
 	cb->vslotusing = (cb->vslotusing+1)%VERB_SEND_SLOT;
-	//up(&cb->sem_verb_mutex); //if not up here, it's up in event_handler
+	up(&cb->sem_verb_mutex); //if not up here, it's up in event_handler
 
   
 
@@ -516,21 +516,12 @@ static int universal_send(struct krping_cb *cb, u64 imm, char* addr, u64 size){
 		DEBUG_LOG("SEND VERB ISSUE ERROR\n");
 
 	}
-/*
+
 	if(cb->sq_wr[slot].send_flags&IB_SEND_SIGNALED){
 		DEBUG_LOG("SEND VERB slot n-1, wait for ack\n");
-
-
-
-
-
 		ret=down_killable(&cb->sem_verb_ack);
-
-
-
-
 	}
-*/
+
 	return 0;
 }
 
@@ -544,7 +535,7 @@ static int send_buffer_info(struct krping_cb *cb)
 	ret = down_killable(&cb->sem_verb_mutex);
 		slot = cb->vslotusing;
 		cb->vslotusing=(cb->vslotusing+1)%VERB_SEND_SLOT;
-	//up(&cb->sem_verb_mutex);
+	up(&cb->sem_verb_mutex);
   
 	info = (struct buffer_info *) &(cb->send_buf[slot]);
 	DEBUG_LOG("about to send buffer info\n");
@@ -715,8 +706,8 @@ static void krping_cq_event_handler_send(struct ib_cq *cq, void *ctx)
 	
 				//if(wc.wr_id%4==3){ //already plus one from alignment
 					//DEBUG_LOG("unlock ");
-					up(&cb->sem_verb_mutex); 
-					//up(&cb->sem_verb_ack); //send one by one for now, simple and slow baseline version first 
+					//up(&cb->sem_verb_mutex); 
+					up(&cb->sem_verb_ack); //send one by one for now, simple and slow baseline version first 
 				//}
 
 				break;
@@ -903,9 +894,9 @@ static void krping_setup_wr(struct krping_cb *cb)
 		cb->send_sgl[i].addr = cb->send_dma_addr+(sizeof(union bufferx)*i);
 		cb->send_sgl[i].lkey = cb->dma_mr->lkey; //cb->send_mr->lkey; //
 		cb->send_sgl[i].addr = (uint64_t)&cb->send_buf[i];
-		//if(i%4 == 0){ //the +1
+		if(i%4 == 0){ //the +1
 			cb->sq_wr[i].send_flags |= IB_SEND_SIGNALED; //last slot is fenced (+1 from above)
-		//}
+		}
 	}
 
 
