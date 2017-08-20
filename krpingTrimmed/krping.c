@@ -86,13 +86,6 @@ MODULE_LICENSE("Dual BSD/GPL");
 #define VERB_RECV_SLOT 64
 #define VERB_SEND_SLOT 24
 
-
-
-
-
-
-
-
 static const struct krping_option krping_opts[] = {
 	{"count", OPT_INT, 'C'},
 	{"size", OPT_INT, 'S'},
@@ -186,9 +179,7 @@ struct krping_cb {
 	struct ib_pd *pd;
 	struct ib_qp *qp;
 	struct krping_sharedspace *bigspace;
-
 	struct ib_mr *dma_mr;
-
 
 	int read_inv;
 	u8 key;
@@ -204,17 +195,11 @@ struct krping_cb {
 	union bufferx send_buf[VERB_SEND_SLOT];
 	int vslotusing;
 
-
 	u64 recv_dma_addr; //single position only, will calculate address offset later
 	u64 send_dma_addr;
 
-
 	DECLARE_PCI_UNMAP_ADDR(recv_mapping)
 	struct ib_mr *recv_mr;
-
-
-
-
 
 	DECLARE_PCI_UNMAP_ADDR(send_mapping)
 	struct ib_mr *send_mr;
@@ -234,6 +219,7 @@ struct krping_cb {
 	struct semaphore sem_read;
 	struct semaphore sem_write_able;
 	struct semaphore sem_ready;
+	
 	uint16_t port;			/* dst port in NBO */
 	u8 addr[16];			/* dst addr in NBO */
 	char *addr_str;			/* dst addr string */
@@ -257,15 +243,10 @@ struct krping_cb {
 	uint64_t *remote_addr;		// local copy of remote buffer page table, normal addr
 	uint64_t remote_dmabuf_addr; //local copy of remote buffer page table,dma addr
 
-
-
-
-
 	//indexes
 	int cbindex;
 	int mynodeID;
 	int remotenodeID;
-
 };
 struct krping_cb **cbs;
 
@@ -551,7 +532,8 @@ static int send_buffer_info(struct krping_cb *cb)
   
 	cb->sq_wr[slot].ex.imm_data = 2; 
 	cb->send_sgl[slot].length = sizeof(struct buffer_info);
-	ret=ib_post_send(cb->qp, &cb->sq_wr[slot], &bad_wr);
+	ret = ib_post_send(cb->qp, &cb->sq_wr[slot], &bad_wr);
+	
 	if(ret){
 		DEBUG_LOG("SEND VERB ISSUE ERROR\n");
 	}
@@ -1299,7 +1281,6 @@ static void krping_run_all(struct krping_cb *cb)
 	if (ret)
 		return;
 
-
 	if(cb->server){
 		ret = krping_setup_qp(cb, cb->child_cm_id);
 	}else{
@@ -1311,7 +1292,6 @@ static void krping_run_all(struct krping_cb *cb)
 		printk(KERN_ERR PFX "setup_qp failed: %d\n", ret);
 		return;
 	}
-
 
 	ret = krping_setup_buffers(cb); 
 	cb->exitstatus=0;
@@ -1335,23 +1315,8 @@ static void krping_run_all(struct krping_cb *cb)
 		//err in here if server doesn't exist
 		ret = krping_connect_client(cb);
 	}
-	
-
-
 
 	if(ret){
-
-
-
-
-
-
-
-
-
-
-
-
 		printk(KERN_ERR PFX "connect error %d\n", ret);
 		disconnect_cb(cb);
 		return;
@@ -1362,12 +1327,6 @@ static void krping_run_all(struct krping_cb *cb)
 	}else{
 		krping_test_client(cb);
 	}
-
-
-
-
-
-
 }
 
 int krping_doit(char *cmd)
@@ -1403,9 +1362,6 @@ int krping_doit(char *cmd)
 		if(!cbs[i]){
 			return -ENOMEM;
 		}
-
-
-
 		
 		cbs[i]->cbindex=i;
 		cbs[i]->bigspace=bigspaceptr;
@@ -1415,15 +1371,14 @@ int krping_doit(char *cmd)
 		cbs[i]->size = RPING_BUFSIZE;
 		cbs[i]->txdepth = RPING_SQ_DEPTH;
 
-
 		init_waitqueue_head(&cbs[i]->sem);
 		sema_init(&cbs[i]->sem_signal_ack,0);
-		sema_init(&cbs[i]->sem_verb_ack,0);
-		sema_init(&cbs[i]->sem_verb_mutex,1);
+		sema_init(&cbs[i]->sem_verb_ack, 0);
+		sema_init(&cbs[i]->sem_verb_mutex, 1);
 		sema_init(&cbs[i]->sem_read_able, 1);
-		sema_init(&cbs[i]->sem_read,0);
+		sema_init(&cbs[i]->sem_read, 0);
 		sema_init(&cbs[i]->sem_write_able, 5);
-		sema_init(&cbs[i]->sem_ready,0);
+		sema_init(&cbs[i]->sem_ready, 0);
 		
 		// IP
 		cbs[i]->addr_str = CONF_allIP[i];
