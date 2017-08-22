@@ -3,8 +3,6 @@ void COMEX_init_Remote()
 	int i,j;
 	printk(KERN_INFO "%s... Begin\n", __FUNCTION__);
 	
-//	memset(COMEX_checksum, 0, Total_CHKSM*sizeof(unsigned long));
-	
 	COMEX_free_group = (COMEX_R_free_group_t *)vmalloc(sizeof(COMEX_R_free_group_t)*COMEX_total_nodes);
 	for(i=0; i<COMEX_total_nodes; i++){
 		COMEX_free_group[i].mssg_qouta  = MAX_MSSG;

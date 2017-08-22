@@ -4,7 +4,7 @@
 #define PreF_BITS 3
 #define PreF_SIZE (1UL << PreF_BITS)
 #define PreF_MASK (~(PreF_SIZE - 1))
-#define Total_CHKSM 524288
+//#define Total_CHKSM 524288
 
 //unsigned long COMEX_checksum[Total_CHKSM];
 
@@ -127,7 +127,7 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 			
 //			COMEX_checksum[*retPageNO] = checkSum_page(old_page);
 			*retNodeID = dest_node;
-			return 1;
+			return -1;
 		}
 		spin_unlock(&COMEX_free_group[dest_node].list_lock);
 		dest_node = COMEX_hash(dest_node);
