@@ -115,7 +115,7 @@ void COMEX_do_work(struct work_struct *work)
 	void *piggy = &myWork_cont->args[0];
 	
 	if(CMD_num == CODE_COMEX_PAGE_RQST){
-		printk(KERN_INFO "PAGE_RQST: From node %d\n", *(int *)piggy);
+//		printk(KERN_INFO "PAGE_RQST: From node %d\n", *(int *)piggy);
 		COMEX_pages_request(*(int *)piggy);
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_RPLY){

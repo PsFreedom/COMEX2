@@ -335,6 +335,10 @@ void COMEX_flush_buff(int nodeID)
 		if(buff_pos[nodeID].head + count == COMEX_total_writeOut)
 			break;
 	}
+	if(count == 0){
+		spin_unlock(&buff_pos[nodeID].pos_lock);
+		return;
+	}
 	
 	addr_struct.local  = (unsigned long)get_writeOut_buff(nodeID, buff_pos[nodeID].head);
 	addr_struct.remote = (unsigned long)COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head].pageNO << SHIFT_PAGE;
