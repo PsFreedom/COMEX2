@@ -1235,7 +1235,7 @@ extern int COMEX_Ready;
 extern int COMEX_ID;
 extern int COMEX_total_nodes;
 extern int COMEX_total_pages;
-//extern unsigned long COMEX_checksum[];
+extern unsigned long COMEX_checksum[];
 
 //	Module Function Pointer		// Function in kernel module 
 extern void 	(*COMEX_module_echo)(char *);
@@ -1257,7 +1257,6 @@ extern void COMEX_read_from_local(struct page *new_page, int pageNO);
 extern void COMEX_read_from_remote(struct page *new_page, int node_ID, int pageNO);
 extern int COMEX_read_from_buffer(struct page *new_page, int nodeID, int pageNO);
 extern int COMEX_read_from_preFetch(struct page *new_page, int nodeID, int pageNO);
-extern void COMEX_free_to_remote(int nodeID, int pageNO);
 
 ////////// 	End COMEX Section 	//////////
 

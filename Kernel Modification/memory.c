@@ -1100,9 +1100,6 @@ static unsigned long zap_pte_range(struct mmu_gather *tlb,
 	spinlock_t *ptl;
 	pte_t *start_pte;
 	pte_t *pte;
-	
-	int	NodeID;		// COMEX
-	unsigned long COMEX_pageNO;		// COMEX
 
 again:
 	init_rss_vec(rss);
@@ -1177,22 +1174,6 @@ again:
 		} else {
 			swp_entry_t entry = pte_to_swp_entry(ptent);
 
-			if(swp_type(entry) == 8){		// COMEX Remote
-				COMEX_pageNO = (unsigned long)swp_offset(entry);
-				NodeID = (int)COMEX_pageNO & 1023;
-				COMEX_pageNO = COMEX_pageNO >> 10;
-				
-				COMEX_free_to_remote(NodeID, COMEX_pageNO);
-				rss[MM_SWAPENTS]--;
-				goto COMEX_Jump_Free;
-			}else 
-			if(swp_type(entry) == 9){		// COMEX Local
-				COMEX_free_page((int)swp_offset(entry), 0);
-				
-				rss[MM_SWAPENTS]--;
-				goto COMEX_Jump_Free;
-			}
-			
 			if (!non_swap_entry(entry))
 				rss[MM_SWAPENTS]--;
 			else if (is_migration_entry(entry)) {
@@ -1208,7 +1189,6 @@ again:
 			if (unlikely(!free_swap_and_cache(entry)))
 				print_bad_pte(vma, addr, ptent, NULL);
 		}
-COMEX_Jump_Free:
 		pte_clear_not_present_full(mm, addr, pte, tlb->fullmm);
 	} while (pte++, addr += PAGE_SIZE, addr != end);
 

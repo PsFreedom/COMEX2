@@ -353,7 +353,7 @@ static int do_write(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 
 		DEBUG_LOG("\nALERT, BUFFER MISALIGNMENT FOUND\n\n\n");
 		return 1;
 	}else if(remote_offset/RPING_BUFSIZE>cb->remote_pcount){
-		DEBUG_LOG("\nALERT, try to use more memory than what otherside have\n\n\n");
+		DEBUG_LOG("\nALERT WRITE, %ld %ld %ld\n", local_offset, remote_offset, size);
 		return 1;
     }else{
 		sema_init(&sem_write,0);  
@@ -397,7 +397,7 @@ static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 s
 		DEBUG_LOG("\nALERT, BUFFER MISALIGNMENT FOUND\n\n\n");
 		return 1;
 	}else if(remote_offset/RPING_BUFSIZE>cb->remote_pcount){
-		DEBUG_LOG("\nALERT, try to use more memory than what otherside have\n\n\n");
+		DEBUG_LOG("\nALERT READ, %ld %ld %ld\n", local_offset, remote_offset, size);
 		return 1;
 	}else{
 		rdma_sq_wr_copy.wr.rdma.rkey = cb->remote_rkey;
@@ -481,8 +481,12 @@ static int universal_send(struct krping_cb *cb, u64 imm, char* addr, u64 size){
 	cb->vslotusing = (cb->vslotusing+1)%VERB_SEND_SLOT;
 	up(&cb->sem_verb_mutex); //if not up here, it's up in event_handler
 
+  
+
 	cb->send_sgl[slot].length=size;
 	memcpy(&cb->send_buf[slot],addr,size);
+
+
 
 	cb->sq_wr[slot].ex.imm_data=imm; 
 
@@ -493,8 +497,9 @@ static int universal_send(struct krping_cb *cb, u64 imm, char* addr, u64 size){
 		DEBUG_LOG("SEND VERB ISSUE ERROR\n");
 
 	}
+
 	if(cb->sq_wr[slot].send_flags&IB_SEND_SIGNALED){
-		DEBUG_LOG("SEND VERB slot n-1, wait for ack\n");
+//		DEBUG_LOG("SEND VERB slot n-1, wait for ack\n");
 		ret=down_killable(&cb->sem_verb_ack);
 	}
 
@@ -545,7 +550,13 @@ static int send_buffer_info(struct krping_cb *cb)
 	cb->remote_dmabuf_addr = dma_map_single(cb->pd->device->dma_device,cb->remote_addr,sizeof(char*)*cb->remote_pcount, DMA_BIDIRECTIONAL);
 	pci_unmap_addr_set(cb, dmabuf_mapping, cb->remote_dmabuf_addr);
 	//
-	
+
+
+
+
+
+
+
 	ret = do_read_bufferptr(cb);
 	if(ret){
 		DEBUG_LOG("%d:BUG IN READ THEIR PTR TABLE\n",cb->cbindex);
@@ -577,25 +588,64 @@ static void universal_recv_handler(struct krping_cb *cb, uint64_t imm, uint64_t 
 			wake_up_interruptible(&cb->sem);
 
 			break;
+
+
+
+
+
+
+
+
+
+
+
+
 		case 4:
+
+
+
+
 			DEBUG_LOG("up verb slots\n");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 			break;
+
 		case 5:
 			DEBUG_LOG("recv exit\n");
 			break;
 		case 99: //set buffers info
 			printk("unexpected,unhandled immediate received=%lld %s\n",imm,cb->recv_buf[slot].piggy);
+
 			break;
 		default:
 			//DEBUG_LOG("bug default recv\n");
 			COMEX_do_verb( imm, cb, slot); // COMEX
-//			break;
-			return;
+			break;
 	}			
+
+
+
 
 	ret = ib_post_recv(cb->qp, &cb->rq_wr[slot], &bad_wr);
 	if(ret){
 		printk(KERN_ERR PFX "post recv error: %d\n", ret);
+
 	}
 	return ;
 }
