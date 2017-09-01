@@ -2,10 +2,10 @@
 #define MAX_MSSG 8
 #define FLUSH 32
 #define PreF_BITS 3
-#define PreF_SIZE (1UL << PreF_BITS)
-#define PreF_MASK (~(PreF_SIZE - 1))
-#define Total_CHKSM 524288
+#define PreF_SIZE (1UL << PreF_BITS)	// 0000 1000
+#define PreF_MASK (~(PreF_SIZE - 1))	// 0000 0111 -> 1111 1000
 
+//#define Total_CHKSM 524288
 //unsigned long COMEX_checksum[Total_CHKSM];
 
 typedef struct{
@@ -137,11 +137,37 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 	return -1;
 }
 
+void COMEX_read_single(struct page *new_page, int node_ID, int pageNO)
+{
+	COMEX_address_t addr_struct;
+	int buff_no = pageNO % COMEX_total_readIn;
+	char *buf_vAddr = (char *)get_readIn_buff(buff_no);
+	char *new_vAddr = (char *)kmap(new_page);
+	
+	COMEX_readIn_buff[buff_no].status = -1;
+	COMEX_readIn_buff[buff_no].nodeID = -1;
+	COMEX_readIn_buff[buff_no].pageNO = -1;
+	
+	addr_struct.local  = (unsigned long)buf_vAddr;
+	addr_struct.remote = (unsigned long)pageNO << SHIFT_PAGE;
+	addr_struct.size   = 1 << SHIFT_PAGE;
+	addr_struct.bufIDX = buff_no;
+	COMEX_RDMA(node_ID, CODE_COMEX_PAGE_READ, &addr_struct, sizeof(addr_struct));
+	COMEX_free_to_remote(node_ID, pageNO);
+	
+	COMEX_readIn_buff[buff_no].status = 2;
+	COMEX_readIn_buff[buff_no].nodeID = node_ID;
+	COMEX_readIn_buff[buff_no].pageNO = pageNO;
+	
+	memcpy(new_vAddr, (char *)COMEX_offset_to_addr((uint64_t)get_readIn_buff(buff_no)), X86PageSize);	
+	kunmap(new_page);
+}
+
 void COMEX_read_from_remote(struct page *new_page, int node_ID, int pageNO)
 {
 	COMEX_address_t addr_struct;
 	int i;
-	int addr_FLR = pageNO & PreF_MASK;
+	int addr_FLR = pageNO & PreF_MASK;	// ((>> x) << x)
 	int buff_FLR = addr_FLR % COMEX_total_readIn;
 	char *buf_vAddr = (char *)get_readIn_buff(buff_FLR);
 	char *new_vAddr = (char *)kmap(new_page);
