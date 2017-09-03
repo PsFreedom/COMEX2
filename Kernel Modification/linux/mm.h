@@ -1235,7 +1235,7 @@ extern int COMEX_Ready;
 extern int COMEX_ID;
 extern int COMEX_total_nodes;
 extern int COMEX_total_pages;
-extern unsigned long COMEX_checksum[];
+//extern unsigned long COMEX_checksum[];
 
 //	Module Function Pointer		// Function in kernel module 
 extern void 	(*COMEX_module_echo)(char *);

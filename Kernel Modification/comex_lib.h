@@ -61,17 +61,10 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 	COMEX_total_writeOut = writeOut_buff;
 	COMEX_total_readIn   = readIn_buff;
 	
-//	COMEX_total_nodes	 = 4;
-//	COMEX_total_writeOut = 64;
-//	COMEX_total_readIn   = 256;
-	
 	strcpy(proc_name, namePtr);
 	printk(KERN_INFO "COMEX Kernel v.2 --> %s\n", proc_name);
 	printk(KERN_INFO "ID %d n_nodes %d total_pages %d\n", node_ID, n_nodes, total_pages);
 	printk(KERN_INFO "writeOut_buff %d readIn_buff %d\n", writeOut_buff, readIn_buff);
-//	for(i=0; i<total_pages; i++){
-//		printk(KERN_INFO "%d %lu --> %lu\n", i, (uint64_t)i*X86PageSize, COMEX_offset_to_addr((uint64_t)i*X86PageSize));
-//	}
 
 ///// Semalphore & MUTEX
 	spin_lock_init(&COMEX_buddy_spin);
