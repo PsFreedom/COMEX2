@@ -1100,6 +1100,9 @@ static unsigned long zap_pte_range(struct mmu_gather *tlb,
 	spinlock_t *ptl;
 	pte_t *start_pte;
 	pte_t *pte;
+	
+	int	NodeID;
+	unsigned long COMEX_pageNO;
 
 again:
 	init_rss_vec(rss);
@@ -1173,6 +1176,18 @@ again:
 				print_bad_pte(vma, addr, ptent, NULL);
 		} else {
 			swp_entry_t entry = pte_to_swp_entry(ptent);
+			
+			if(swp_type(entry) == 8)
+			{
+				COMEX_pageNO = (unsigned long)swp_offset(entry);
+				NodeID = (int)COMEX_pageNO & 1023;
+				COMEX_pageNO = COMEX_pageNO >> 10;
+				COMEX_free_to_remote(NodeID, COMEX_pageNO);
+			}
+			else if(swp_type(entry) == 9)
+			{
+				COMEX_free_page((int)swp_offset(entry), 0);	
+			}
 
 			if (!non_swap_entry(entry))
 				rss[MM_SWAPENTS]--;

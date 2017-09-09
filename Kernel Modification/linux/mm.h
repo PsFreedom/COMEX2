@@ -1251,6 +1251,7 @@ extern unsigned long checkSum_Vpage(unsigned char *chrPtr);
 
 extern void COMEX_free_page(int inPageNO, int order);
 extern void COMEX_free_buff(int nodeID, int pageNO, int con_page);
+extern void COMEX_free_to_remote(int nodeID, int pageNO);
 
 //	Global Private Function		// Only for kernel use.
 extern void COMEX_read_from_local(struct page *new_page, int pageNO);

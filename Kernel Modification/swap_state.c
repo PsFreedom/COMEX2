@@ -305,7 +305,7 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 	struct page *found_page, *new_page = NULL;
 	int err;
 
-	int	NodeID, i;
+	int	NodeID;
 	unsigned long COMEX_pageNO;
 	do {
 		/*
