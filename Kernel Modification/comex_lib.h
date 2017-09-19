@@ -1,3 +1,15 @@
+void COMEX_init_FS()
+{
+	dir = debugfs_create_dir("comex_info", NULL);
+	file_SWAP_to_Disk	= debugfs_create_u64("SWAP_to_Disk",   0644, dir, &SWAP_to_Disk);
+	file_SWAP_to_COMEX	= debugfs_create_u64("SWAP_to_COMEX",  0644, dir, &SWAP_to_COMEX);
+	file_COMEX_in_total	= debugfs_create_u64("COMEX_in_total", 0644, dir, &COMEX_in_total);
+	file_COMEX_in_preF	= debugfs_create_u64("COMEX_in_preF",  0644, dir, &COMEX_in_preF);
+	file_COMEX_in_buff	= debugfs_create_u64("COMEX_in_buff",  0644, dir, &COMEX_in_buff);
+	file_COMEX_in_RDMA	= debugfs_create_u64("COMEX_in_RDMA",  0644, dir, &COMEX_in_RDMA);
+	printk(KERN_INFO "%s: debugfs_create_file\n", __FUNCTION__);
+}
+
 void COMEX_init_Remote()
 {
 	int i,j;
