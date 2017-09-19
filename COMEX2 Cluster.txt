@@ -30,45 +30,45 @@ ssh 10.132.121.26 'rm -rf /home/comex/linux-3.10.87' &
 ssh 10.132.121.25 'rm -rf /home/comex/linux-3.10.87' &
 
 
-rsync -avz /home/comex/linux-3.10.87 root@10.132.121.16:/home/comex/
-rsync -avz /home/comex/linux-3.10.87 root@10.132.121.15:/home/comex/
-rsync -avz /home/comex/linux-3.10.87 root@10.132.121.14:/home/comex/
-rsync -avz /home/comex/linux-3.10.87 root@10.132.121.13:/home/comex/
-rsync -avz /home/comex/linux-3.10.87 root@10.132.121.12:/home/comex/
-rsync -avz /home/comex/linux-3.10.87 root@10.132.121.11:/home/comex/
-rsync -avz /home/comex/linux-3.10.87 root@10.132.121.30:/home/comex/
-rsync -avz /home/comex/linux-3.10.87 root@10.132.121.29:/home/comex/
-rsync -avz /home/comex/linux-3.10.87 root@10.132.121.28:/home/comex/
-rsync -avz /home/comex/linux-3.10.87 root@10.132.121.27:/home/comex/
-rsync -avz /home/comex/linux-3.10.87 root@10.132.121.26:/home/comex/
-rsync -avz /home/comex/linux-3.10.87 root@10.132.121.25:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.16:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.15:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.14:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.13:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.12:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.11:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.30:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.29:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.28:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.27:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.26:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.25:/home/comex/
 
-rsync -avz /home/comex/linux-3.10.87 root@10.132.121.63:/home/comex/
-rsync -avz /home/comex/linux-3.10.87 root@10.132.121.61:/home/comex/
-rsync -avz /home/comex/linux-3.10.87 root@10.132.121.59:/home/comex/
-rsync -avz /home/comex/linux-3.10.87 root@10.132.121.58:/home/comex/
-
-
-rsync -avz /home/comex/krpingTrimmed root@10.132.121.16:/home/comex/
-rsync -avz /home/comex/krpingTrimmed root@10.132.121.15:/home/comex/
-rsync -avz /home/comex/krpingTrimmed root@10.132.121.14:/home/comex/
-rsync -avz /home/comex/krpingTrimmed root@10.132.121.13:/home/comex/
-rsync -avz /home/comex/krpingTrimmed root@10.132.121.12:/home/comex/
-rsync -avz /home/comex/krpingTrimmed root@10.132.121.11:/home/comex/
-rsync -avz /home/comex/krpingTrimmed root@10.132.121.30:/home/comex/
-rsync -avz /home/comex/krpingTrimmed root@10.132.121.29:/home/comex/
-rsync -avz /home/comex/krpingTrimmed root@10.132.121.28:/home/comex/
-rsync -avz /home/comex/krpingTrimmed root@10.132.121.27:/home/comex/
-rsync -avz /home/comex/krpingTrimmed root@10.132.121.26:/home/comex/
-rsync -avz /home/comex/krpingTrimmed root@10.132.121.25:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.63:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.61:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.59:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.58:/home/comex/
 
 
-rsync -avz /home/benchmark root@10.132.121.16:/home/
-rsync -avz /home/benchmark root@10.132.121.15:/home/
-rsync -avz /home/benchmark root@10.132.121.63:/home/
-rsync -avz /home/benchmark root@10.132.121.61:/home/
-rsync -avz /home/benchmark root@10.132.121.59:/home/
-rsync -avz /home/benchmark root@10.132.121.58:/home/
+rsync -az /home/comex/krpingTrimmed root@10.132.121.16:/home/comex/
+rsync -az /home/comex/krpingTrimmed root@10.132.121.15:/home/comex/
+rsync -az /home/comex/krpingTrimmed root@10.132.121.14:/home/comex/
+rsync -az /home/comex/krpingTrimmed root@10.132.121.13:/home/comex/
+rsync -az /home/comex/krpingTrimmed root@10.132.121.12:/home/comex/
+rsync -az /home/comex/krpingTrimmed root@10.132.121.11:/home/comex/
+rsync -az /home/comex/krpingTrimmed root@10.132.121.30:/home/comex/
+rsync -az /home/comex/krpingTrimmed root@10.132.121.29:/home/comex/
+rsync -az /home/comex/krpingTrimmed root@10.132.121.28:/home/comex/
+rsync -az /home/comex/krpingTrimmed root@10.132.121.27:/home/comex/
+rsync -az /home/comex/krpingTrimmed root@10.132.121.26:/home/comex/
+rsync -az /home/comex/krpingTrimmed root@10.132.121.25:/home/comex/
+
+
+rsync -az /home/benchmark root@10.132.121.16:/home/
+rsync -az /home/benchmark root@10.132.121.15:/home/
+rsync -az /home/benchmark root@10.132.121.63:/home/
+rsync -az /home/benchmark root@10.132.121.61:/home/
+rsync -az /home/benchmark root@10.132.121.59:/home/
+rsync -az /home/benchmark root@10.132.121.58:/home/
 
 
 ssh 10.132.121.16 'mkdir -p /home/result' 

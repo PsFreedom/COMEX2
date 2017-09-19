@@ -378,6 +378,7 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				COMEX_pageNO = (unsigned long)swp_offset(entry);
 				NodeID = (int)COMEX_pageNO & 1023;
 				COMEX_pageNO = COMEX_pageNO >> 10;
+				COMEX_in_total++;
 				
 				if(COMEX_read_from_buffer(new_page, NodeID, (int)COMEX_pageNO) == 0){
 					if(COMEX_read_from_preFetch(new_page, NodeID, (int)COMEX_pageNO) == 0){
@@ -394,6 +395,8 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 			}
 			else if(swp_type(entry) == 9)
 			{
+				COMEX_in_total++;
+				COMEX_in_Local++;
 				COMEX_read_from_local(new_page, (int)swp_offset(entry));
 				count_vm_event(PSWPIN);
 				SetPageDirty(new_page);

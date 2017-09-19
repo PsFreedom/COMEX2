@@ -1,7 +1,7 @@
 #define MAX_TRY 5
 #define MAX_MSSG 8
 #define FLUSH 32
-#define PreF_BITS 3
+#define PreF_BITS 4
 #define PreF_SIZE (1UL << PreF_BITS)	// 0000 1000
 #define PreF_MASK (~(PreF_SIZE - 1))	// 0000 0111 -> 1111 1000
 
@@ -169,6 +169,7 @@ void COMEX_read_from_remote(struct page *new_page, int node_ID, int pageNO)
 	}
 	memcpy(new_vAddr, (char *)COMEX_offset_to_addr((uint64_t)get_readIn_buff(pageNO%COMEX_total_readIn)), X86PageSize);	
 	kunmap(new_page);
+	COMEX_in_RDMA++;
 }
 EXPORT_SYMBOL(COMEX_read_from_remote);
 
@@ -188,6 +189,7 @@ int COMEX_read_from_buffer(struct page *new_page, int nodeID, int pageNO)
 			
 //			printk(KERN_INFO "%s: Hit Buffer!... %d %d\n", __FUNCTION__, nodeID, i);
 			COMEX_free_to_remote(nodeID, pageNO);
+			COMEX_in_buff++;
 			return 1;
 		}
 	}
@@ -211,6 +213,7 @@ int COMEX_read_from_preFetch(struct page *new_page, int nodeID, int pageNO)
 			
 //			printk(KERN_INFO "%s: Hit preFetch!... %d %d\n", __FUNCTION__, nodeID, i);
 			COMEX_free_to_remote(nodeID, pageNO);
+			COMEX_in_preF++;
 			return 1;
 		}
 	}

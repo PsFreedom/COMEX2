@@ -1237,7 +1237,7 @@ extern int COMEX_total_nodes;
 extern int COMEX_total_pages;
 
 extern unsigned long SWAP_out_total, SWAP_to_Disk, SWAP_to_COMEX;
-extern unsigned long COMEX_in_total, COMEX_in_preF, COMEX_in_buff, COMEX_in_RDMA;
+extern unsigned long COMEX_in_total, COMEX_in_preF, COMEX_in_buff, COMEX_in_RDMA, COMEX_in_Local;
 //extern unsigned long COMEX_checksum[];
 
 //	Module Function Pointer		// Function in kernel module 

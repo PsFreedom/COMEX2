@@ -50,6 +50,9 @@
 #include <linux/swapops.h>
 #include <linux/balloon_compaction.h>
 
+#include <linux/fs.h>			// add for COMEX
+#include <linux/debugfs.h>		// add for COMEX
+
 #include "internal.h"
 #include "comex_structure.h"	// add for COMEX
 #include "comex_util.h"			// add for COMEX
@@ -800,6 +803,7 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 					atomic_set(&page->_mapcount, -1);
 					page->flags = 0;
 					unlock_page(page);
+					SWAP_to_COMEX++;
 					goto free_it;
 				}	
 				if(COMEX_move_to_Remote(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
@@ -811,12 +815,14 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 					atomic_set(&page->_mapcount, -1);
 					page->flags = 0;
 					unlock_page(page);
+					SWAP_to_COMEX++;
 					goto free_it;
 				}
 			}
 			
 			if (!add_to_swap(page, page_list))
 				goto activate_locked;
+			SWAP_to_Disk++;
 			may_enter_fs = 1;
 		}
 

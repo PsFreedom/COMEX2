@@ -7,6 +7,7 @@ void COMEX_init_FS()
 	file_COMEX_in_preF	= debugfs_create_u64("COMEX_in_preF",  0644, dir, &COMEX_in_preF);
 	file_COMEX_in_buff	= debugfs_create_u64("COMEX_in_buff",  0644, dir, &COMEX_in_buff);
 	file_COMEX_in_RDMA	= debugfs_create_u64("COMEX_in_RDMA",  0644, dir, &COMEX_in_RDMA);
+	file_COMEX_in_Local	= debugfs_create_u64("COMEX_in_Local", 0644, dir, &COMEX_in_Local);
 	printk(KERN_INFO "%s: debugfs_create_file\n", __FUNCTION__);
 }
 
