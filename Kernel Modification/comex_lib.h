@@ -16,6 +16,7 @@ void COMEX_init_Remote()
 	int i,j;
 	printk(KERN_INFO "%s... Begin\n", __FUNCTION__);
 	
+	COMEX_init_FS();
 //	memset(COMEX_checksum, 0, Total_CHKSM*sizeof(unsigned long));
 	
 	COMEX_free_group = (COMEX_R_free_group_t *)vmalloc(sizeof(COMEX_R_free_group_t)*COMEX_total_nodes);

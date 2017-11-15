@@ -1,10 +1,12 @@
 
 cd /home/comex && rm -rf linux-3.10.87 && tar -zxf linux-3.10.87.tar.gz && cp myConfig linux-3.10.87/.config
-cd /home/comex/linux-3.10.87 && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install && rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot
+cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install && rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot
 
+cd /home/comex/linux-3.19.8 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install && rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot
 
 tail -n 100 /var/log/messages
 tail -n 1000 /var/log/messages
+tail -n 10000 /var/log/messages
 tail -n 30000 /var/log/messages
 
 
@@ -17,19 +19,27 @@ echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >
 
 
 screen
-cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && free -h && /usr/bin/time -v ./bt.D.x 
-cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && free -h && /usr/bin/time -v ./dc.B.x 
-cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && free -h && /usr/bin/time -v ./ft.D.x 
-cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && free -h && /usr/bin/time -v ./cg.D.x 
-cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && free -h && /usr/bin/time -v ./is.D.x 
-cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && free -h && /usr/bin/time -v ./lu.D.x 
-cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && free -h && /usr/bin/time -v ./mg.D.x 
-cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && free -h && /usr/bin/time -v ./sp.D.x 
-cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && free -h && /usr/bin/time -v ./ua.D.x 
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v ./bt.D.x && grep "" /sys/kernel/debug/comex_info/*
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v ./dc.B.x && grep "" /sys/kernel/debug/comex_info/*
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v ./ft.D.x && grep "" /sys/kernel/debug/comex_info/*
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v ./cg.D.x && grep "" /sys/kernel/debug/comex_info/*
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v ./is.D.x && grep "" /sys/kernel/debug/comex_info/*
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v ./lu.D.x && grep "" /sys/kernel/debug/comex_info/*
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v ./mg.D.x && grep "" /sys/kernel/debug/comex_info/*
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v ./sp.D.x && grep "" /sys/kernel/debug/comex_info/*
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v ./ua.D.x && grep "" /sys/kernel/debug/comex_info/*
+
+cd /home/benchmark/PBBS/ && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v breadthFirstSearch/serialBFS/BFS -r 1 inputs/randLocalGraph-3D-350M-70M && grep "" /sys/kernel/debug/comex_info/*
+cd /home/benchmark/PBBS/ && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v convexHull/serialHull/hull -r 1 inputs/uniform-2D-250M && grep "" /sys/kernel/debug/comex_info/*
+cd /home/benchmark/PBBS/ && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v integerSort/serialRadixSort/isort -r 1 inputs/randomSeq-700M && grep "" /sys/kernel/debug/comex_info/*
+cd /home/benchmark/PBBS/ && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v maximalIndependentSet/serialMIS/MIS -r 1 inputs/randLocalGraph-3D-450M-90M && grep "" /sys/kernel/debug/comex_info/*
+cd /home/benchmark/PBBS/ && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v minSpanningForest/serialMST/MST -r 1 inputs/randLocalGraph-weighted-3D-250M-50M && grep "" /sys/kernel/debug/comex_info/*
+cd /home/benchmark/PBBS/ && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v dictionary/serialHash/dict -r 1 inputs/randomSeq-int-800M && grep "" /sys/kernel/debug/comex_info/*
+cd /home/benchmark/PBBS/ && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v comparisonSort/serialSort/sort -r 1 inputs/randomSeq-double-500M && grep "" /sys/kernel/debug/comex_info/*
 
 
 vim /boot/grub/grub.conf
-cat /boot/grub/grub.conf
+head -n 16 /boot/grub/grub.conf | tail -n 1 
 rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot
 poweroff
 free -h 

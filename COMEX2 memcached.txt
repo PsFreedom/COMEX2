@@ -1,0 +1,31 @@
+yum -y install memcached-devel.x86_64
+yum -y install libmemcached.x86_64
+
+vim /etc/sysconfig/memcached
+vim /etc/sysconfig/iptables
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 11211 -j ACCEPT
+
+chkconfig memcached on
+chkconfig memcached off
+/etc/init.d/memcached start
+/etc/init.d/memcached stop
+
+
+screen
+free -h && /usr/bin/time -v memcached -v -m 30720 -u memcached_test
+
+
+memaslap --threads=4 --concurrency=128 --servers=10.132.121.16:11211 --execute_number=10000000 --verbose --cfg_cmd=/root/SYS_00
+memaslap --threads=4 --concurrency=128 --servers=10.132.121.16:11211 --execute_number=10000000 --verbose --cfg_cmd=/root/SYS_01
+
+
+ps aux --sort -rss
+useradd memcached_test
+
+
+rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot
+
+
+
+
+

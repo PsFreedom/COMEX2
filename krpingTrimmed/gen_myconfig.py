@@ -38,13 +38,20 @@ for i in range(1, Total_Node+1):
 
 print "int CONF_allPort[] = {",
 for i in range(1, Total_Node+1):
-    if i != Node_ID:
-        if Node_ID < i:
-            line6 = "56" + str(Node_ID) + str(i)
-        else:
-            line6 = "56" + str(i) + str(Node_ID)
-        if i < Total_Node:
-            print line6 + ",",
-        else:
-            print line6 + " };"
+	if i != Node_ID:
+		if Node_ID<10 and i<10:
+			if Node_ID < i:
+				line6 = "52" + str(Node_ID) + str(i)
+			else:
+				line6 = "52" + str(i) + str(Node_ID)
+		else:
+			if Node_ID < i:
+				line6 = "4" + str(Node_ID) + str(i)
+			else:
+				line6 = "4" + str(i) + str(Node_ID)
+			
+        	if i < Total_Node:
+            		print line6 + ",",
+        	else:
+			print line6 + " };"
 

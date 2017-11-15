@@ -1,0 +1,96 @@
+
+ssh 10.132.121.16 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 1 1040 192.168.10. > myconfig.h;' &
+ssh 10.132.121.15 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 2 1040 192.168.10. > myconfig.h;' &
+ssh 10.132.121.14 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 3 1040 192.168.10. > myconfig.h;' &
+ssh 10.132.121.13 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 4 1040 192.168.10. > myconfig.h;' &
+ssh 10.132.121.12 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 5 1040 192.168.10. > myconfig.h;' &
+ssh 10.132.121.11 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 6 1040 192.168.10. > myconfig.h;' &
+ssh 10.132.121.30 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 7 1040 192.168.10. > myconfig.h;' &
+ssh 10.132.121.29 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 8 1040 192.168.10. > myconfig.h;' &
+ssh 10.132.121.28 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 9 1040 192.168.10. > myconfig.h;' &
+ssh 10.132.121.27 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 10 1040 192.168.10. > myconfig.h;' &
+ssh 10.132.121.26 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 11 1040 192.168.10. > myconfig.h;' &
+ssh 10.132.121.25 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 12 1040 192.168.10. > myconfig.h;' &
+
+
+ssh 10.132.121.16 'yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/; yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/' &
+ssh 10.132.121.15 'yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/; yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/' &
+ssh 10.132.121.14 'yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/; yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/' &
+ssh 10.132.121.13 'yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/; yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/' &
+ssh 10.132.121.12 'yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/; yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/' &
+ssh 10.132.121.11 'yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/; yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/' &
+ssh 10.132.121.30 'yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/; yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/' &
+ssh 10.132.121.29 'yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/; yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/' &
+ssh 10.132.121.28 'yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/; yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/' &
+ssh 10.132.121.27 'yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/; yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/' &
+ssh 10.132.121.26 'yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/; yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/' &
+ssh 10.132.121.25 'yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/; yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/' &
+ssh 10.132.121.16 'cd /home/comex/krpingTrimmed; modprobe -r rdma_krping; make clean; make; make install; modprobe rdma_krping' &
+ssh 10.132.121.15 'cd /home/comex/krpingTrimmed; modprobe -r rdma_krping; make clean; make; make install; modprobe rdma_krping' &
+ssh 10.132.121.14 'cd /home/comex/krpingTrimmed; modprobe -r rdma_krping; make clean; make; make install; modprobe rdma_krping' &
+ssh 10.132.121.13 'cd /home/comex/krpingTrimmed; modprobe -r rdma_krping; make clean; make; make install; modprobe rdma_krping' &
+ssh 10.132.121.12 'cd /home/comex/krpingTrimmed; modprobe -r rdma_krping; make clean; make; make install; modprobe rdma_krping' &
+ssh 10.132.121.11 'cd /home/comex/krpingTrimmed; modprobe -r rdma_krping; make clean; make; make install; modprobe rdma_krping' &
+ssh 10.132.121.30 'cd /home/comex/krpingTrimmed; modprobe -r rdma_krping; make clean; make; make install; modprobe rdma_krping' &
+ssh 10.132.121.29 'cd /home/comex/krpingTrimmed; modprobe -r rdma_krping; make clean; make; make install; modprobe rdma_krping' &
+ssh 10.132.121.28 'cd /home/comex/krpingTrimmed; modprobe -r rdma_krping; make clean; make; make install; modprobe rdma_krping' &
+ssh 10.132.121.27 'cd /home/comex/krpingTrimmed; modprobe -r rdma_krping; make clean; make; make install; modprobe rdma_krping' &
+ssh 10.132.121.26 'cd /home/comex/krpingTrimmed; modprobe -r rdma_krping; make clean; make; make install; modprobe rdma_krping' &
+ssh 10.132.121.25 'cd /home/comex/krpingTrimmed; modprobe -r rdma_krping; make clean; make; make install; modprobe rdma_krping' &
+
+
+ssh 10.132.121.16 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping;' &
+ssh 10.132.121.15 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=dict" >/proc/krping;' &
+ssh 10.132.121.14 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x" >/proc/krping;' &
+ssh 10.132.121.13 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=sp.D.x" >/proc/krping;' &
+ssh 10.132.121.12 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=isort" >/proc/krping;' &
+ssh 10.132.121.11 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=MIS" >/proc/krping;' &
+ssh 10.132.121.30 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=MIS" >/proc/krping;' &
+ssh 10.132.121.29 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=MIS" >/proc/krping;' &
+ssh 10.132.121.28 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=MIS" >/proc/krping;' &
+ssh 10.132.121.27 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=MIS" >/proc/krping;' &
+ssh 10.132.121.26 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=MIS" >/proc/krping;' &
+ssh 10.132.121.25 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=MIS" >/proc/krping;' &
+
+
+ssh 10.132.121.16 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping;' &
+ssh 10.132.121.15 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=dict" >/proc/krping;' &
+ssh 10.132.121.14 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=BFS" >/proc/krping;' &
+ssh 10.132.121.13 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=hull" >/proc/krping;' &
+ssh 10.132.121.12 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=MST" >/proc/krping;' &
+ssh 10.132.121.11 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=sort" >/proc/krping;' &
+ssh 10.132.121.30 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=MIS" >/proc/krping;' &
+ssh 10.132.121.29 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=MIS" >/proc/krping;' &
+ssh 10.132.121.28 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=MIS" >/proc/krping;' &
+ssh 10.132.121.27 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=MIS" >/proc/krping;' &
+ssh 10.132.121.26 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=MIS" >/proc/krping;' &
+ssh 10.132.121.25 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=MIS" >/proc/krping;' &
+
+
+ssh 10.132.121.16 'tail -n 10 /var/log/messages' &
+ssh 10.132.121.15 'tail -n 10 /var/log/messages' &
+ssh 10.132.121.14 'tail -n 10 /var/log/messages' &
+ssh 10.132.121.13 'tail -n 10 /var/log/messages' &
+ssh 10.132.121.12 'tail -n 10 /var/log/messages' &
+ssh 10.132.121.11 'tail -n 10 /var/log/messages' &
+ssh 10.132.121.30 'tail -n 10 /var/log/messages' &
+ssh 10.132.121.29 'tail -n 10 /var/log/messages' &
+ssh 10.132.121.28 'tail -n 10 /var/log/messages' &
+ssh 10.132.121.27 'tail -n 10 /var/log/messages' &
+ssh 10.132.121.26 'tail -n 10 /var/log/messages' &
+ssh 10.132.121.25 'tail -n 10 /var/log/messages' &
+
+
+ssh 10.132.121.16 'rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot' &
+ssh 10.132.121.15 'rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot' &
+ssh 10.132.121.14 'rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot' &
+ssh 10.132.121.13 'rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot' &
+ssh 10.132.121.12 'rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot' &
+ssh 10.132.121.11 'rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot' &
+ssh 10.132.121.30 'rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot' &
+ssh 10.132.121.29 'rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot' &
+ssh 10.132.121.28 'rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot' &
+ssh 10.132.121.27 'rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot' &
+ssh 10.132.121.26 'rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot' &
+ssh 10.132.121.25 'rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot' &
+
