@@ -799,14 +799,15 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 //					printk(KERN_INFO "%s: nodeID %d pageNO %d\n", __FUNCTION__, COMEX_nodeID, COMEX_pageNO);
 					try_to_unmap_COMEX(page, ttu_flags, COMEX_nodeID, COMEX_pageNO);
 					ClearPageDirty(page);
-					atomic_set(&page->_count,0);
+					atomic_set(&page->_count, 0);
 					atomic_set(&page->_mapcount, -1);
-					page->flags = 0;
+//					page->flags = 0;
 					unlock_page(page);
+					printk(KERN_INFO "%s: After UnLock\n", __FUNCTION__);
 					SWAP_to_COMEX++;
 					goto free_it;
 				}	
-				if(COMEX_move_to_Remote(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
+/*				if(COMEX_move_to_Remote(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
 				{
 //					printk(KERN_INFO "%s: nodeID %d pageNO %d\n", __FUNCTION__, COMEX_nodeID, COMEX_pageNO);
 					try_to_unmap_COMEX(page, ttu_flags, COMEX_nodeID, COMEX_pageNO);
@@ -817,7 +818,7 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 					unlock_page(page);
 					SWAP_to_COMEX++;
 					goto free_it;
-				}
+				}	*/
 			}
 			
 			if (!add_to_swap(page, page_list))

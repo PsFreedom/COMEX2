@@ -1768,12 +1768,12 @@ int try_to_unmap_COMEX(struct page *page, enum ttu_flags flags, int COMEX_nodeID
 	int ret;
 
 	BUG_ON(!PageLocked(page));
-	VM_BUG_ON(!PageHuge(page) && PageTransHuge(page));
+//	VM_BUG_ON(!PageHuge(page) && PageTransHuge(page));
 
 	ret = try_to_unmap_anon_COMEX(page, flags, COMEX_nodeID, COMEX_pageNO);
 
-	if (ret != SWAP_MLOCK && !page_mapped(page))
-		ret = SWAP_SUCCESS;
+//	if (ret != SWAP_MLOCK && !page_mapped(page))
+//		ret = SWAP_SUCCESS;
 	return ret;
 }
 /**
