@@ -314,8 +314,7 @@ static int krping_cma_event_handler(struct rdma_cm_id *cma_id, struct rdma_cm_ev
 	case RDMA_CM_EVENT_CONNECT_ERROR:
 	case RDMA_CM_EVENT_UNREACHABLE:
 	case RDMA_CM_EVENT_REJECTED:
-		printk(KERN_ERR PFX "cma event %d, error %d\n", event->event,
-		       event->status);
+		printk(KERN_ERR PFX "cma event %d, error %d\n", event->event, event->status);
   //break; //fall through, no break
 	case RDMA_CM_EVENT_DISCONNECTED:
 		printk(KERN_ERR PFX "DISCONNECT ...\n");

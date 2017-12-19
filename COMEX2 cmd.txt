@@ -8,7 +8,7 @@ yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/bui
 dmesg -c && modprobe -r rdma_krping
 make clean && make && make install && modprobe rdma_krping
 
-echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping
+echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=java" >/proc/krping
 
 
 screen

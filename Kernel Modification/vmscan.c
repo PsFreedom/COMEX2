@@ -803,29 +803,32 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 					atomic_set(&page->_mapcount, -1);
 //					page->flags = 0;
 					unlock_page(page);
-					printk(KERN_INFO "%s: After UnLock\n", __FUNCTION__);
 					SWAP_to_COMEX++;
 					goto free_it;
-				}	
-/*				if(COMEX_move_to_Remote(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
+				}
+				if(COMEX_move_to_Remote(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
 				{
 //					printk(KERN_INFO "%s: nodeID %d pageNO %d\n", __FUNCTION__, COMEX_nodeID, COMEX_pageNO);
 					try_to_unmap_COMEX(page, ttu_flags, COMEX_nodeID, COMEX_pageNO);
 					ClearPageDirty(page);
 					atomic_set(&page->_count, 0);
 					atomic_set(&page->_mapcount, -1);
-					page->flags = 0;
+//					page->flags = 0;
 					unlock_page(page);
 					SWAP_to_COMEX++;
 					goto free_it;
-				}	*/
+				}
 			}
 			
+//			printk(KERN_INFO "%s: %s count %d map_count %d..... YES! \n", __FUNCTION__, COMEX_task->comm, page->_count, page_mapcount(page));
 			if (!add_to_swap(page, page_list))
 				goto activate_locked;
 			SWAP_to_Disk++;
 			may_enter_fs = 1;
 		}
+//		else{
+//			printk(KERN_INFO "%s: %s count %d map_count %d..... NO! \n", __FUNCTION__, COMEX_task->comm, page->_count, page_mapcount(page));
+//		}
 
 		mapping = page_mapping(page);
 
