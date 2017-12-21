@@ -130,8 +130,9 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 	new_vAddr  = (char *)COMEX_offset_to_addr((uint64_t)COMEX_pageNO<<SHIFT_PAGE);
 	old_vAddr  = (char *)kmap(old_page);
 	
-//	printk(KERN_INFO "%s: memcpy new %p | old %p\n", __FUNCTION__, new_vAddr, old_vAddr);
-	if(!new_vAddr){
+	printk(KERN_INFO "%s: memcpy new %p | old %p\n", __FUNCTION__, new_vAddr, old_vAddr);
+	if((new_vAddr >> 22) == 0){
+		printk(KERN_INFO "%s: new_vAddr BUG -> OUT!!!\n", __FUNCTION__);
 		return -1;
 	}
 	memcpy(new_vAddr, old_vAddr, X86PageSize);

@@ -107,18 +107,18 @@ ssh 10.132.121.26 'cd /home/comex/linux-3.10.87 && touch -m .config && make clea
 ssh 10.132.121.25 'cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install && rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot' &
 
 
-ssh 10.132.121.16 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 1 2060 192.168.10. > myconfig.h;' &
-ssh 10.132.121.15 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 2 2060 192.168.10. > myconfig.h;' &
+ssh 10.132.121.16 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 1 520 192.168.10. > myconfig.h;' &
+ssh 10.132.121.15 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 2 520 192.168.10. > myconfig.h;' &
 ssh 10.132.121.14 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 3 2060 192.168.10. > myconfig.h;' &
 ssh 10.132.121.13 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 4 2060 192.168.10. > myconfig.h;' &
 ssh 10.132.121.12 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 5 2060 192.168.10. > myconfig.h;' &
 ssh 10.132.121.11 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 6 2060 192.168.10. > myconfig.h;' &
 ssh 10.132.121.30 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 7 2060 192.168.10. > myconfig.h;' &
 ssh 10.132.121.29 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 8 2060 192.168.10. > myconfig.h;' &
-ssh 10.132.121.31 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 9 2060 192.168.10. > myconfig.h;' &
-ssh 10.132.121.27 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 10 2060 192.168.10. > myconfig.h;' &
-ssh 10.132.121.26 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 11 2060 192.168.10. > myconfig.h;' &
-ssh 10.132.121.25 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 12 2060 192.168.10. > myconfig.h;' &
+ssh 10.132.121.31 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 9 12300 192.168.10. > myconfig.h;' &
+ssh 10.132.121.27 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 10 12300 192.168.10. > myconfig.h;' &
+ssh 10.132.121.26 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 11 12300 192.168.10. > myconfig.h;' &
+ssh 10.132.121.25 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 12 12300 192.168.10. > myconfig.h;' &
 
 
 ssh 10.132.121.16 'yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/; yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/' &
@@ -147,18 +147,18 @@ ssh 10.132.121.26 'cd /home/comex/krpingTrimmed; modprobe -r rdma_krping; make c
 ssh 10.132.121.25 'cd /home/comex/krpingTrimmed; modprobe -r rdma_krping; make clean; make; make install; modprobe rdma_krping' &
 
 
-ssh 10.132.121.16 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
-ssh 10.132.121.15 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
+ssh 10.132.121.16 'cd /home/comex/; echo "total_pages=524288,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
+ssh 10.132.121.15 'cd /home/comex/; echo "total_pages=524288,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
 ssh 10.132.121.14 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
 ssh 10.132.121.13 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
 ssh 10.132.121.12 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
 ssh 10.132.121.11 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
 ssh 10.132.121.30 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
 ssh 10.132.121.29 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
-ssh 10.132.121.31 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
-ssh 10.132.121.27 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
-ssh 10.132.121.26 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
-ssh 10.132.121.25 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
+ssh 10.132.121.31 'cd /home/comex/; echo "total_pages=12582912,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
+ssh 10.132.121.27 'cd /home/comex/; echo "total_pages=12582912,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
+ssh 10.132.121.26 'cd /home/comex/; echo "total_pages=12582912,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
+ssh 10.132.121.25 'cd /home/comex/; echo "total_pages=12582912,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
 
 
 ssh 10.132.121.16 'tail -n 10 /var/log/messages' &
@@ -215,6 +215,34 @@ ssh 10.132.121.31 'free -h' &
 ssh 10.132.121.27 'free -h' &
 ssh 10.132.121.26 'free -h' &
 ssh 10.132.121.25 'free -h' &
+
+
+ssh 10.132.121.16 'dmesg' &
+ssh 10.132.121.15 'dmesg' &
+ssh 10.132.121.14 'dmesg' &
+ssh 10.132.121.13 'dmesg' &
+ssh 10.132.121.12 'dmesg' &
+ssh 10.132.121.11 'dmesg' &
+ssh 10.132.121.30 'dmesg' &
+ssh 10.132.121.29 'dmesg' &
+ssh 10.132.121.31 'dmesg' &
+ssh 10.132.121.27 'dmesg' &
+ssh 10.132.121.26 'dmesg' &
+ssh 10.132.121.25 'dmesg' &
+
+
+ssh 10.132.121.16 'cat /var/log/mcelog' &
+ssh 10.132.121.15 'cat /var/log/mcelog' &
+ssh 10.132.121.14 'cat /var/log/mcelog' &
+ssh 10.132.121.13 'cat /var/log/mcelog' &
+ssh 10.132.121.12 'cat /var/log/mcelog' &
+ssh 10.132.121.11 'cat /var/log/mcelog' &
+ssh 10.132.121.30 'cat /var/log/mcelog' &
+ssh 10.132.121.29 'cat /var/log/mcelog' &
+ssh 10.132.121.31 'cat /var/log/mcelog' &
+ssh 10.132.121.27 'cat /var/log/mcelog' &
+ssh 10.132.121.26 'cat /var/log/mcelog' &
+ssh 10.132.121.25 'cat /var/log/mcelog' &
 
 
 ssh 10.132.121.16 'uname -r' &
