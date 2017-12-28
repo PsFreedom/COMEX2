@@ -513,7 +513,7 @@ static struct swap_info_struct *swap_info_get(swp_entry_t entry)
 	if (!entry.val)
 		goto out;
 	type = swp_type(entry);
-	if(type == 8 || type == 9){
+	if(type == 18 || type == 17){
 //		p = swap_info[8];	// COMEX
 //		spin_lock(&p->lock);
 //		return p;
@@ -750,7 +750,7 @@ int free_swap_and_cache(swp_entry_t entry)
 
 	if (non_swap_entry(entry))
 		return 1;
-	if (swp_type(entry) == 8 || swp_type(entry) == 9)
+	if (swp_type(entry) == 18 || swp_type(entry) == 17)
 		return 1;
 
 	p = swap_info_get(entry);
@@ -2229,7 +2229,7 @@ static int __swap_duplicate(swp_entry_t entry, unsigned char usage)
 		goto out;
 
 	type = swp_type(entry);
-	if(type == 8 || type == 9){
+	if(type == 18 || type == 17){
 		return 0;	// COMEX
 	}
 	if (type >= nr_swapfiles)

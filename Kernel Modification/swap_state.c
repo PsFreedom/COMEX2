@@ -460,7 +460,7 @@ struct page *swapin_readahead(swp_entry_t entry, gfp_t gfp_mask,
 	if (!start_offset && swp_type(entry) != 8 && swp_type(entry) != 9)	/* First page is swap header. */
 		start_offset++;
 
-	if(swp_type(entry) == 8 || swp_type(entry) == 9){
+	if(swp_type(entry) == 18 || swp_type(entry) == 17){
 		page = read_swap_cache_async(entry, gfp_mask, vma, addr);
 		if (page)
 			page_cache_release(page);
