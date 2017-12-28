@@ -64,7 +64,8 @@ int COMEX_hash(int seed){
 uint64_t get_writeOut_buff(int node_ID, int buff_slot){
 	uint64_t address;
 
-	address  = COMEX_total_pages;
+//	address  = COMEX_total_pages;
+	address  = 0;
 	address += node_ID*COMEX_total_writeOut;
 	address += buff_slot;
 	address *= X86PageSize;
@@ -74,7 +75,9 @@ uint64_t get_writeOut_buff(int node_ID, int buff_slot){
 uint64_t get_readIn_buff(int buff_slot){
 	uint64_t address;
 
-	address  = COMEX_total_pages + (COMEX_total_writeOut*COMEX_total_nodes);
+//	address  = COMEX_total_pages;
+	address  = 0;
+	address += COMEX_total_writeOut*COMEX_total_nodes;
 	address += buff_slot;
 	address *= X86PageSize;
 	return address;
@@ -121,7 +124,7 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 			memcpy((char *)COMEX_offset_to_addr((uint64_t)buf_vAddr), old_vAddr, X86PageSize);
 			kunmap(old_page);
 			
-			COMEX_writeOut_buff[dest_node][buff_slot].nodeID = dest_node;
+			COMEX_writeOut_buff[dest_node][buff_slot].nodeID = dest_node;	//Buffer Descriptor
 			COMEX_writeOut_buff[dest_node][buff_slot].pageNO = *retPageNO;
 			COMEX_writeOut_buff[dest_node][buff_slot].status = 2;
 			if(buff_slot%FLUSH == 0 && buff_slot != 0)
@@ -153,12 +156,12 @@ void COMEX_read_from_remote(struct page *new_page, int node_ID, int pageNO)
 		COMEX_readIn_buff[buff_FLR + i].nodeID = -1;
 		COMEX_readIn_buff[buff_FLR + i].pageNO = -1;
 	}
-//	printk(KERN_INFO "Fault %d %d --> IDX %d size %ld %d\n", node_ID, pageNO, buff_FLR, PreF_SIZE, PreF_BITS);
 	
 	addr_struct.local  = (unsigned long)buf_vAddr;
 	addr_struct.remote = (unsigned long)addr_FLR << SHIFT_PAGE;
 	addr_struct.size   = PreF_SIZE << SHIFT_PAGE;
 	addr_struct.bufIDX = buff_FLR;
+	printk(KERN_INFO "Fault %d %d --> IDX %d Addr %p %p\n", node_ID, pageNO, buff_FLR, addr_struct.local, addr_struct.remote);
 	COMEX_RDMA(node_ID, CODE_COMEX_PAGE_READ, &addr_struct, sizeof(addr_struct));
 	COMEX_free_to_remote(node_ID, pageNO);
 	
@@ -304,6 +307,7 @@ void COMEX_free_to_remote(int nodeID, int pageNO)
 
 void COMEX_pages_request(int target)
 {
+	uint64_t tmp_addr; 
 	char *new_vAddr;
 	int i = COMEX_MAX_ORDER-1;
 	reply_pages_t myStruct;
@@ -313,7 +317,8 @@ void COMEX_pages_request(int target)
 	myStruct.size     = i;
 	
 	new_vAddr  = (char *)COMEX_offset_to_addr((uint64_t)myStruct.page_no<<SHIFT_PAGE);
-	if((new_vAddr >> 22) == 0){
+	tmp_addr = new_vAddr;
+	if((tmp_addr >> 22) == 0){
 		printk(KERN_INFO "%s: new_vAddr BUG -> OUT!!!\n", __FUNCTION__);
 		myStruct.page_no = -1;
 		myStruct.size    = 0;

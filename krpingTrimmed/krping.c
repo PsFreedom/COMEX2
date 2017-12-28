@@ -253,14 +253,17 @@ static int regis_bigspace(struct krping_sharedspace *bigspace,int num_bigpages)
 	bigspace->sg          = kzalloc(sizeof(struct   scatterlist) *num_bigpages,GFP_KERNEL);
 	bigspace->bufferpages = kmalloc(sizeof(char*) *num_bigpages,GFP_KERNEL);
 	bigspace->dmapages    = kzalloc(sizeof(uint64_t)*num_bigpages,GFP_KERNEL);
-  
+    
+	for(i=0; i<num_bigpages; i++){
+		bigspace->bufferpages[i] = NULL;	// Zero initialize
+	}
 	for(i=0; i<num_bigpages; i++){
 		//sg_set_page(&cb->sg[i],alloc_pages( GFP_KERNEL, 10),4*1024*1024,0); // choice A, get page directly
 		bigspace->bufferpages[i] = kmalloc(RPING_BUFSIZE, GFP_KERNEL); // choice B, get buffer and addr
-    if(!bigspace->bufferpages[i]){
-      DEBUG_LOG("Kmalloc fail\n");
-      return -1;
-    }
+		if(!bigspace->bufferpages[i]){
+		  DEBUG_LOG("Kmalloc fail\n");
+		  return -1;
+		}
 		sg_set_buf(&bigspace->sg[i], bigspace->bufferpages[i], RPING_BUFSIZE);
 	}
 	return 0;
@@ -1247,7 +1250,11 @@ int krping_doit(char *cmd)
 	bigspaceptr = kzalloc(sizeof(struct krping_sharedspace), GFP_KERNEL);
 	if (!bigspaceptr)
 		return -ENOMEM;
-	regis_bigspace(bigspaceptr,CONF_localpagecount); //4MB each
+	
+	regis_bigspace(bigspaceptr, CONF_localpagecount); //4MB each
+	for(i=0; i<CONF_localpagecount; i++){
+		printk(KERN_INFO "%s: Kmalloc -> %p\n", __FUNCTION__, bigspaceptr->bufferpages[i]);
+	}
 
 	cbs = kmalloc(sizeof(void*)*CONF_totalCB,GFP_KERNEL);
 	for(i=0;i<totalcb;i++)
@@ -1402,17 +1409,16 @@ int krping_doit(char *cmd)
 	DEBUG_LOG("===========================\n");
   //verb test
  
-/*
-	for(i=0;i<totalcb;i++){
-		for(j=0;j<511;j++){
-			//DEBUG_LOG("sending %d %d\n",i,j);
-			sprintf(t,"zxyf %d %d",cbs[i]->cbindex,j);
-			DEBUG_LOG("sending out %d\n",j);
-			CHK(universal_send(cbs[i], 99,t, 14)) 
-		}
 
-    }
-*/
+//	for(i=0;i<totalcb;i++){
+//		for(j=0;j<511;j++){
+//			//DEBUG_LOG("sending %d %d\n",i,j);
+//			sprintf(t,"zxyf %d %d",cbs[i]->cbindex,j);
+//			DEBUG_LOG("sending out %d\n",j);
+//			CHK(universal_send(cbs[i], 99,t, 14)) 
+//		}
+//	}
+
 
 //// ready to operate!  
 	COMEX_init();	// for COMEX
@@ -1454,6 +1460,7 @@ out:
 	}
 	kfree(cbs);
 	return ret;
+	
 }
 
 /*

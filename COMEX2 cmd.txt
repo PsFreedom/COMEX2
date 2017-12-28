@@ -30,7 +30,7 @@ cd /home/benchmark/PBBS/ && mount -t debugfs none /sys/kernel/debug/ && head -n 
 cd /home/benchmark/PBBS/ && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v dictionary/serialHash/dict -r 1 inputs/randomSeq-int-800M && grep "" /sys/kernel/debug/comex_info/*
 cd /home/benchmark/PBBS/ && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v comparisonSort/serialSort/sort -r 1 inputs/randomSeq-double-500M && grep "" /sys/kernel/debug/comex_info/*
 
-
+dmesg
 tail -n 100 /var/log/messages
 tail -n 1000 /var/log/messages
 tail -n 10000 /var/log/messages

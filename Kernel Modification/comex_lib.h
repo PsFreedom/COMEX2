@@ -119,6 +119,7 @@ EXPORT_SYMBOL(COMEX_init_ENV);
 
 int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 {
+	uint64_t tmp_addr; 
 	int COMEX_pageNO = COMEX_rmqueue_smallest(0);
 	char *new_vAddr;
 	char *old_vAddr;
@@ -127,11 +128,12 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 //		printk(KERN_INFO "%s: Wrong pageNO %ld\n", __FUNCTION__, COMEX_pageNO);
 		return -1;
 	}
-	new_vAddr  = (char *)COMEX_offset_to_addr((uint64_t)COMEX_pageNO<<SHIFT_PAGE);
+	new_vAddr  = (char *)COMEX_offset_to_addr((uint64_t)COMEX_pageNO << SHIFT_PAGE);
 	old_vAddr  = (char *)kmap(old_page);
 	
 	printk(KERN_INFO "%s: memcpy new %p | old %p\n", __FUNCTION__, new_vAddr, old_vAddr);
-	if((new_vAddr >> 22) == 0){
+	tmp_addr = new_vAddr;
+	if((tmp_addr >> 22) == 0){
 		printk(KERN_INFO "%s: new_vAddr BUG -> OUT!!!\n", __FUNCTION__);
 		return -1;
 	}

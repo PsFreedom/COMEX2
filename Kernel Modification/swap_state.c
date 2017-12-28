@@ -373,7 +373,7 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 			 * Initiate read into locked page and return.
 			 */
 			lru_cache_add_anon(new_page);
-			if(swp_type(entry) == 8)
+			if(swp_type(entry) == 18)
 			{
 				COMEX_pageNO = (unsigned long)swp_offset(entry);
 				NodeID = (int)COMEX_pageNO & 1023;
@@ -393,7 +393,7 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 //				if(checkSum_page(new_page) != COMEX_checksum[COMEX_pageNO])
 //					printk(KERN_INFO "READ: Checksum FAILED! %d %d - %lu != %lu\n", NodeID, COMEX_pageNO, COMEX_checksum[COMEX_pageNO], checkSum_page(new_page));
 			}
-			else if(swp_type(entry) == 9)
+			else if(swp_type(entry) == 17)
 			{
 				COMEX_in_total++;
 				COMEX_in_Local++;

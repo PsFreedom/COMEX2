@@ -6,6 +6,7 @@ static char proc_name[100];
 static int total_pages;
 static int writeOut_buff;
 static int readIn_buff;
+u64 remote_shift_offset;
 
 struct workqueue_struct *COMEX_wq;
 
@@ -38,9 +39,10 @@ int ID_to_CB(int nodeID){
 	return -1;
 }
 
-uint64_t COMEX_offset_to_addr_fn(uint64_t offset){
+uint64_t COMEX_offset_to_addr_fn(uint64_t offset)
+{
 	if(offset >= ((uint64_t)CONF_localpagecount*1024*4096))
-		printk(KERN_INFO "%s: Wrong addr %llu >= %llu\n", __FUNCTION__, offset, ((uint64_t)CONF_localpagecount*1024*4096));
+		printk(KERN_INFO "%s: Input addr %llu >= %llu\n", __FUNCTION__, offset, ((uint64_t)CONF_localpagecount*1024*4096));
 	return translate_useraddr(cbs[0], offset);
 }
 
@@ -58,13 +60,13 @@ void COMEX_RDMA_fn(int target, int CMD_num, void *ptr, int struct_size)
 	else if(CMD_num == CODE_COMEX_PAGE_WRTE){
 		COMEX_address_t *myStruct = ptr;
 //		printk(KERN_INFO "PAGE_WRTE: %d | L %lu R %lu %d\n", target, myStruct->local/X86PageSize, myStruct->remote/X86PageSize, myStruct->size/X86PageSize);
-		CHK(do_write(cbs[target], myStruct->local, myStruct->remote, myStruct->size << PAGE_SHIFT))
+		CHK(do_write(cbs[target], myStruct->local, myStruct->remote + remote_shift_offset, myStruct->size << PAGE_SHIFT))
 		COMEX_free_buff(target, myStruct->bufIDX, myStruct->size);
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_READ){
 		COMEX_address_t *myStruct = ptr;
 //		printk(KERN_INFO "PAGE_READ: %d | L %lu R %lu %d\n", target, myStruct->local, myStruct->remote, myStruct->size);
-		CHK(do_read(cbs[target], myStruct->local, myStruct->remote, myStruct->size))
+		CHK(do_read(cbs[target], myStruct->local, myStruct->remote + remote_shift_offset, myStruct->size))
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_FREE){
 		CHK(universal_send(cbs[target], CMD_num, ptr, struct_size))
@@ -150,6 +152,10 @@ void COMEX_init(){
 	COMEX_module_echo    = &COMEX_module_echo_fn;
 	COMEX_offset_to_addr = &COMEX_offset_to_addr_fn;
 	COMEX_RDMA 			 = &COMEX_RDMA_fn;
+	
+	remote_shift_offset  = writeOut_buff*CONF_totalCB;
+	remote_shift_offset += readIn_buff;
+	remote_shift_offset  = remote_shift_offset << 12;
 	
 //	COMEX_wq = alloc_workqueue("COMEX WorkQueue", WQ_MEM_RECLAIM | WQ_NON_REENTRANT | WQ_HIGHPRI, 0);
 	COMEX_wq = create_singlethread_workqueue("COMEX WorkQueue");
