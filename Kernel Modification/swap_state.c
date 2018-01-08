@@ -380,9 +380,9 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				COMEX_pageNO = COMEX_pageNO >> 10;
 				COMEX_in_total++;
 				
-				if(COMEX_read_from_buffer(new_page, NodeID, (int)COMEX_pageNO) == 0){
-					if(COMEX_read_from_preFetch(new_page, NodeID, (int)COMEX_pageNO) == 0){
-						COMEX_read_from_remote(new_page, NodeID, (int)COMEX_pageNO);
+				if(COMEX_read_from_buffer(new_page, NodeID, COMEX_pageNO) == 0){
+					if(COMEX_read_from_preFetch(new_page, NodeID, COMEX_pageNO) == 0){
+						COMEX_read_from_remote(new_page, NodeID, COMEX_pageNO);
 					}
 				}
 				count_vm_event(PSWPIN);

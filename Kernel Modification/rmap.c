@@ -1355,7 +1355,7 @@ int try_to_unmap_one_COMEX(struct page *page, struct vm_area_struct *vma,
 //		printk(KERN_INFO "%s: NodeID %d swp_type %d pageNO %lu\n", __FUNCTION__, COMEX_nodeID, swp_type(entry), swp_offset(entry));
 	}
 	else{
-		offsetField = COMEX_nodeID + (COMEX_pageNO<<10);
+		offsetField = offsetField + (unsigned long)COMEX_nodeID + ((unsigned long)COMEX_pageNO << 10);
 		entry = swp_entry(18, offsetField);
 	}
 	

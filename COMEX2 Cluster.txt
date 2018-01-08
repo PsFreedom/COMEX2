@@ -1,5 +1,17 @@
-
 cd /home/comex && rm -rf linux-3.10.87 && tar -zxf linux-3.10.87.tar.gz && cp myConfig linux-3.10.87/.config
+
+ssh 10.132.121.16 'rm -rf /home/comex/linux-3.10.87' &
+ssh 10.132.121.15 'rm -rf /home/comex/linux-3.10.87' &
+ssh 10.132.121.14 'rm -rf /home/comex/linux-3.10.87' &
+ssh 10.132.121.13 'rm -rf /home/comex/linux-3.10.87' &
+ssh 10.132.121.12 'rm -rf /home/comex/linux-3.10.87' &
+ssh 10.132.121.11 'rm -rf /home/comex/linux-3.10.87' &
+ssh 10.132.121.30 'rm -rf /home/comex/linux-3.10.87' &
+ssh 10.132.121.29 'rm -rf /home/comex/linux-3.10.87' &
+ssh 10.132.121.31 'rm -rf /home/comex/linux-3.10.87' &
+ssh 10.132.121.27 'rm -rf /home/comex/linux-3.10.87' &
+ssh 10.132.121.26 'rm -rf /home/comex/linux-3.10.87' &
+ssh 10.132.121.25 'rm -rf /home/comex/linux-3.10.87' &
 
 
 ssh 10.132.121.16 'rm -rf /home/comex/krpingTrimmed' &
@@ -14,20 +26,6 @@ ssh 10.132.121.31 'rm -rf /home/comex/krpingTrimmed' &
 ssh 10.132.121.27 'rm -rf /home/comex/krpingTrimmed' &
 ssh 10.132.121.26 'rm -rf /home/comex/krpingTrimmed' &
 ssh 10.132.121.25 'rm -rf /home/comex/krpingTrimmed' &
-
-
-ssh 10.132.121.16 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.15 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.14 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.13 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.12 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.11 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.30 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.29 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.31 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.27 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.26 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.25 'rm -rf /home/comex/linux-3.10.87' &
 
 
 rsync -az /home/comex/linux-3.10.87 root@10.132.121.16:/home/comex/
@@ -271,6 +269,20 @@ ssh 10.132.121.31 'ifconfig eth0' &
 ssh 10.132.121.27 'ifconfig eth0' &
 ssh 10.132.121.26 'ifconfig eth0' &
 ssh 10.132.121.25 'ifconfig eth0' &
+
+
+ssh 10.132.121.16 'ifconfig eth0 | grep "inet addr" ' &
+ssh 10.132.121.15 'ifconfig eth0 | grep "inet addr" ' &
+ssh 10.132.121.14 'ifconfig eth0 | grep "inet addr" ' &
+ssh 10.132.121.13 'ifconfig eth0 | grep "inet addr" ' &
+ssh 10.132.121.12 'ifconfig eth0 | grep "inet addr" ' &
+ssh 10.132.121.11 'ifconfig eth0 | grep "inet addr" ' &
+ssh 10.132.121.30 'ifconfig eth0 | grep "inet addr" ' &
+ssh 10.132.121.29 'ifconfig eth0 | grep "inet addr" ' &
+ssh 10.132.121.31 'ifconfig eth0 | grep "inet addr" ' &
+ssh 10.132.121.27 'ifconfig eth0 | grep "inet addr" ' &
+ssh 10.132.121.26 'ifconfig eth0 | grep "inet addr" ' &
+ssh 10.132.121.25 'ifconfig eth0 | grep "inet addr" ' &
 
 
 ssh 10.132.121.16 'poweroff' &

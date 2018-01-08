@@ -156,6 +156,7 @@ void COMEX_init(){
 	remote_shift_offset  = writeOut_buff*CONF_totalCB;
 	remote_shift_offset += readIn_buff;
 	remote_shift_offset  = remote_shift_offset << 12;
+//	remote_shift_offset  = 0;
 	
 //	COMEX_wq = alloc_workqueue("COMEX WorkQueue", WQ_MEM_RECLAIM | WQ_NON_REENTRANT | WQ_HIGHPRI, 0);
 	COMEX_wq = create_singlethread_workqueue("COMEX WorkQueue");
