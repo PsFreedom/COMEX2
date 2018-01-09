@@ -68,7 +68,7 @@ uint64_t get_writeOut_buff(int node_ID, int buff_slot){
 	address  = 0;
 	address += node_ID*COMEX_total_writeOut;
 	address += buff_slot;
-	address *= X86PageSize;
+	address  = address << SHIFT_PAGE;
 	return address;
 }
 
@@ -79,7 +79,7 @@ uint64_t get_readIn_buff(int buff_slot){
 	address  = 0;
 	address += COMEX_total_writeOut*COMEX_total_nodes;
 	address += buff_slot;
-	address *= X86PageSize;
+	address  = address << SHIFT_PAGE;
 	return address;
 }
 ////////////////////
