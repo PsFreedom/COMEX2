@@ -131,12 +131,12 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 	char *old_vAddr;
 	
 	if(COMEX_pageNO < 0 || COMEX_pageNO >= COMEX_total_pages){	// No page available
-//		printk(KERN_INFO "%s: Wrong pageNO %ld\n", __FUNCTION__, COMEX_pageNO);
+		printk(KERN_INFO "%s: Wrong pageNO %d\n", __FUNCTION__, COMEX_pageNO);
 		return -1;
 	}
+	
 	new_vAddr  = (char *)COMEX_offset_to_addr((uint64_t)COMEX_pageNO << SHIFT_PAGE);
 	old_vAddr  = (char *)kmap(old_page);
-
 	memcpy(new_vAddr, old_vAddr, X86PageSize);
 //	COMEX_Buddy_page[COMEX_pageNO].CMX_cntr++;
 //	COMEX_Buddy_page[COMEX_pageNO].CMX_CKSM = checkSum_page(old_page);
@@ -158,9 +158,9 @@ void COMEX_read_from_local(struct page *new_page, int pageNO)
 		printk(KERN_INFO "%s: Wrong pageNO %d\n", __FUNCTION__, pageNO);
 		return;
 	}
+	
 	old_vAddr = (char *)COMEX_offset_to_addr((uint64_t)pageNO<<SHIFT_PAGE);
 	new_vAddr = (char *)kmap(new_page);
-	
 	memcpy(new_vAddr, old_vAddr, X86PageSize);
 //	COMEX_Buddy_page[pageNO].CMX_cntr--;
 //	if(COMEX_Buddy_page[pageNO].CMX_CKSM != 0)
