@@ -66,6 +66,7 @@ void COMEX_init_Remote()
 
 void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff, int total_pages, char *namePtr)
 {
+	char *new_vAddr;
 	char initMSG[50];
 	int i, ret=0;
 	
@@ -102,12 +103,18 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 	for(i=0; i<total_pages; i++){
 		COMEX_free_page(i,0);
 	}
+	print_nr_free();
 	while(ret >= 0){
 		ret = COMEX_rmqueue_smallest(0);
 	}
+	print_nr_free();
 	for(i=0; i<total_pages; i++){
-		COMEX_free_page(i,0);
+		new_vAddr = (char *)COMEX_offset_to_addr((uint64_t)i << SHIFT_PAGE);
+		if(new_vAddr != NULL){
+			COMEX_free_page(i,0);
+		}
 	}
+	print_nr_free();
 
 ///// Footer
 	COMEX_init_Remote();
@@ -130,11 +137,11 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 	new_vAddr  = (char *)COMEX_offset_to_addr((uint64_t)COMEX_pageNO << SHIFT_PAGE);
 	old_vAddr  = (char *)kmap(old_page);
 
-	if(new_vAddr == NULL){
+/*	if(new_vAddr == NULL){
 		printk(KERN_INFO "%s: new_vAddr BUG -> OUT!!!\n", __FUNCTION__);
 		return -1;
 	}
-
+*/
 	memcpy(new_vAddr, old_vAddr, X86PageSize);
 //	COMEX_Buddy_page[COMEX_pageNO].CMX_cntr++;
 //	COMEX_Buddy_page[COMEX_pageNO].CMX_CKSM = checkSum_page(old_page);
