@@ -307,22 +307,12 @@ void COMEX_free_to_remote(int nodeID, int pageNO)
 
 void COMEX_pages_request(int target)
 {
-//	char *new_vAddr;
 	int i = COMEX_MAX_ORDER-1;
 	reply_pages_t myStruct;
 	
 	myStruct.src_node = COMEX_ID;
 	myStruct.page_no  = COMEX_rmqueue_smallest(i);
 	myStruct.size     = i;
-	
-/*	new_vAddr = (char *)COMEX_offset_to_addr((uint64_t)myStruct.page_no << SHIFT_PAGE);
-	if(new_vAddr == NULL){
-		printk(KERN_INFO "%s: new_vAddr BUG -> OUT!!!\n", __FUNCTION__);
-		myStruct.page_no = -1;
-		myStruct.size    = 0;
-		i = 0;
-	}
-*/	
 	while(myStruct.page_no<0 && i>8){
 		i--;
 		myStruct.page_no  = COMEX_rmqueue_smallest(i);

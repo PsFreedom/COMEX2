@@ -137,11 +137,6 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 	new_vAddr  = (char *)COMEX_offset_to_addr((uint64_t)COMEX_pageNO << SHIFT_PAGE);
 	old_vAddr  = (char *)kmap(old_page);
 
-/*	if(new_vAddr == NULL){
-		printk(KERN_INFO "%s: new_vAddr BUG -> OUT!!!\n", __FUNCTION__);
-		return -1;
-	}
-*/
 	memcpy(new_vAddr, old_vAddr, X86PageSize);
 //	COMEX_Buddy_page[COMEX_pageNO].CMX_cntr++;
 //	COMEX_Buddy_page[COMEX_pageNO].CMX_CKSM = checkSum_page(old_page);
