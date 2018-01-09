@@ -110,7 +110,6 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 	}
 
 ///// Footer
-
 	COMEX_init_Remote();
 	sprintf(initMSG,"Finish initialization...");
 	COMEX_module_echo(initMSG);
@@ -120,7 +119,6 @@ EXPORT_SYMBOL(COMEX_init_ENV);
 
 int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 {
-	uint64_t tmp_addr; 
 	int COMEX_pageNO = COMEX_rmqueue_smallest(0);
 	char *new_vAddr;
 	char *old_vAddr;
@@ -131,13 +129,12 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 	}
 	new_vAddr  = (char *)COMEX_offset_to_addr((uint64_t)COMEX_pageNO << SHIFT_PAGE);
 	old_vAddr  = (char *)kmap(old_page);
-	
-//	printk(KERN_INFO "%s: memcpy new %p | old %p\n", __FUNCTION__, new_vAddr, old_vAddr);
-	tmp_addr = (uint64_t)new_vAddr;
-	if((tmp_addr >> 22) == 0){
+
+	if(new_vAddr == NULL){
 		printk(KERN_INFO "%s: new_vAddr BUG -> OUT!!!\n", __FUNCTION__);
 		return -1;
 	}
+
 	memcpy(new_vAddr, old_vAddr, X86PageSize);
 //	COMEX_Buddy_page[COMEX_pageNO].CMX_cntr++;
 //	COMEX_Buddy_page[COMEX_pageNO].CMX_CKSM = checkSum_page(old_page);

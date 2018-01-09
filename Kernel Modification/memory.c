@@ -1177,14 +1177,14 @@ again:
 		} else {
 			swp_entry_t entry = pte_to_swp_entry(ptent);
 			
-			if(swp_type(entry) == 18)
+			if(swp_type(entry) == 8)
 			{
 				COMEX_pageNO = (unsigned long)swp_offset(entry);
 				NodeID = (int)COMEX_pageNO & 1023;
 				COMEX_pageNO = COMEX_pageNO >> 10;
 				COMEX_free_to_remote(NodeID, COMEX_pageNO);
 			}
-			else if(swp_type(entry) == 17)
+			else if(swp_type(entry) == 9)
 			{
 				COMEX_free_page((int)swp_offset(entry), 0);	
 			}

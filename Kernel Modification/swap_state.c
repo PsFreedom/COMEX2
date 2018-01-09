@@ -373,16 +373,16 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 			 * Initiate read into locked page and return.
 			 */
 			lru_cache_add_anon(new_page);
-			if(swp_type(entry) == 18)
+			if(swp_type(entry) == 8)
 			{
 				COMEX_pageNO = (unsigned long)swp_offset(entry);
 				NodeID = (int)COMEX_pageNO & 1023;
 				COMEX_pageNO = COMEX_pageNO >> 10;
 				COMEX_in_total++;
 				
-				if(COMEX_read_from_buffer(new_page, NodeID, COMEX_pageNO) == 0){
-					if(COMEX_read_from_preFetch(new_page, NodeID, COMEX_pageNO) == 0){
-						COMEX_read_from_remote(new_page, NodeID, COMEX_pageNO);
+				if(COMEX_read_from_buffer(new_page, NodeID, (int)COMEX_pageNO) == 0){
+					if(COMEX_read_from_preFetch(new_page, NodeID, (int)COMEX_pageNO) == 0){
+						COMEX_read_from_remote(new_page, NodeID, (int)COMEX_pageNO);
 					}
 				}
 				count_vm_event(PSWPIN);
@@ -393,7 +393,7 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 //				if(checkSum_page(new_page) != COMEX_checksum[COMEX_pageNO])
 //					printk(KERN_INFO "READ: Checksum FAILED! %d %d - %lu != %lu\n", NodeID, COMEX_pageNO, COMEX_checksum[COMEX_pageNO], checkSum_page(new_page));
 			}
-			else if(swp_type(entry) == 17)
+			else if(swp_type(entry) == 9)
 			{
 				COMEX_in_total++;
 				COMEX_in_Local++;
@@ -460,7 +460,7 @@ struct page *swapin_readahead(swp_entry_t entry, gfp_t gfp_mask,
 	if (!start_offset && swp_type(entry) != 8 && swp_type(entry) != 9)	/* First page is swap header. */
 		start_offset++;
 
-	if(swp_type(entry) == 18 || swp_type(entry) == 17){
+	if(swp_type(entry) == 8 || swp_type(entry) == 9){
 		page = read_swap_cache_async(entry, gfp_mask, vma, addr);
 		if (page)
 			page_cache_release(page);

@@ -39,10 +39,9 @@ int ID_to_CB(int nodeID){
 	return -1;
 }
 
-uint64_t COMEX_offset_to_addr_fn(uint64_t offset)
-{
+uint64_t COMEX_offset_to_addr_fn(uint64_t offset){
 	if(offset >= ((uint64_t)CONF_localpagecount*1024*4096))
-		printk(KERN_INFO "%s: Input addr %llu >= %llu\n", __FUNCTION__, offset, ((uint64_t)CONF_localpagecount*1024*4096));
+		printk(KERN_INFO "%s: Wrong addr %llu >= %llu\n", __FUNCTION__, offset, ((uint64_t)CONF_localpagecount*1024*4096));
 	return translate_useraddr(cbs[0], offset);
 }
 

@@ -391,7 +391,7 @@ struct address_space *page_mapping(struct page *page)
 		swp_entry_t entry;
 
 		entry.val = page_private(page);
-		if(swp_type(entry) == 18 || swp_type(entry) == 17){
+		if(swp_type(entry) == 8 || swp_type(entry) == 9){
 			return NULL;
 		}
 		mapping = swap_address_space(entry);
