@@ -5,9 +5,6 @@
 #define PreF_SIZE (1UL << PreF_BITS)	// 0000 1000
 #define PreF_MASK (~(PreF_SIZE - 1))	// 0000 0111 -> 1111 1000
 
-//#define Total_CHKSM 2097152
-//unsigned long COMEX_checksum[Total_CHKSM];
-
 typedef struct{
 	int mssg_qouta;
 	int total_group;
@@ -45,7 +42,7 @@ int COMEX_freelist_getpage(int list_ID);
 void COMEX_free_to_remote(int nodeID, int pageNO);
 void COMEX_flush_buff(int nodeID);
 void COMEX_flush_one(int nodeID, int slot);
-void invalidate_preFetch(int nodeID, int pageNO);
+void invalidate_buffer(int nodeID, int pageNO);
 
 ////////////////////
 
@@ -68,7 +65,7 @@ uint64_t get_writeOut_buff(int node_ID, int buff_slot){
 	address  = 0;
 	address += node_ID*COMEX_total_writeOut;
 	address += buff_slot;
-	address  = address << SHIFT_PAGE;
+	address *= X86PageSize;
 	return address;
 }
 
@@ -79,7 +76,7 @@ uint64_t get_readIn_buff(int buff_slot){
 	address  = 0;
 	address += COMEX_total_writeOut*COMEX_total_nodes;
 	address += buff_slot;
-	address  = address << SHIFT_PAGE;
+	address *= X86PageSize;
 	return address;
 }
 ////////////////////
@@ -108,10 +105,11 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 			}
 		}
 		
-		if(COMEX_free_group[dest_node].total_group > 0 && COMEX_writeOut_buff[dest_node][buff_pos[dest_node].tail].status == -1)
+		if(COMEX_free_group[dest_node].total_group > 0 && 
+		   COMEX_writeOut_buff[dest_node][buff_pos[dest_node].tail].status == -1)
 		{
 			*retPageNO = COMEX_freelist_getpage(dest_node);
-			invalidate_preFetch(dest_node, *retPageNO);
+			invalidate_buffer(dest_node, *retPageNO);
 			
 			buff_slot = buff_pos[dest_node].tail;
 			buff_pos[dest_node].tail++;
@@ -223,7 +221,7 @@ int COMEX_read_from_preFetch(struct page *new_page, int nodeID, int pageNO)
 	return 0;
 }
 
-void invalidate_preFetch(int nodeID, int pageNO)
+void invalidate_buffer(int nodeID, int pageNO)
 {
 	int pageIDX = pageNO % COMEX_total_readIn;
 	if(COMEX_readIn_buff[pageIDX].nodeID == nodeID && COMEX_readIn_buff[pageIDX].pageNO == pageNO){

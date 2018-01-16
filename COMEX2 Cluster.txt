@@ -63,6 +63,8 @@ rsync -az /home/comex/krpingTrimmed root@10.132.121.25:/home/comex/
 
 rsync -avz /home/benchmark root@10.132.121.16:/home/
 rsync -avz /home/benchmark root@10.132.121.15:/home/
+
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.14:/home/benchmark/
 rsync -avz /home/benchmark root@192.168.10.2:/home/
 rsync -avz /home/benchmark root@192.168.10.3:/home/
 rsync -avz /home/benchmark root@192.168.10.4:/home/
@@ -75,6 +77,20 @@ rsync -avz /home/benchmark root@10.132.121.63:/home/
 rsync -avz /home/benchmark root@10.132.121.61:/home/
 rsync -avz /home/benchmark root@10.132.121.59:/home/
 rsync -avz /home/benchmark root@10.132.121.58:/home/
+
+
+ssh 10.132.121.16 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 1 2060 192.168.10. > myconfig.h;' &
+ssh 10.132.121.15 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 2 2060 192.168.10. > myconfig.h;' &
+ssh 10.132.121.14 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 3 2060 192.168.10. > myconfig.h;' &
+ssh 10.132.121.13 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 4 2060 192.168.10. > myconfig.h;' &
+ssh 10.132.121.12 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 5 2060 192.168.10. > myconfig.h;' &
+ssh 10.132.121.11 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 6 2060 192.168.10. > myconfig.h;' &
+ssh 10.132.121.30 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 7 2060 192.168.10. > myconfig.h;' &
+ssh 10.132.121.29 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 8 2060 192.168.10. > myconfig.h;' &
+ssh 10.132.121.31 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 9 12300 192.168.10. > myconfig.h;' &
+ssh 10.132.121.27 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 10 12300 192.168.10. > myconfig.h;' &
+ssh 10.132.121.26 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 11 12300 192.168.10. > myconfig.h;' &
+ssh 10.132.121.25 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 12 12300 192.168.10. > myconfig.h;' &
 
 
 ssh 10.132.121.16 'cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install' &
@@ -105,20 +121,6 @@ ssh 10.132.121.26 'cd /home/comex/linux-3.10.87 && touch -m .config && make clea
 ssh 10.132.121.25 'cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install && rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot' &
 
 
-ssh 10.132.121.16 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 1 520 192.168.10. > myconfig.h;' &
-ssh 10.132.121.15 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 2 520 192.168.10. > myconfig.h;' &
-ssh 10.132.121.14 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 3 2060 192.168.10. > myconfig.h;' &
-ssh 10.132.121.13 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 4 2060 192.168.10. > myconfig.h;' &
-ssh 10.132.121.12 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 5 2060 192.168.10. > myconfig.h;' &
-ssh 10.132.121.11 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 6 2060 192.168.10. > myconfig.h;' &
-ssh 10.132.121.30 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 7 2060 192.168.10. > myconfig.h;' &
-ssh 10.132.121.29 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 8 2060 192.168.10. > myconfig.h;' &
-ssh 10.132.121.31 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 9 12300 192.168.10. > myconfig.h;' &
-ssh 10.132.121.27 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 10 12300 192.168.10. > myconfig.h;' &
-ssh 10.132.121.26 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 11 12300 192.168.10. > myconfig.h;' &
-ssh 10.132.121.25 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 12 12300 192.168.10. > myconfig.h;' &
-
-
 ssh 10.132.121.16 'yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/; yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/' &
 ssh 10.132.121.15 'yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/; yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/' &
 ssh 10.132.121.14 'yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/; yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/' &
@@ -145,8 +147,8 @@ ssh 10.132.121.26 'cd /home/comex/krpingTrimmed; modprobe -r rdma_krping; make c
 ssh 10.132.121.25 'cd /home/comex/krpingTrimmed; modprobe -r rdma_krping; make clean; make; make install; modprobe rdma_krping' &
 
 
-ssh 10.132.121.16 'cd /home/comex/; echo "total_pages=524288,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
-ssh 10.132.121.15 'cd /home/comex/; echo "total_pages=524288,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
+ssh 10.132.121.16 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
+ssh 10.132.121.15 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
 ssh 10.132.121.14 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
 ssh 10.132.121.13 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
 ssh 10.132.121.12 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &

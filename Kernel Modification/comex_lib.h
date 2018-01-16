@@ -68,7 +68,8 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 {
 	char *new_vAddr;
 	char initMSG[50];
-	int i, ret=0;
+	int i, ret = 0;
+	int offsetNO = 0;
 	
 	COMEX_ID			 = node_ID;
 	COMEX_total_nodes	 = n_nodes;
@@ -95,8 +96,8 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 		COMEX_Buddy_page[i].pageNO    =  i;
 		COMEX_Buddy_page[i].private   =  0;
 		COMEX_Buddy_page[i]._mapcount = -1;
-//		COMEX_Buddy_page[i].CMX_cntr  =  0;
-//		COMEX_Buddy_page[i].CMX_CKSM  =  0;
+		COMEX_Buddy_page[i].CMX_cntr  =  0;
+		COMEX_Buddy_page[i].CMX_CKSM  =  0;
 		INIT_LIST_COMEX(&COMEX_Buddy_page[i].lru);
 	}
 	
@@ -109,7 +110,8 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 	}
 	print_nr_free();
 	for(i=0; i<total_pages; i++){
-		new_vAddr = (char *)COMEX_offset_to_addr((uint64_t)i << SHIFT_PAGE);
+		offsetNO  = i + (COMEX_total_writeOut*COMEX_total_nodes) + COMEX_total_readIn;
+		new_vAddr = (char *)COMEX_offset_to_addr((uint64_t)offsetNO << SHIFT_PAGE);
 		if(new_vAddr != NULL){
 			COMEX_free_page(i,0);
 		}
@@ -118,7 +120,7 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 
 ///// Footer
 	COMEX_init_Remote();
-	sprintf(initMSG,"Finish initialization...");
+	sprintf(initMSG,"Finish initialization... CheckSUM 2 ON!");
 	COMEX_module_echo(initMSG);
 	COMEX_Ready = 1;
 }
@@ -127,21 +129,21 @@ EXPORT_SYMBOL(COMEX_init_ENV);
 int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 {
 	int COMEX_pageNO = COMEX_rmqueue_smallest(0);
+	int offsetNO = 0;
 	char *new_vAddr;
 	char *old_vAddr;
 	
 	if(COMEX_pageNO < 0 || COMEX_pageNO >= COMEX_total_pages){	// No page available
-		printk(KERN_INFO "%s: Wrong pageNO %d\n", __FUNCTION__, COMEX_pageNO);
+//		printk(KERN_INFO "%s: Wrong pageNO %d\n", __FUNCTION__, COMEX_pageNO);
 		return -1;
 	}
-	
-	new_vAddr  = (char *)COMEX_offset_to_addr((uint64_t)COMEX_pageNO << SHIFT_PAGE);
-	old_vAddr  = (char *)kmap(old_page);
+	offsetNO  = COMEX_pageNO + (COMEX_total_writeOut*COMEX_total_nodes) + COMEX_total_readIn;
+	new_vAddr = (char *)COMEX_offset_to_addr((uint64_t)offsetNO << SHIFT_PAGE);
+	old_vAddr = (char *)kmap(old_page);
+
 	memcpy(new_vAddr, old_vAddr, X86PageSize);
-//	COMEX_Buddy_page[COMEX_pageNO].CMX_cntr++;
-//	COMEX_Buddy_page[COMEX_pageNO].CMX_CKSM = checkSum_page(old_page);
-//	if(checkSum_page(old_page) != 0)
-//		printk(KERN_INFO "%s: No %d - %lu %lu %lu\n", __FUNCTION__, COMEX_pageNO, checkSum_page(old_page), checkSum_page(vmalloc_to_page(new_vAddr)), checkSum_Vpage(new_vAddr));
+	COMEX_Buddy_page[COMEX_pageNO].CMX_cntr++;
+	COMEX_Buddy_page[COMEX_pageNO].CMX_CKSM = checkSum_Vpage(old_vAddr);
 	
 	kunmap(old_page);
 	*retNodeID = -11;
@@ -151,6 +153,7 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 
 void COMEX_read_from_local(struct page *new_page, int pageNO)
 {
+	int offsetNO = 0;
 	char *old_vAddr;
 	char *new_vAddr;
 	
@@ -158,14 +161,16 @@ void COMEX_read_from_local(struct page *new_page, int pageNO)
 		printk(KERN_INFO "%s: Wrong pageNO %d\n", __FUNCTION__, pageNO);
 		return;
 	}
-	
-	old_vAddr = (char *)COMEX_offset_to_addr((uint64_t)pageNO<<SHIFT_PAGE);
+	offsetNO  = pageNO + (COMEX_total_writeOut*COMEX_total_nodes) + COMEX_total_readIn;
+	old_vAddr = (char *)COMEX_offset_to_addr((uint64_t)offsetNO << SHIFT_PAGE);
 	new_vAddr = (char *)kmap(new_page);
-	memcpy(new_vAddr, old_vAddr, X86PageSize);
-//	COMEX_Buddy_page[pageNO].CMX_cntr--;
-//	if(COMEX_Buddy_page[pageNO].CMX_CKSM != 0)
-//		printk(KERN_INFO "%s: No %d - %lu %lu\n", __FUNCTION__, pageNO, COMEX_Buddy_page[pageNO].CMX_CKSM, checkSum_page(new_page));
 	
-	COMEX_free_page(pageNO, 0);	
+	memcpy(new_vAddr, old_vAddr, X86PageSize);
+	COMEX_Buddy_page[pageNO].CMX_cntr--;
+	if(COMEX_Buddy_page[pageNO].CMX_CKSM != 0){
+		printk(KERN_INFO "%s: CMX_CKSM %d - %lu %lu\n", __FUNCTION__, pageNO, COMEX_Buddy_page[pageNO].CMX_CKSM, checkSum_Vpage(new_vAddr));
+	}
+	
+	COMEX_free_page(pageNO, 0);
 	kunmap(new_page);
 }
