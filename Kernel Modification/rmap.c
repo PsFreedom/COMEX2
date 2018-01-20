@@ -1311,6 +1311,7 @@ out_mlock:
 	}
 	return ret;
 }
+
 int try_to_unmap_one_COMEX(struct page *page, struct vm_area_struct *vma,
 		     unsigned long address, enum ttu_flags flags, int COMEX_nodeID, int COMEX_pageNO)
 {
@@ -1318,9 +1319,9 @@ int try_to_unmap_one_COMEX(struct page *page, struct vm_area_struct *vma,
 	pte_t *pte;
 	pte_t pteval;
 	spinlock_t *ptl;
-	swp_entry_t entry;
 	int ret = SWAP_AGAIN;
 	
+	swp_entry_t entry;
 	unsigned long offsetField = 0;
 
 	pte = page_check_address(page, mm, address, &ptl, 0);
@@ -1584,6 +1585,7 @@ static int try_to_unmap_anon(struct page *page, enum ttu_flags flags)
 	page_unlock_anon_vma_read(anon_vma);
 	return ret;
 }
+
 static int try_to_unmap_anon_COMEX(struct page *page, enum ttu_flags flags, int COMEX_nodeID, int COMEX_pageNO)
 {
 	struct anon_vma *anon_vma;
@@ -1764,19 +1766,13 @@ int try_to_unmap(struct page *page, enum ttu_flags flags)
 		ret = SWAP_SUCCESS;
 	return ret;
 }
+
 int try_to_unmap_COMEX(struct page *page, enum ttu_flags flags, int COMEX_nodeID, int COMEX_pageNO)
 {
-	int ret;
-
-	BUG_ON(!PageLocked(page));
-//	VM_BUG_ON(!PageHuge(page) && PageTransHuge(page));
-
-	ret = try_to_unmap_anon_COMEX(page, flags, COMEX_nodeID, COMEX_pageNO);
-
-//	if (ret != SWAP_MLOCK && !page_mapped(page))
-//		ret = SWAP_SUCCESS;
-	return ret;
+	try_to_unmap_anon_COMEX(page, flags, COMEX_nodeID, COMEX_pageNO);
+	return SWAP_SUCCESS;
 }
+
 /**
  * try_to_munlock - try to munlock a page
  * @page: the page to be munlocked

@@ -205,7 +205,8 @@ int COMEX_read_from_preFetch(struct page *new_page, int nodeID, int pageNO)
 	int buff_FLR = (pageNO & PreF_MASK) % COMEX_total_readIn;
 	
 	for(i=buff_FLR; i<buff_FLR+PreF_SIZE; i++){
-		if(COMEX_readIn_buff[i].nodeID == nodeID && COMEX_readIn_buff[i].pageNO == pageNO)
+		if(COMEX_readIn_buff[i].nodeID == nodeID && 
+		   COMEX_readIn_buff[i].pageNO == pageNO)
 		{
 			buf_vAddr = (char *)get_readIn_buff(i);
 			new_vAddr = (char *)kmap(new_page);
@@ -260,7 +261,8 @@ int COMEX_freelist_getpage(int list_ID)
 	int ret_pageNO = -1;
 	
 	myPtr      = list_entry(COMEX_free_group[list_ID].free_group.next, free_group_t, link);
-	ret_pageNO = myPtr->page_start++;
+	ret_pageNO = myPtr->page_start;
+	myPtr->page_start++;
 	if(myPtr->page_start > myPtr->page_end){
 		list_del(&myPtr->link);
 		COMEX_free_group[list_ID].total_group--;
@@ -339,7 +341,8 @@ void COMEX_flush_buff(int nodeID)
 	COMEX_address_t addr_struct;
 	
 	spin_lock(&buff_pos[nodeID].pos_lock);
-	while(COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].status == 2){
+	while(COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].status == 2)
+	{
 		COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].status = 3;
 		count++;
 		if(buff_pos[nodeID].head + count == COMEX_total_writeOut)

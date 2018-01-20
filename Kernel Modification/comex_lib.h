@@ -120,7 +120,7 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 
 ///// Footer
 	COMEX_init_Remote();
-	sprintf(initMSG,"Finish initialization... CheckSUM 2 ON!");
+	sprintf(initMSG,"Finish initialization... CheckSUM 4 ON!");
 	COMEX_module_echo(initMSG);
 	COMEX_Ready = 1;
 }
@@ -167,7 +167,7 @@ void COMEX_read_from_local(struct page *new_page, int pageNO)
 	
 	memcpy(new_vAddr, old_vAddr, X86PageSize);
 	COMEX_Buddy_page[pageNO].CMX_cntr--;
-	if(COMEX_Buddy_page[pageNO].CMX_CKSM != 0){
+	if(COMEX_Buddy_page[pageNO].CMX_CKSM != checkSum_Vpage(new_vAddr)){
 		printk(KERN_INFO "%s: CMX_CKSM %d - %lu %lu\n", __FUNCTION__, pageNO, COMEX_Buddy_page[pageNO].CMX_CKSM, checkSum_Vpage(new_vAddr));
 	}
 	

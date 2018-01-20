@@ -794,7 +794,7 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 			if(COMEX_Ready == 1 && page_mapcount(page) == 1 && COMEX_task != NULL && strcmp(COMEX_task->comm, proc_name) == 0){
 				COMEX_nodeID = -1;
 				COMEX_pageNO = 200;
-				if(COMEX_move_to_COMEX(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
+/*				if(COMEX_move_to_COMEX(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
 				{
 					try_to_unmap_COMEX(page, ttu_flags, COMEX_nodeID, COMEX_pageNO);
 					ClearPageDirty(page);
@@ -805,7 +805,7 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 					SWAP_to_COMEX++;
 					goto free_it;
 				}	
-/*				if(COMEX_move_to_Remote(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
+*/				if(COMEX_move_to_Remote(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
 				{
 					try_to_unmap_COMEX(page, ttu_flags, COMEX_nodeID, COMEX_pageNO);
 					ClearPageDirty(page);
@@ -816,7 +816,7 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 					SWAP_to_COMEX++;
 					goto free_it;
 				}
-*/			}
+			}
 			
 			if (!add_to_swap(page, page_list))
 				goto activate_locked;
