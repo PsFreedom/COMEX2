@@ -700,6 +700,8 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 	int COMEX_nodeID;
 	int COMEX_pageNO;
 	struct task_struct *COMEX_task;
+	swp_entry_t entry;
+	unsigned long offsetField = 0;
 
 	cond_resched();
 
@@ -794,24 +796,44 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 			if(COMEX_Ready == 1 && page_mapcount(page) == 1 && COMEX_task != NULL && strcmp(COMEX_task->comm, proc_name) == 0){
 				COMEX_nodeID = -1;
 				COMEX_pageNO = 200;
-/*				if(COMEX_move_to_COMEX(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
+				if(COMEX_move_to_COMEX(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
 				{
+					offsetField = offsetField + (unsigned long)COMEX_pageNO;
+					entry = swp_entry(9, offsetField);
+					set_page_private(page, entry.val);
+					add_to_swap_cache(page, entry, __GFP_HIGH|__GFP_NOMEMALLOC|__GFP_NOWARN);
+					mapping = swap_address_space(entry);
+					
 					try_to_unmap_COMEX(page, ttu_flags, COMEX_nodeID, COMEX_pageNO);
 					ClearPageDirty(page);
 					atomic_set(&page->_count, 0);
-					atomic_set(&page->_mapcount, -1);
+//					atomic_set(&page->_mapcount, -1);
 //					page->flags = 0;
-					unlock_page(page);
 					SWAP_to_COMEX++;
+					
+					spin_lock_irq(&mapping->tree_lock);
+					__delete_from_swap_cache(page);
+					spin_unlock_irq(&mapping->tree_lock);
+					unlock_page(page);
 					goto free_it;
-				}	
-*/				if(COMEX_move_to_Remote(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
+				}
+				if(COMEX_move_to_Remote(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
 				{
+					offsetField = offsetField + (unsigned long)COMEX_nodeID + ((unsigned long)COMEX_pageNO << 10);
+					entry = swp_entry(8, offsetField);
+					set_page_private(page, entry.val);
+					add_to_swap_cache(page, entry, __GFP_HIGH|__GFP_NOMEMALLOC|__GFP_NOWARN);
+					mapping = swap_address_space(entry);
+					
 					try_to_unmap_COMEX(page, ttu_flags, COMEX_nodeID, COMEX_pageNO);
 					ClearPageDirty(page);
 					atomic_set(&page->_count, 0);
-					atomic_set(&page->_mapcount, -1);
+//					atomic_set(&page->_mapcount, -1);
 //					page->flags = 0;
+
+					spin_lock_irq(&mapping->tree_lock);
+					__delete_from_swap_cache(page);
+					spin_unlock_irq(&mapping->tree_lock);
 					unlock_page(page);
 					SWAP_to_COMEX++;
 					goto free_it;

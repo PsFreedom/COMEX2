@@ -65,6 +65,10 @@ rsync -avz /home/benchmark root@10.132.121.16:/home/
 rsync -avz /home/benchmark root@10.132.121.15:/home/
 
 rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.14:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.13:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.12:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.11:/home/benchmark/
+
 rsync -avz /home/benchmark root@192.168.10.2:/home/
 rsync -avz /home/benchmark root@192.168.10.3:/home/
 rsync -avz /home/benchmark root@192.168.10.4:/home/

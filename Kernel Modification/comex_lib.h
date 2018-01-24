@@ -120,7 +120,7 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 
 ///// Footer
 	COMEX_init_Remote();
-	sprintf(initMSG,"Finish initialization... CheckSUM 4 ON!");
+	sprintf(initMSG,"Finish initialization... Prototype!");
 	COMEX_module_echo(initMSG);
 	COMEX_Ready = 1;
 }
@@ -142,8 +142,8 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 	old_vAddr = (char *)kmap(old_page);
 
 	memcpy(new_vAddr, old_vAddr, X86PageSize);
-	COMEX_Buddy_page[COMEX_pageNO].CMX_cntr++;
-	COMEX_Buddy_page[COMEX_pageNO].CMX_CKSM = checkSum_Vpage(old_vAddr);
+//	COMEX_Buddy_page[COMEX_pageNO].CMX_cntr++;
+//	COMEX_Buddy_page[COMEX_pageNO].CMX_CKSM = checkSum_Vpage(old_vAddr);
 	
 	kunmap(old_page);
 	*retNodeID = -11;
@@ -167,9 +167,9 @@ void COMEX_read_from_local(struct page *new_page, int pageNO)
 	
 	memcpy(new_vAddr, old_vAddr, X86PageSize);
 	COMEX_Buddy_page[pageNO].CMX_cntr--;
-	if(COMEX_Buddy_page[pageNO].CMX_CKSM != checkSum_Vpage(new_vAddr)){
-		printk(KERN_INFO "%s: CMX_CKSM %d - %lu %lu\n", __FUNCTION__, pageNO, COMEX_Buddy_page[pageNO].CMX_CKSM, checkSum_Vpage(new_vAddr));
-	}
+//	if(COMEX_Buddy_page[pageNO].CMX_CKSM != checkSum_Vpage(new_vAddr)){
+//		printk(KERN_INFO "%s: CMX_CKSM %d - %lu %lu\n", __FUNCTION__, pageNO, COMEX_Buddy_page[pageNO].CMX_CKSM, checkSum_Vpage(new_vAddr));
+//	}
 	
 	COMEX_free_page(pageNO, 0);
 	kunmap(new_page);

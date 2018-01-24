@@ -457,7 +457,7 @@ struct page *swapin_readahead(swp_entry_t entry, gfp_t gfp_mask,
 	/* Read a page_cluster sized and aligned cluster around offset. */
 	start_offset = offset & ~mask;
 	end_offset = offset | mask;
-	if (!start_offset && swp_type(entry) != 8 && swp_type(entry) != 9)	/* First page is swap header. */
+	if (!start_offset)	/* First page is swap header. */
 		start_offset++;
 
 	if(swp_type(entry) == 8 || swp_type(entry) == 9){
