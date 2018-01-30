@@ -800,46 +800,50 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 				{
 					offsetField = offsetField + (unsigned long)COMEX_pageNO;
 					entry = swp_entry(9, offsetField);
-					set_page_private(page, entry.val);
-					add_to_swap_cache(page, entry, __GFP_HIGH|__GFP_NOMEMALLOC|__GFP_NOWARN);
-					mapping = swap_address_space(entry);
+					
+					__add_to_swap_cache(page, entry);
+					mapping = page_mapping(page);
+					if(!mapping){
+						__delete_from_swap_cache(page);
+						printk(KERN_INFO "%p mapping %p -> goto SWAP!\n", page, mapping);
+						goto goto_SWAP;
+					}
+//					printk(KERN_INFO "mapping %p -> COMEX OK!\n", mapping);
 					
 					try_to_unmap_COMEX(page, ttu_flags, COMEX_nodeID, COMEX_pageNO);
 					ClearPageDirty(page);
-					atomic_set(&page->_count, 0);
-//					atomic_set(&page->_mapcount, -1);
-//					page->flags = 0;
-					SWAP_to_COMEX++;
+					__remove_mapping(mapping, page);
 					
-					spin_lock_irq(&mapping->tree_lock);
-					__delete_from_swap_cache(page);
-					spin_unlock_irq(&mapping->tree_lock);
 					unlock_page(page);
+				//	atomic_set(&page->_count, 0);
+					SWAP_to_COMEX++;
 					goto free_it;
 				}
 				if(COMEX_move_to_Remote(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
 				{
 					offsetField = offsetField + (unsigned long)COMEX_nodeID + ((unsigned long)COMEX_pageNO << 10);
 					entry = swp_entry(8, offsetField);
-					set_page_private(page, entry.val);
-					add_to_swap_cache(page, entry, __GFP_HIGH|__GFP_NOMEMALLOC|__GFP_NOWARN);
-					mapping = swap_address_space(entry);
+					
+					__add_to_swap_cache(page, entry);
+					mapping = page_mapping(page);
+					if(!mapping){
+						__delete_from_swap_cache(page);
+						printk(KERN_INFO "%p mapping %p -> goto SWAP!\n", page, mapping);
+						goto goto_SWAP;
+					}
+//					printk(KERN_INFO "mapping %p -> COMEX OK!\n", mapping);
 					
 					try_to_unmap_COMEX(page, ttu_flags, COMEX_nodeID, COMEX_pageNO);
 					ClearPageDirty(page);
-					atomic_set(&page->_count, 0);
-//					atomic_set(&page->_mapcount, -1);
-//					page->flags = 0;
-
-					spin_lock_irq(&mapping->tree_lock);
-					__delete_from_swap_cache(page);
-					spin_unlock_irq(&mapping->tree_lock);
+					__remove_mapping(mapping, page);
+					
 					unlock_page(page);
+				//	atomic_set(&page->_count, 0);
 					SWAP_to_COMEX++;
 					goto free_it;
 				}
 			}
-			
+goto_SWAP:			
 			if (!add_to_swap(page, page_list))
 				goto activate_locked;
 			SWAP_to_Disk++;

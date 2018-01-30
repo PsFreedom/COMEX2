@@ -397,7 +397,9 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 			{
 				COMEX_in_total++;
 				COMEX_in_Local++;
+				
 				COMEX_read_from_local(new_page, (int)swp_offset(entry));
+				
 				count_vm_event(PSWPIN);
 				SetPageDirty(new_page);
 				SetPageUptodate(new_page);

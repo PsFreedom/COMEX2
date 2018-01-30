@@ -3153,14 +3153,10 @@ static int do_swap_page(struct mm_struct *mm, struct vm_area_struct *vma,
 	mem_cgroup_commit_charge_swapin(page, ptr);
 
 	swap_free(entry);
-	if(swp_type(entry) != 8 && swp_type(entry) != 9){
-		if (vm_swap_full() || (vma->vm_flags & VM_LOCKED) || PageMlocked(page))
-			try_to_free_swap(page);
-	}
-	else{
-		delete_from_swap_cache(page);
-		SetPageDirty(page);
-	}
+	if (swp_type(entry) == 8 || swp_type(entry) == 9)
+		try_to_free_swap(page);
+	else if (vm_swap_full() || (vma->vm_flags & VM_LOCKED) || PageMlocked(page))
+		try_to_free_swap(page);
 	unlock_page(page);
 	if (page != swapcache) {
 		/*

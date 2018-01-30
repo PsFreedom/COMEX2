@@ -514,10 +514,7 @@ static struct swap_info_struct *swap_info_get(swp_entry_t entry)
 		goto out;
 	type = swp_type(entry);
 	if(type == 8 || type == 9){
-//		p = swap_info[8];	// COMEX
-//		spin_lock(&p->lock);
-//		return p;
-		goto out;
+		return swap_info[type];
 	}
 	if (type >= nr_swapfiles)
 		goto bad_nofile;
@@ -749,8 +746,6 @@ int free_swap_and_cache(swp_entry_t entry)
 	struct page *page = NULL;
 
 	if (non_swap_entry(entry))
-		return 1;
-	if (swp_type(entry) == 8 || swp_type(entry) == 9)
 		return 1;
 
 	p = swap_info_get(entry);
@@ -2230,7 +2225,7 @@ static int __swap_duplicate(swp_entry_t entry, unsigned char usage)
 
 	type = swp_type(entry);
 	if(type == 8 || type == 9){
-		return 0;	// COMEX
+		return 0;
 	}
 	if (type >= nr_swapfiles)
 		goto bad_file;

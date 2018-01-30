@@ -120,7 +120,7 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 
 ///// Footer
 	COMEX_init_Remote();
-	sprintf(initMSG,"Finish initialization... Prototype!");
+	sprintf(initMSG,"Finish initialization... Prototype! 02");
 	COMEX_module_echo(initMSG);
 	COMEX_Ready = 1;
 }
