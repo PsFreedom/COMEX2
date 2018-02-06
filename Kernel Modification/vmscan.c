@@ -700,8 +700,6 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 	int COMEX_nodeID;
 	int COMEX_pageNO;
 	struct task_struct *COMEX_task;
-	swp_entry_t entry;
-	unsigned long offsetField = 0;
 
 	cond_resched();
 
@@ -711,6 +709,9 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 		struct page *page;
 		int may_enter_fs;
 		enum page_references references = PAGEREF_RECLAIM_CLEAN;
+		
+		swp_entry_t comex_entry;
+		struct address_space *comex_mapping;
 
 		cond_resched();
 
@@ -798,52 +799,54 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 				COMEX_pageNO = 200;
 				if(COMEX_move_to_COMEX(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
 				{
-					offsetField = offsetField + (unsigned long)COMEX_pageNO;
-					entry = swp_entry(9, offsetField);
-					
-					__add_to_swap_cache(page, entry);
-					mapping = page_mapping(page);
-					if(!mapping){
-						__delete_from_swap_cache(page);
-						printk(KERN_INFO "%p mapping %p -> goto SWAP!\n", page, mapping);
-						goto goto_SWAP;
-					}
-//					printk(KERN_INFO "mapping %p -> COMEX OK!\n", mapping);
+				//	mapping = page_mapping(page);
+				//	if(mapping == NULL){
+				//		printk(KERN_INFO "LOCAL: %p Mapping FUCK!\n", page);
+				//		goto goto_SWAP;
+				//	}
 					
 					try_to_unmap_COMEX(page, ttu_flags, COMEX_nodeID, COMEX_pageNO);
-					ClearPageDirty(page);
-					__remove_mapping(mapping, page);
+				//	printk(KERN_INFO "LOCAL: %p to COMEX OK!\n", page);
 					
+					comex_entry.val = page_private(page);
+					comex_mapping   = swap_address_space(comex_entry);
+					spin_lock_irq(&comex_mapping->tree_lock);
+					__delete_from_swap_cache(page);
+					spin_unlock_irq(&comex_mapping->tree_lock);
+					swapcache_free(comex_entry, page);
+
+					atomic_set(&page->_count, 0);
+					ClearPageDirty(page);
 					unlock_page(page);
-				//	atomic_set(&page->_count, 0);
 					SWAP_to_COMEX++;
 					goto free_it;
 				}
 				if(COMEX_move_to_Remote(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
 				{
-					offsetField = offsetField + (unsigned long)COMEX_nodeID + ((unsigned long)COMEX_pageNO << 10);
-					entry = swp_entry(8, offsetField);
-					
-					__add_to_swap_cache(page, entry);
-					mapping = page_mapping(page);
-					if(!mapping){
-						__delete_from_swap_cache(page);
-						printk(KERN_INFO "%p mapping %p -> goto SWAP!\n", page, mapping);
-						goto goto_SWAP;
-					}
-//					printk(KERN_INFO "mapping %p -> COMEX OK!\n", mapping);
+				//	mapping = page_mapping(page);
+				//	if(mapping == NULL){
+				//		printk(KERN_INFO "REMOTE: %p Mapping FUCK!\n", page);
+				//		goto goto_SWAP;
+				//	}
 					
 					try_to_unmap_COMEX(page, ttu_flags, COMEX_nodeID, COMEX_pageNO);
-					ClearPageDirty(page);
-					__remove_mapping(mapping, page);
+				//	printk(KERN_INFO "REMOTE: %p to COMEX OK!\n", page);
 					
+					comex_entry.val = page_private(page);
+					comex_mapping   = swap_address_space(comex_entry);
+					spin_lock_irq(&comex_mapping->tree_lock);
+					__delete_from_swap_cache(page);
+					spin_unlock_irq(&comex_mapping->tree_lock);
+					swapcache_free(comex_entry, page);
+
+					atomic_set(&page->_count, 0);
+					ClearPageDirty(page);
 					unlock_page(page);
-				//	atomic_set(&page->_count, 0);
 					SWAP_to_COMEX++;
 					goto free_it;
 				}
 			}
-goto_SWAP:			
+goto_SWAP:
 			if (!add_to_swap(page, page_list))
 				goto activate_locked;
 			SWAP_to_Disk++;

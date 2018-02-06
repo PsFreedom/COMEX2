@@ -86,6 +86,9 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 	char *old_vAddr, *buf_vAddr;
 	int i, buff_slot, dest_node = COMEX_hash(get_page_PID(old_page));
 	
+	swp_entry_t entry;
+	unsigned long offsetField = 0;
+	
 	for(i=0; i<MAX_TRY; i++)
 	{
 		spin_lock(&COMEX_free_group[dest_node].list_lock);
@@ -116,6 +119,14 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 			buff_pos[dest_node].tail %= COMEX_total_writeOut;
 			COMEX_writeOut_buff[dest_node][buff_slot].status = 1;
 			spin_unlock(&COMEX_free_group[dest_node].list_lock);
+			
+			offsetField = 0UL + (unsigned long)dest_node + ((unsigned long)*retPageNO << 10);
+			entry = swp_entry(8, offsetField);
+			if(__add_to_swap_cache(old_page, entry)){
+//				printk(KERN_INFO "REMOTE: %p add_to_swap_cache FAILED!\n", old_page);
+				swapcache_free(entry, NULL);
+				return -1;
+			}
 			
 			buf_vAddr  = (char *)get_writeOut_buff(dest_node, buff_slot);
 			old_vAddr  = (char *)kmap(old_page);

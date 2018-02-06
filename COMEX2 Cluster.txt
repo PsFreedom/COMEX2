@@ -83,34 +83,32 @@ rsync -avz /home/benchmark root@10.132.121.59:/home/
 rsync -avz /home/benchmark root@10.132.121.58:/home/
 
 
-ssh 10.132.121.16 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 1 270 192.168.10. > myconfig.h;' &
-ssh 10.132.121.15 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 2 270 192.168.10. > myconfig.h;' &
-ssh 10.132.121.14 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 3 270 192.168.10. > myconfig.h;' &
-ssh 10.132.121.13 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 4 270 192.168.10. > myconfig.h;' &
-ssh 10.132.121.12 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 5 270 192.168.10. > myconfig.h;' &
-ssh 10.132.121.11 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 6 270 192.168.10. > myconfig.h;' &
-ssh 10.132.121.30 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 7 2060 192.168.10. > myconfig.h;' &
-ssh 10.132.121.29 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 8 2060 192.168.10. > myconfig.h;' &
-ssh 10.132.121.31 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 9 12300 192.168.10. > myconfig.h;' &
-ssh 10.132.121.27 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 10 12300 192.168.10. > myconfig.h;' &
-ssh 10.132.121.26 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 11 12300 192.168.10. > myconfig.h;' &
-ssh 10.132.121.25 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 12 12300 192.168.10. > myconfig.h;' &
+ssh 10.132.121.16 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 1 280 192.168.10. > myconfig.h;' &
+ssh 10.132.121.15 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 2 280 192.168.10. > myconfig.h;' &
+ssh 10.132.121.14 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 3 280 192.168.10. > myconfig.h;' &
+ssh 10.132.121.13 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 4 280 192.168.10. > myconfig.h;' &
+ssh 10.132.121.12 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 5 280 192.168.10. > myconfig.h;' &
+ssh 10.132.121.11 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 6 280 192.168.10. > myconfig.h;' &
+ssh 10.132.121.30 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 7 3100 192.168.10. > myconfig.h;' &
+ssh 10.132.121.29 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 8 3100 192.168.10. > myconfig.h;' &
+ssh 10.132.121.31 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 9 14360 192.168.10. > myconfig.h;' &
+ssh 10.132.121.27 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 10 14360 192.168.10. > myconfig.h;' &
+ssh 10.132.121.26 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 11 14360 192.168.10. > myconfig.h;' &
+ssh 10.132.121.25 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 11 12 14360 192.168.10. > myconfig.h;' &
 
 
-ssh 10.132.121.16 'cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install' &
-ssh 10.132.121.15 'cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install' &
-ssh 10.132.121.14 'cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install' &
-ssh 10.132.121.13 'cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install' &
-ssh 10.132.121.12 'cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install' &
-ssh 10.132.121.11 'cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install' &
-ssh 10.132.121.30 'cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install' &
-ssh 10.132.121.29 'cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install' &
-ssh 10.132.121.31 'cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install' &
-ssh 10.132.121.27 'cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install' &
-ssh 10.132.121.26 'cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install' &
-ssh 10.132.121.25 'cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install' &
-
-
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.16:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.15:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.14:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.13:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.12:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.11:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.30:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.29:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.31:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.27:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.26:/home/comex/
+rsync -az /home/comex/linux-3.10.87 root@10.132.121.25:/home/comex/
 ssh 10.132.121.16 'cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install && rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot' &
 ssh 10.132.121.15 'cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install && rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot' &
 ssh 10.132.121.14 'cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 4 && make -j 4 modules && make headers_install && make modules_install && make install && rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot' &
@@ -171,12 +169,12 @@ ssh 10.132.121.14 'cd /home/comex/; echo "total_pages=262144,writeOut_buff=256,r
 ssh 10.132.121.13 'cd /home/comex/; echo "total_pages=262144,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
 ssh 10.132.121.12 'cd /home/comex/; echo "total_pages=262144,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
 ssh 10.132.121.11 'cd /home/comex/; echo "total_pages=262144,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
-ssh 10.132.121.30 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
-ssh 10.132.121.29 'cd /home/comex/; echo "total_pages=2097152,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
-ssh 10.132.121.31 'cd /home/comex/; echo "total_pages=12582912,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
-ssh 10.132.121.27 'cd /home/comex/; echo "total_pages=12582912,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
-ssh 10.132.121.26 'cd /home/comex/; echo "total_pages=12582912,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
-ssh 10.132.121.25 'cd /home/comex/; echo "total_pages=12582912,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
+ssh 10.132.121.30 'cd /home/comex/; echo "total_pages=3145728,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
+ssh 10.132.121.29 'cd /home/comex/; echo "total_pages=3145728,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
+ssh 10.132.121.31 'cd /home/comex/; echo "total_pages=14680064,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
+ssh 10.132.121.27 'cd /home/comex/; echo "total_pages=14680064,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
+ssh 10.132.121.26 'cd /home/comex/; echo "total_pages=14680064,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
+ssh 10.132.121.25 'cd /home/comex/; echo "total_pages=14680064,writeOut_buff=256,readIn_buff=4096,proc_name=ft.D.x" >/proc/krping; echo $! > PID' &
 
 
 ssh 10.132.121.16 'tail -n 10 /var/log/messages' &

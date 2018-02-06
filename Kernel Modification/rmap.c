@@ -1351,15 +1351,7 @@ int try_to_unmap_one_COMEX(struct page *page, struct vm_area_struct *vma,
 	dec_mm_counter(mm, MM_ANONPAGES);
 	inc_mm_counter(mm, MM_SWAPENTS);
 	
-	if(COMEX_nodeID == -11){
-		offsetField = offsetField + (unsigned long)COMEX_pageNO;
-		entry = swp_entry(9, offsetField);
-//		printk(KERN_INFO "%s: NodeID %d swp_type %d pageNO %lu\n", __FUNCTION__, COMEX_nodeID, swp_type(entry), swp_offset(entry));
-	}
-	else{
-		offsetField = offsetField + (unsigned long)COMEX_nodeID + ((unsigned long)COMEX_pageNO << 10);
-		entry = swp_entry(8, offsetField);
-	}
+	entry.val = page_private(page);
 	
 	set_pte_at(mm, address, pte, swp_entry_to_pte(entry));
 	BUG_ON(pte_file(*pte));
