@@ -50,15 +50,7 @@
 #include <linux/swapops.h>
 #include <linux/balloon_compaction.h>
 
-#include <linux/fs.h>			// add for COMEX
-#include <linux/debugfs.h>		// add for COMEX
-
 #include "internal.h"
-#include "comex_structure.h"	// add for COMEX
-#include "comex_util.h"			// add for COMEX
-#include "comex_buddy.h"		// add for COMEX
-#include "comex_remote.h"		// add for COMEX
-#include "comex_lib.h"			// add for COMEX
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/vmscan.h>
@@ -403,6 +395,9 @@ static pageout_t pageout(struct page *page, struct address_space *mapping,
 	 * swap_backing_dev_info is bust: it doesn't reflect the
 	 * congestion state of the swapdevs.  Easy to fix, if needed.
 	 */
+	swp_entry_t entry;
+	entry.val = page_private(page);
+	
 	if (!is_page_cache_freeable(page))
 		return PAGE_KEEP;
 	if (!mapping) {
@@ -419,6 +414,15 @@ static pageout_t pageout(struct page *page, struct address_space *mapping,
 		}
 		return PAGE_KEEP;
 	}
+	
+	if(swp_type(entry) == 8 || swp_type(entry) == 9){
+		TestClearPageWriteback(page);
+		ClearPageReclaim(page);
+		ClearPageDirty(page);
+		unlock_page(page);
+		return PAGE_SUCCESS;
+	}
+	
 	if (mapping->a_ops->writepage == NULL)
 		return PAGE_ACTIVATE;
 	if (!may_write_to_queue(mapping->backing_dev_info, sc))
@@ -696,10 +700,6 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 	unsigned long nr_congested = 0;
 	unsigned long nr_reclaimed = 0;
 	unsigned long nr_writeback = 0;
-	
-	int COMEX_nodeID;
-	int COMEX_pageNO;
-	struct task_struct *COMEX_task;
 
 	cond_resched();
 
@@ -709,9 +709,6 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 		struct page *page;
 		int may_enter_fs;
 		enum page_references references = PAGEREF_RECLAIM_CLEAN;
-		
-		swp_entry_t comex_entry;
-		struct address_space *comex_mapping;
 
 		cond_resched();
 
@@ -792,64 +789,8 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 		if (PageAnon(page) && !PageSwapCache(page)) {
 			if (!(sc->gfp_mask & __GFP_IO))
 				goto keep_locked;
-			
-			COMEX_task = get_taskStruct(page);
-			if(COMEX_Ready == 1 && page_mapcount(page) == 1 && COMEX_task != NULL && strcmp(COMEX_task->comm, proc_name) == 0){
-				COMEX_nodeID = -1;
-				COMEX_pageNO = 200;
-				if(COMEX_move_to_COMEX(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
-				{
-				//	mapping = page_mapping(page);
-				//	if(mapping == NULL){
-				//		printk(KERN_INFO "LOCAL: %p Mapping FUCK!\n", page);
-				//		goto goto_SWAP;
-				//	}
-					
-					try_to_unmap_COMEX(page, ttu_flags, COMEX_nodeID, COMEX_pageNO);
-				//	printk(KERN_INFO "LOCAL: %p to COMEX OK!\n", page);
-					
-					comex_entry.val = page_private(page);
-					comex_mapping   = swap_address_space(comex_entry);
-					spin_lock_irq(&comex_mapping->tree_lock);
-					__delete_from_swap_cache(page);
-					spin_unlock_irq(&comex_mapping->tree_lock);
-					swapcache_free(comex_entry, page);
-
-					atomic_set(&page->_count, 0);
-					ClearPageDirty(page);
-					unlock_page(page);
-					SWAP_to_COMEX++;
-					goto free_it;
-				}
-				if(COMEX_move_to_Remote(page, &COMEX_nodeID, &COMEX_pageNO) == 1)
-				{
-				//	mapping = page_mapping(page);
-				//	if(mapping == NULL){
-				//		printk(KERN_INFO "REMOTE: %p Mapping FUCK!\n", page);
-				//		goto goto_SWAP;
-				//	}
-					
-					try_to_unmap_COMEX(page, ttu_flags, COMEX_nodeID, COMEX_pageNO);
-				//	printk(KERN_INFO "REMOTE: %p to COMEX OK!\n", page);
-					
-					comex_entry.val = page_private(page);
-					comex_mapping   = swap_address_space(comex_entry);
-					spin_lock_irq(&comex_mapping->tree_lock);
-					__delete_from_swap_cache(page);
-					spin_unlock_irq(&comex_mapping->tree_lock);
-					swapcache_free(comex_entry, page);
-
-					atomic_set(&page->_count, 0);
-					ClearPageDirty(page);
-					unlock_page(page);
-					SWAP_to_COMEX++;
-					goto free_it;
-				}
-			}
-goto_SWAP:
 			if (!add_to_swap(page, page_list))
 				goto activate_locked;
-			SWAP_to_Disk++;
 			may_enter_fs = 1;
 		}
 

@@ -21,6 +21,16 @@
 
 #include <asm/pgtable.h>
 
+#include <linux/fs.h>			// add for COMEX
+#include <linux/debugfs.h>		// add for COMEX
+#include <linux/rmap.h>			// add for COMEX
+
+#include "comex_structure.h"	// add for COMEX
+#include "comex_util.h"			// add for COMEX
+#include "comex_buddy.h"		// add for COMEX
+#include "comex_remote.h"		// add for COMEX
+#include "comex_lib.h"			// add for COMEX
+
 /*
  * swapper_space is a fiction, retained to simplify the path through
  * vmscan's shrink_page_list.
@@ -164,11 +174,31 @@ int add_to_swap(struct page *page, struct list_head *list)
 {
 	swp_entry_t entry;
 	int err;
+	
+	int NodeID, PageNO, COMEX_check;
+	unsigned long offsetField;
+	struct task_struct *COMEX_task;
 
 	VM_BUG_ON(!PageLocked(page));
 	VM_BUG_ON(!PageUptodate(page));
 
-	entry = get_swap_page();
+	COMEX_check = 0;
+	COMEX_task = get_taskStruct(page);
+	if(COMEX_Ready == 1 && page_mapcount(page) == 1 && COMEX_task != NULL && strcmp(COMEX_task->comm, proc_name) == 0){
+		if(COMEX_move_to_COMEX(page, &NodeID, &PageNO) == 1){
+			offsetField = 0UL + (unsigned long)PageNO;
+			entry = swp_entry(9, offsetField);
+			COMEX_check = 1;
+		}
+		else if(COMEX_move_to_Remote(page, &NodeID, &PageNO) == 1){
+			offsetField = 0UL + (unsigned long)NodeID + ((unsigned long)PageNO << 10);
+			entry = swp_entry(8, offsetField);
+			COMEX_check = 1;
+		}
+	}
+	
+	if(COMEX_check == 0)
+		entry = get_swap_page();
 	if (!entry.val)
 		return 0;
 
@@ -390,6 +420,7 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				SetPageUptodate(new_page);
 				unlock_page(new_page);
 				
+				printk(KERN_INFO "REMOTE: NodeID %d pageNO %d\n", NodeID, (int)COMEX_pageNO);
 //				if(checkSum_page(new_page) != COMEX_checksum[COMEX_pageNO])
 //					printk(KERN_INFO "REMOTE: Checksum FAILED! %d %d - %lu != %lu\n", NodeID, COMEX_pageNO, COMEX_checksum[COMEX_pageNO], checkSum_page(new_page));
 			}
@@ -405,6 +436,7 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				SetPageUptodate(new_page);
 				unlock_page(new_page);
 				
+				printk(KERN_INFO "LOCAL: pageNO %d\n", (int)swp_offset(entry));
 //				if(checkSum_page(new_page) != 0)
 //					printk(KERN_INFO "LOCAL: %d - %lu\n", (int)swp_offset(entry), checkSum_page(new_page));
 			}

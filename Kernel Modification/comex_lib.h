@@ -133,19 +133,8 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 	char *new_vAddr;
 	char *old_vAddr;
 	
-	swp_entry_t entry;
-	unsigned long offsetField = 0;
-	
 	if(COMEX_pageNO < 0 || COMEX_pageNO >= COMEX_total_pages){	// No page available
 //		printk(KERN_INFO "%s: Wrong pageNO %d\n", __FUNCTION__, COMEX_pageNO);
-		return -1;
-	}
-	
-	offsetField = 0UL + (unsigned long)COMEX_pageNO;
-	entry = swp_entry(9, offsetField);
-	if(__add_to_swap_cache(old_page, entry)){
-//		printk(KERN_INFO "LOCAL: %p add_to_swap_cache FAILED!\n", old_page);
-		swapcache_free(entry, NULL);
 		return -1;
 	}
 	
