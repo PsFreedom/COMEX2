@@ -184,6 +184,9 @@ int add_to_swap(struct page *page, struct list_head *list)
 
 	COMEX_check = 0;
 	COMEX_task = get_taskStruct(page);
+//	if(strcmp(COMEX_task->comm, proc_name) == 0){
+//		printk(KERN_INFO "%s: %s-> _count %d mapcount %d   ", __FUNCTION__, COMEX_task->comm, atomic_read(&page->_count), page_mapcount(page));
+//	}
 	if(COMEX_Ready == 1 && page_mapcount(page) == 1 && COMEX_task != NULL && strcmp(COMEX_task->comm, proc_name) == 0){
 		if(COMEX_move_to_COMEX(page, &NodeID, &PageNO) == 1){
 			offsetField = 0UL + (unsigned long)PageNO;
@@ -245,6 +248,9 @@ void delete_from_swap_cache(struct page *page)
 {
 	swp_entry_t entry;
 	struct address_space *address_space;
+	
+	int	NodeID;
+	unsigned long COMEX_pageNO;
 
 	entry.val = page_private(page);
 
@@ -255,6 +261,19 @@ void delete_from_swap_cache(struct page *page)
 
 	swapcache_free(entry, page);
 	page_cache_release(page);
+	
+	if(swp_type(entry) == 8)
+	{
+		COMEX_pageNO = (unsigned long)swp_offset(entry);
+		NodeID = (int)COMEX_pageNO & 1023;
+		COMEX_pageNO = COMEX_pageNO >> 10;
+		
+		COMEX_free_to_remote(NodeID, (int)COMEX_pageNO);
+	}
+	else if(swp_type(entry) == 9)
+	{
+		COMEX_free_page((int)swp_offset(entry), 0);
+	}
 }
 
 /* 
@@ -430,7 +449,6 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				COMEX_in_Local++;
 				
 				COMEX_read_from_local(new_page, (int)swp_offset(entry));
-				
 				count_vm_event(PSWPIN);
 				SetPageDirty(new_page);
 				SetPageUptodate(new_page);

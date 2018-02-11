@@ -161,7 +161,7 @@ void COMEX_read_from_remote(struct page *new_page, int node_ID, int pageNO)
 	addr_struct.size   = PreF_SIZE << SHIFT_PAGE;
 	addr_struct.bufIDX = buff_FLR;
 	COMEX_RDMA(node_ID, CODE_COMEX_PAGE_READ, &addr_struct, sizeof(addr_struct));
-	COMEX_free_to_remote(node_ID, pageNO);
+//	COMEX_free_to_remote(node_ID, pageNO);
 	
 	for(i=0; i<PreF_SIZE; i++){
 		COMEX_readIn_buff[buff_FLR + i].status = 2;
@@ -189,7 +189,7 @@ int COMEX_read_from_buffer(struct page *new_page, int nodeID, int pageNO)
 			kunmap(new_page);
 			
 //			printk(KERN_INFO "%s: Hit Buffer!... %d %d\n", __FUNCTION__, nodeID, i);
-			COMEX_free_to_remote(nodeID, pageNO);
+//			COMEX_free_to_remote(nodeID, pageNO);
 			COMEX_in_buff++;
 			return 1;
 		}
@@ -214,7 +214,7 @@ int COMEX_read_from_preFetch(struct page *new_page, int nodeID, int pageNO)
 			kunmap(new_page);
 			
 //			printk(KERN_INFO "%s: Hit preFetch!... %d %d\n", __FUNCTION__, nodeID, i);
-			COMEX_free_to_remote(nodeID, pageNO);
+//			COMEX_free_to_remote(nodeID, pageNO);
 			COMEX_in_preF++;
 			return 1;
 		}

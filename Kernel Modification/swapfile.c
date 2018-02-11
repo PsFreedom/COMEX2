@@ -2235,7 +2235,7 @@ static int __swap_duplicate(swp_entry_t entry, unsigned char usage)
 	spin_lock(&p->lock);
 	if (unlikely(offset >= p->max))
 		goto unlock_out;
-	
+
 	count = p->swap_map[offset];
 	has_cache = count & SWAP_HAS_CACHE;
 	count &= ~SWAP_HAS_CACHE;

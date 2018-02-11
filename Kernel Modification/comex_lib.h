@@ -171,6 +171,6 @@ void COMEX_read_from_local(struct page *new_page, int pageNO)
 //		printk(KERN_INFO "%s: CMX_CKSM %d - %lu %lu\n", __FUNCTION__, pageNO, COMEX_Buddy_page[pageNO].CMX_CKSM, checkSum_Vpage(new_vAddr));
 //	}
 	
-	COMEX_free_page(pageNO, 0);
+//	COMEX_free_page(pageNO, 0);
 	kunmap(new_page);
 }
