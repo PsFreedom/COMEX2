@@ -96,8 +96,8 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 		COMEX_Buddy_page[i].pageNO    =  i;
 		COMEX_Buddy_page[i].private   =  0;
 		COMEX_Buddy_page[i]._mapcount = -1;
-		COMEX_Buddy_page[i].CMX_cntr  =  0;
-		COMEX_Buddy_page[i].CMX_CKSM  =  0;
+//		COMEX_Buddy_page[i].CMX_cntr  =  0;
+//		COMEX_Buddy_page[i].CMX_CKSM  =  0;
 		INIT_LIST_COMEX(&COMEX_Buddy_page[i].lru);
 	}
 	
@@ -166,7 +166,7 @@ void COMEX_read_from_local(struct page *new_page, int pageNO)
 	new_vAddr = (char *)kmap(new_page);
 	
 	memcpy(new_vAddr, old_vAddr, X86PageSize);
-	COMEX_Buddy_page[pageNO].CMX_cntr--;
+// 	COMEX_Buddy_page[pageNO].CMX_cntr--;
 //	if(COMEX_Buddy_page[pageNO].CMX_CKSM != checkSum_Vpage(new_vAddr)){
 //		printk(KERN_INFO "%s: CMX_CKSM %d - %lu %lu\n", __FUNCTION__, pageNO, COMEX_Buddy_page[pageNO].CMX_CKSM, checkSum_Vpage(new_vAddr));
 //	}

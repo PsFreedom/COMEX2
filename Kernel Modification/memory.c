@@ -1176,13 +1176,13 @@ again:
 				print_bad_pte(vma, addr, ptent, NULL);
 		} else {
 			swp_entry_t entry = pte_to_swp_entry(ptent);
-			
+
 			if(swp_type(entry) == 8)
 			{
 				COMEX_pageNO = (unsigned long)swp_offset(entry);
 				NodeID = (int)COMEX_pageNO & 1023;
 				COMEX_pageNO = COMEX_pageNO >> 10;
-				COMEX_free_to_remote(NodeID, COMEX_pageNO);
+				COMEX_free_to_remote(NodeID, (int)COMEX_pageNO);
 			}
 			else if(swp_type(entry) == 9)
 			{
@@ -3030,6 +3030,9 @@ static int do_swap_page(struct mm_struct *mm, struct vm_area_struct *vma,
 	struct mem_cgroup *ptr;
 	int exclusive = 0;
 	int ret = 0;
+	
+	int	NodeID;
+	unsigned long COMEX_pageNO;
 
 	if (!pte_unmap_same(mm, pmd, page_table, orig_pte))
 		goto out;
@@ -3153,8 +3156,17 @@ static int do_swap_page(struct mm_struct *mm, struct vm_area_struct *vma,
 	mem_cgroup_commit_charge_swapin(page, ptr);
 
 	swap_free(entry);
-	if (swp_type(entry) == 8 || swp_type(entry) == 9){
+	if     (swp_type(entry) == 8){
 		try_to_free_swap(page);
+		
+		COMEX_pageNO = (unsigned long)swp_offset(entry);
+		NodeID = (int)COMEX_pageNO & 1023;
+		COMEX_pageNO = COMEX_pageNO >> 10;
+		COMEX_free_to_remote(NodeID, (int)COMEX_pageNO);
+	}
+	else if(swp_type(entry) == 9){
+		try_to_free_swap(page);
+		COMEX_free_page((int)swp_offset(entry), 0);
 	}
 	else if (vm_swap_full() || (vma->vm_flags & VM_LOCKED) || PageMlocked(page)){
 		try_to_free_swap(page);

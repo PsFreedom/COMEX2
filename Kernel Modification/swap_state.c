@@ -248,9 +248,6 @@ void delete_from_swap_cache(struct page *page)
 {
 	swp_entry_t entry;
 	struct address_space *address_space;
-	
-	int	NodeID;
-	unsigned long COMEX_pageNO;
 
 	entry.val = page_private(page);
 
@@ -261,19 +258,6 @@ void delete_from_swap_cache(struct page *page)
 
 	swapcache_free(entry, page);
 	page_cache_release(page);
-	
-	if(swp_type(entry) == 8)
-	{
-		COMEX_pageNO = (unsigned long)swp_offset(entry);
-		NodeID = (int)COMEX_pageNO & 1023;
-		COMEX_pageNO = COMEX_pageNO >> 10;
-		
-		COMEX_free_to_remote(NodeID, (int)COMEX_pageNO);
-	}
-	else if(swp_type(entry) == 9)
-	{
-		COMEX_free_page((int)swp_offset(entry), 0);
-	}
 }
 
 /* 

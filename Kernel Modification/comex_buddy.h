@@ -20,8 +20,8 @@ typedef struct Dummy_page {
 	int _mapcount;
 	struct COMEX_list_head lru;
 	
-	int CMX_cntr;			// TEMP
-	unsigned long CMX_CKSM;	// TEMP
+//	int CMX_cntr;			// TEMP
+//	unsigned long CMX_CKSM;	// TEMP
 } COMEX_page;
 COMEX_page *COMEX_Buddy_page;
 

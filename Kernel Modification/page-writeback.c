@@ -2101,13 +2101,6 @@ int set_page_dirty(struct page *page)
 {
 	struct address_space *mapping = page_mapping(page);
 	swp_entry_t entry;
-	
-	entry.val = page_private(page);
-	if(swp_type(entry) == 8 || swp_type(entry) == 9){
-		TestSetPageDirty(page);
-//		printk(KERN_INFO "%s: %p COMEX\n", __FUNCTION__, page);
-		return 0;
-	}
 
 	if (likely(mapping)) {
 		int (*spd)(struct page *) = mapping->a_ops->set_page_dirty;
@@ -2122,6 +2115,10 @@ int set_page_dirty(struct page *page)
 		 * process. But it's a trivial problem.
 		 */
 		ClearPageReclaim(page);
+		entry.val = page_private(page);
+		if(swp_type(entry) == 8 || swp_type(entry) == 9){
+			return 0;
+		}
 #ifdef CONFIG_BLOCK
 		if (!spd)
 			spd = __set_page_dirty_buffers;
