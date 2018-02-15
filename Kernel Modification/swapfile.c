@@ -514,6 +514,7 @@ static struct swap_info_struct *swap_info_get(swp_entry_t entry)
 		goto out;
 	type = swp_type(entry);
 	if(type == 8 || type == 9){
+//		printk(KERN_INFO "swap_info_get %d -> %p\n", type, swap_info[type]);
 		return swap_info[type];
 	}
 	if (type >= nr_swapfiles)

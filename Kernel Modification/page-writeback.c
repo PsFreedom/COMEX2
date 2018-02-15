@@ -2117,6 +2117,7 @@ int set_page_dirty(struct page *page)
 		ClearPageReclaim(page);
 		entry.val = page_private(page);
 		if(swp_type(entry) == 8 || swp_type(entry) == 9){
+			SetPageDirty(page);
 			return 0;
 		}
 #ifdef CONFIG_BLOCK

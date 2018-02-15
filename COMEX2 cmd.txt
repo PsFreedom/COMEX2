@@ -17,7 +17,6 @@ python gen_myconfig.py 2 3 6160 10.1.13. > myconfig.h
 
 echo "total_pages=524288,writeOut_buff=256,readIn_buff=4096,proc_name=java" >/proc/krping &
 echo "total_pages=6291456,writeOut_buff=256,readIn_buff=4096,proc_name=java" >/proc/krping &
-echo "total_pages=6291456,writeOut_buff=256,readIn_buff=4096,proc_name=java" >/proc/krping &
 
 
 screen

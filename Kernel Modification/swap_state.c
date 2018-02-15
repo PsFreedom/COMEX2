@@ -423,7 +423,7 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				SetPageUptodate(new_page);
 				unlock_page(new_page);
 				
-				printk(KERN_INFO "REMOTE: NodeID %d pageNO %d\n", NodeID, (int)COMEX_pageNO);
+//				printk(KERN_INFO "REMOTE: NodeID %d pageNO %d\n", NodeID, (int)COMEX_pageNO);
 //				if(checkSum_page(new_page) != COMEX_checksum[COMEX_pageNO])
 //					printk(KERN_INFO "REMOTE: Checksum FAILED! %d %d - %lu != %lu\n", NodeID, COMEX_pageNO, COMEX_checksum[COMEX_pageNO], checkSum_page(new_page));
 			}
@@ -438,7 +438,7 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				SetPageUptodate(new_page);
 				unlock_page(new_page);
 				
-				printk(KERN_INFO "LOCAL: pageNO %d\n", (int)swp_offset(entry));
+//				printk(KERN_INFO "LOCAL: pageNO %d\n", (int)swp_offset(entry));
 //				if(checkSum_page(new_page) != 0)
 //					printk(KERN_INFO "LOCAL: %d - %lu\n", (int)swp_offset(entry), checkSum_page(new_page));
 			}

@@ -3156,17 +3156,24 @@ static int do_swap_page(struct mm_struct *mm, struct vm_area_struct *vma,
 	mem_cgroup_commit_charge_swapin(page, ptr);
 
 	swap_free(entry);
-	if     (swp_type(entry) == 8){
+	if (swp_type(entry) == 8){
 		try_to_free_swap(page);
 		
-		COMEX_pageNO = (unsigned long)swp_offset(entry);
-		NodeID = (int)COMEX_pageNO & 1023;
-		COMEX_pageNO = COMEX_pageNO >> 10;
-		COMEX_free_to_remote(NodeID, (int)COMEX_pageNO);
+		if (!PageSwapCache(page)){
+			COMEX_pageNO = (unsigned long)swp_offset(entry);
+			NodeID = (int)COMEX_pageNO & 1023;
+			COMEX_pageNO = COMEX_pageNO >> 10;
+			
+			printk(KERN_INFO "%p Try to Free SwapCache %d - %d %lu\n", page, swp_type(entry), NodeID, COMEX_pageNO);
+			COMEX_free_to_remote(NodeID, COMEX_pageNO);
+		}
 	}
-	else if(swp_type(entry) == 9){
+	else if (swp_type(entry) == 9){
 		try_to_free_swap(page);
-		COMEX_free_page((int)swp_offset(entry), 0);
+		if (!PageSwapCache(page)){
+			printk(KERN_INFO "%p Try to Free SwapCache %d - %d\n", page, swp_type(entry), (int)swp_offset(entry));
+			COMEX_free_page((int)swp_offset(entry), 0);
+		}
 	}
 	else if (vm_swap_full() || (vma->vm_flags & VM_LOCKED) || PageMlocked(page)){
 		try_to_free_swap(page);
