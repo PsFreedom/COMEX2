@@ -15,8 +15,8 @@ python gen_myconfig.py 2 2 6160 10.1.12. > myconfig.h
 python gen_myconfig.py 2 3 6160 10.1.13. > myconfig.h
 
 
-echo "total_pages=524288,writeOut_buff=256,readIn_buff=4096,proc_name=java" >/proc/krping &
-echo "total_pages=6291456,writeOut_buff=256,readIn_buff=4096,proc_name=java" >/proc/krping &
+echo "total_pages=524288,writeOut_buff=256,readIn_buff=4096,proc_name=sp.D.x" >/proc/krping &
+echo "total_pages=6291456,writeOut_buff=256,readIn_buff=4096,proc_name=sp.D.x" >/proc/krping &
 
 
 screen
@@ -45,6 +45,7 @@ tail -n 10000 /var/log/messages
 tail -n 30000 /var/log/messages
 
 
+ transparent_hugepage=never no_console_suspend=1
 vim /boot/grub/grub.conf
 head -n 16 /boot/grub/grub.conf | tail -n 1 
 rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot

@@ -86,7 +86,7 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 	char *old_vAddr, *buf_vAddr;
 	int i, buff_slot, dest_node = COMEX_hash(get_page_PID(old_page));
 	
-	for(i=0; i<MAX_TRY; i++)
+	for(i=0; i<COMEX_total_nodes; i++)
 	{
 		spin_lock(&COMEX_free_group[dest_node].list_lock);
 		if(COMEX_free_group[dest_node].total_group < MAX_MSSG && 
@@ -168,7 +168,7 @@ void COMEX_read_from_remote(struct page *new_page, int node_ID, int pageNO)
 		COMEX_readIn_buff[buff_FLR + i].nodeID = node_ID;
 		COMEX_readIn_buff[buff_FLR + i].pageNO = addr_FLR + i;
 	}
-	memcpy(new_vAddr, (char *)COMEX_offset_to_addr((uint64_t)get_readIn_buff(pageNO%COMEX_total_readIn)), X86PageSize);	
+	memcpy(new_vAddr, (char *)COMEX_offset_to_addr((uint64_t)get_readIn_buff(pageNO%COMEX_total_readIn)), X86PageSize);
 	kunmap(new_page);
 	COMEX_in_RDMA++;
 }

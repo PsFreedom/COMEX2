@@ -6,8 +6,7 @@ int COMEX_total_writeOut = 0;
 int COMEX_total_readIn = 0;
 char proc_name[100];
 
-//#define Total_CHKSM 2097152
-//unsigned long COMEX_checksum[Total_CHKSM];
+//#define Total_CHKSM 14680064
 
 ///// Counter 
 unsigned long SWAP_to_Disk   = 0;

@@ -62,6 +62,14 @@ void COMEX_init_Remote()
 			COMEX_free_struct[i].count[j]  =  0;	
 		}
 	}
+	
+//	COMEX_checksum = (unsigned long **)vmalloc(sizeof(unsigned long *)*(COMEX_total_nodes+1));
+//	for(i=0; i<(COMEX_total_nodes+1); i++){
+//		COMEX_checksum = (unsigned long *)vmalloc(sizeof(unsigned long)*Total_CHKSM);
+//		for(j=0; j<Total_CHKSM; j++){
+//			COMEX_checksum[i][j] = 0;
+//		}
+//	}
 }
 
 void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff, int total_pages, char *namePtr)
@@ -96,7 +104,7 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 		COMEX_Buddy_page[i].pageNO    =  i;
 		COMEX_Buddy_page[i].private   =  0;
 		COMEX_Buddy_page[i]._mapcount = -1;
-//		COMEX_Buddy_page[i].CMX_cntr  =  0;
+		COMEX_Buddy_page[i].CMX_cntr  =  1;
 //		COMEX_Buddy_page[i].CMX_CKSM  =  0;
 		INIT_LIST_COMEX(&COMEX_Buddy_page[i].lru);
 	}
@@ -142,8 +150,6 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 	new_vAddr = (char *)COMEX_offset_to_addr((uint64_t)offsetNO << SHIFT_PAGE);
 	old_vAddr = (char *)kmap(old_page);
 	memcpy(new_vAddr, old_vAddr, X86PageSize);
-//	COMEX_Buddy_page[COMEX_pageNO].CMX_cntr++;
-//	COMEX_Buddy_page[COMEX_pageNO].CMX_CKSM = checkSum_Vpage(old_vAddr);
 	
 	kunmap(old_page);
 	*retNodeID = -11;
@@ -161,16 +167,12 @@ void COMEX_read_from_local(struct page *new_page, int pageNO)
 		printk(KERN_INFO "%s: Wrong pageNO %d\n", __FUNCTION__, pageNO);
 		return;
 	}
+	
 	offsetNO  = pageNO + (COMEX_total_writeOut*COMEX_total_nodes) + COMEX_total_readIn;
 	old_vAddr = (char *)COMEX_offset_to_addr((uint64_t)offsetNO << SHIFT_PAGE);
 	new_vAddr = (char *)kmap(new_page);
-	
 	memcpy(new_vAddr, old_vAddr, X86PageSize);
-// 	COMEX_Buddy_page[pageNO].CMX_cntr--;
-//	if(COMEX_Buddy_page[pageNO].CMX_CKSM != checkSum_Vpage(new_vAddr)){
-//		printk(KERN_INFO "%s: CMX_CKSM %d - %lu %lu\n", __FUNCTION__, pageNO, COMEX_Buddy_page[pageNO].CMX_CKSM, checkSum_Vpage(new_vAddr));
-//	}
 	
-//	COMEX_free_page(pageNO, 0);
 	kunmap(new_page);
+//	COMEX_free_page(pageNO, 0);
 }

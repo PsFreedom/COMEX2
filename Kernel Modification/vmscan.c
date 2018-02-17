@@ -707,7 +707,6 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 		int may_enter_fs;
 		enum page_references references = PAGEREF_RECLAIM_CLEAN;
 
-		swp_entry_t entry;
 		cond_resched();
 
 		page = lru_to_page(page_list);
@@ -784,14 +783,6 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 		 * Anonymous process memory has backing store?
 		 * Try to allocate it some swap space here.
 		 */
-		if (PageSwapCache(page)){
-			entry.val = page_private(page);
-			if (swp_type(entry) == 8 || swp_type(entry) == 9)
-			{
-				printk(KERN_INFO "Try to Claim SwapCache %d\n", swp_type(entry));
-				goto keep_locked;
-			}
-		}
 		if (PageAnon(page) && !PageSwapCache(page)) {
 			if (!(sc->gfp_mask & __GFP_IO))
 				goto keep_locked;

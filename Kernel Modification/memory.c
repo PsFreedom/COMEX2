@@ -1183,10 +1183,12 @@ again:
 				NodeID = (int)COMEX_pageNO & 1023;
 				COMEX_pageNO = COMEX_pageNO >> 10;
 				COMEX_free_to_remote(NodeID, (int)COMEX_pageNO);
+				goto COMEX_zap;
 			}
 			else if(swp_type(entry) == 9)
 			{
-				COMEX_free_page((int)swp_offset(entry), 0);	
+				COMEX_free_page((int)swp_offset(entry), 0);
+				goto COMEX_zap;
 			}
 
 			if (!non_swap_entry(entry))
@@ -1204,6 +1206,7 @@ again:
 			if (unlikely(!free_swap_and_cache(entry)))
 				print_bad_pte(vma, addr, ptent, NULL);
 		}
+COMEX_zap:
 		pte_clear_not_present_full(mm, addr, pte, tlb->fullmm);
 	} while (pte++, addr += PAGE_SIZE, addr != end);
 
@@ -3033,6 +3036,7 @@ static int do_swap_page(struct mm_struct *mm, struct vm_area_struct *vma,
 	
 	int	NodeID;
 	unsigned long COMEX_pageNO;
+	struct page *comex_page;
 
 	if (!pte_unmap_same(mm, pmd, page_table, orig_pte))
 		goto out;
@@ -3159,21 +3163,28 @@ static int do_swap_page(struct mm_struct *mm, struct vm_area_struct *vma,
 	if (swp_type(entry) == 8){
 		try_to_free_swap(page);
 		
-		if (!PageSwapCache(page)){
-			COMEX_pageNO = (unsigned long)swp_offset(entry);
-			NodeID = (int)COMEX_pageNO & 1023;
-			COMEX_pageNO = COMEX_pageNO >> 10;
-			
-			printk(KERN_INFO "%p Try to Free SwapCache %d - %d %lu\n", page, swp_type(entry), NodeID, COMEX_pageNO);
-			COMEX_free_to_remote(NodeID, COMEX_pageNO);
+		comex_page = find_get_page(swap_address_space(entry), entry.val);
+		if(comex_page){
+			printk(KERN_INFO "Type %d: Found page %p!\n", swp_type(entry), comex_page);
 		}
+
+		COMEX_pageNO = (unsigned long)swp_offset(entry);
+		NodeID = (int)COMEX_pageNO & 1023;
+		COMEX_pageNO = COMEX_pageNO >> 10;
+		
+//		printk(KERN_INFO "%p Try to Free SwapCache %d - %d %lu\n", page, swp_type(entry), NodeID, (int)COMEX_pageNO);
+		COMEX_free_to_remote(NodeID, COMEX_pageNO);
 	}
 	else if (swp_type(entry) == 9){
 		try_to_free_swap(page);
-		if (!PageSwapCache(page)){
-			printk(KERN_INFO "%p Try to Free SwapCache %d - %d\n", page, swp_type(entry), (int)swp_offset(entry));
-			COMEX_free_page((int)swp_offset(entry), 0);
+		
+		comex_page = find_get_page(swap_address_space(entry), entry.val);
+		if(comex_page){
+			printk(KERN_INFO "Type %d: Found page %p!\n", swp_type(entry), comex_page);
 		}
+		
+//		printk(KERN_INFO "%p Try to Free SwapCache %d - %d\n", page, swp_type(entry), (int)swp_offset(entry));
+		COMEX_free_page((int)swp_offset(entry), 0);
 	}
 	else if (vm_swap_full() || (vma->vm_flags & VM_LOCKED) || PageMlocked(page)){
 		try_to_free_swap(page);
