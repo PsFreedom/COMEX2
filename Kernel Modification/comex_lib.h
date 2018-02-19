@@ -137,7 +137,7 @@ EXPORT_SYMBOL(COMEX_init_ENV);
 int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 {
 	int COMEX_pageNO = COMEX_rmqueue_smallest(0);
-	int offsetNO = 0;
+	int offsetNO = COMEX_pageNO;
 	char *new_vAddr;
 	char *old_vAddr;
 	
@@ -159,7 +159,7 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 
 void COMEX_read_from_local(struct page *new_page, int pageNO)
 {
-	int offsetNO = 0;
+	int offsetNO = pageNO;
 	char *old_vAddr;
 	char *new_vAddr;
 	
