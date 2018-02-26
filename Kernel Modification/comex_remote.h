@@ -283,19 +283,23 @@ void clean_free_struct(int nodeID){
 void COMEX_free_to_remote(int nodeID, int pageNO)
 {
 	int i;
+	spin_lock(&freePage_spin);
 	for(i=0; i<MAX_FREE; i++){
 		if( COMEX_free_struct[nodeID].pageNO[i] + COMEX_free_struct[nodeID].count[i] == pageNO && COMEX_free_struct[nodeID].count[i] < 16384){
 			COMEX_free_struct[nodeID].count[i]++;
+			spin_unlock(&freePage_spin);
 			return;
 		}
 		if( COMEX_free_struct[nodeID].pageNO[i] - 1 == pageNO && COMEX_free_struct[nodeID].count[i] < 16384){
 			COMEX_free_struct[nodeID].pageNO[i]--;
 			COMEX_free_struct[nodeID].count[i]++;
+			spin_unlock(&freePage_spin);
 			return;
 		}
 		if( COMEX_free_struct[nodeID].pageNO[i] == -1){
 			COMEX_free_struct[nodeID].pageNO[i] = pageNO;
 			COMEX_free_struct[nodeID].count[i]  = 1;
+			spin_unlock(&freePage_spin);
 			return;
 		}
 	}
@@ -303,6 +307,7 @@ void COMEX_free_to_remote(int nodeID, int pageNO)
 	clean_free_struct(nodeID);
 	COMEX_free_struct[nodeID].pageNO[0] = pageNO;
 	COMEX_free_struct[nodeID].count[0]  = 1;
+	spin_unlock(&freePage_spin);
 }
 
 void COMEX_pages_request(int target)

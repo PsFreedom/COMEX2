@@ -151,11 +151,11 @@ void COMEX_init(){
 	COMEX_module_echo    = &COMEX_module_echo_fn;
 	COMEX_offset_to_addr = &COMEX_offset_to_addr_fn;
 	COMEX_RDMA 			 = &COMEX_RDMA_fn;
-	
-	remote_shift_offset  = writeOut_buff*CONF_totalCB;
+
+	remote_shift_offset  = 0UL;
+	remote_shift_offset += writeOut_buff*CONF_totalCB;
 	remote_shift_offset += readIn_buff;
 	remote_shift_offset  = remote_shift_offset << 12;
-//	remote_shift_offset  = 0;
 	
 //	COMEX_wq = alloc_workqueue("COMEX WorkQueue", WQ_MEM_RECLAIM | WQ_NON_REENTRANT | WQ_HIGHPRI, 0);
 	COMEX_wq = create_singlethread_workqueue("COMEX WorkQueue");

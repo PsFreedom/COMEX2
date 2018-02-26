@@ -28,6 +28,7 @@ struct dentry *file_COMEX_in_Local;
 ///// Counter
 
 spinlock_t COMEX_buddy_spin;
+spinlock_t freePage_spin;
 
 void (*COMEX_module_echo)(char *) = NULL;
 EXPORT_SYMBOL(COMEX_module_echo);
