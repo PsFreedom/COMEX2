@@ -104,12 +104,10 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 				COMEX_free_group[dest_node].back_off--;
 			}
 		}
-		
 		if(COMEX_free_group[dest_node].total_group > 0 && 
 		   COMEX_writeOut_buff[dest_node][buff_pos[dest_node].tail].status == -1)
 		{
 			*retPageNO = COMEX_freelist_getpage(dest_node);
-			invalidate_buffer(dest_node, *retPageNO);
 			
 			buff_slot = buff_pos[dest_node].tail;
 			buff_pos[dest_node].tail++;
@@ -125,10 +123,12 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 			COMEX_writeOut_buff[dest_node][buff_slot].nodeID = dest_node;
 			COMEX_writeOut_buff[dest_node][buff_slot].pageNO = *retPageNO;
 			COMEX_writeOut_buff[dest_node][buff_slot].status = 2;
-			if(buff_slot%FLUSH == 0 && buff_slot != 0)
-				COMEX_flush_buff(dest_node);
+//			if(buff_slot%FLUSH == 0 && buff_slot != 0)
+//				COMEX_flush_buff(dest_node);
+
+			COMEX_CHKSM[dest_node][*retPageNO] = checkSum_page(old_page);
+			COMEX_flush_one(dest_node, buff_slot);
 			
-		//	COMEX_checksum[*retPageNO] = checkSum_page(old_page);
 			*retNodeID = dest_node;
 			return 1;
 		}
@@ -142,96 +142,27 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 
 void COMEX_read_from_remote(struct page *new_page, int node_ID, int pageNO)
 {
-	COMEX_address_t addr_struct;
-	int i;
-	int addr_FLR = pageNO & PreF_MASK;	// ((>> x) << x)
-	int buff_FLR = addr_FLR % COMEX_total_readIn;
-	char *buf_vAddr = (char *)get_readIn_buff(buff_FLR);
+	int buff_IDX = pageNO % COMEX_total_readIn;
+	char *buf_vAddr = (char *)get_readIn_buff(buff_IDX);
 	char *new_vAddr = (char *)kmap(new_page);
-	
-	for(i=0; i<PreF_SIZE; i++){
-		COMEX_readIn_buff[buff_FLR + i].status = -1;
-		COMEX_readIn_buff[buff_FLR + i].nodeID = -1;
-		COMEX_readIn_buff[buff_FLR + i].pageNO = -1;
-	}
-//	printk(KERN_INFO "Fault %d %d --> IDX %d size %ld %d\n", node_ID, pageNO, buff_FLR, PreF_SIZE, PreF_BITS);
-	
+	COMEX_address_t addr_struct;
+
+	spin_lock(&readBack_spin);
 	addr_struct.local  = (unsigned long)buf_vAddr;
-	addr_struct.remote = (unsigned long)addr_FLR << SHIFT_PAGE;
-	addr_struct.size   = PreF_SIZE << SHIFT_PAGE;
-	addr_struct.bufIDX = buff_FLR;
-	COMEX_RDMA(node_ID, CODE_COMEX_PAGE_READ, &addr_struct, sizeof(addr_struct));
-//	COMEX_free_to_remote(node_ID, pageNO);
+	addr_struct.remote = (unsigned long)pageNO << SHIFT_PAGE;
+	addr_struct.size   = 1;
+	addr_struct.bufIDX = buff_IDX;
 	
-	for(i=0; i<PreF_SIZE; i++){
-		COMEX_readIn_buff[buff_FLR + i].status = 2;
-		COMEX_readIn_buff[buff_FLR + i].nodeID = node_ID;
-		COMEX_readIn_buff[buff_FLR + i].pageNO = addr_FLR + i;
-	}
-	memcpy(new_vAddr, (char *)COMEX_offset_to_addr((uint64_t)get_readIn_buff(pageNO%COMEX_total_readIn)), X86PageSize);
+	addr_struct.dstAddr= new_vAddr;
+	addr_struct.srcAddr= (char *)COMEX_offset_to_addr((uint64_t)get_readIn_buff(buff_IDX));
+	COMEX_RDMA(node_ID, CODE_COMEX_PAGE_READ, &addr_struct, sizeof(addr_struct));
+	
+	spin_unlock(&readBack_spin);
+//	memcpy(new_vAddr, (char *)COMEX_offset_to_addr((uint64_t)get_readIn_buff(buff_FLR)), X86PageSize);
 	kunmap(new_page);
 	COMEX_in_RDMA++;
 }
 EXPORT_SYMBOL(COMEX_read_from_remote);
-
-int COMEX_read_from_buffer(struct page *new_page, int nodeID, int pageNO)
-{
-	int i;
-	char *buf_vAddr;
-	char *new_vAddr;
-	
-	for(i=0; i<COMEX_total_writeOut; i++){
-		if(COMEX_writeOut_buff[nodeID][i].pageNO == pageNO)
-		{
-			buf_vAddr = (char *)get_writeOut_buff(nodeID, i);
-			new_vAddr = (char *)kmap(new_page);
-			memcpy(new_vAddr, (char *)COMEX_offset_to_addr((uint64_t)buf_vAddr), X86PageSize);
-			kunmap(new_page);
-			
-//			printk(KERN_INFO "%s: Hit Buffer!... %d %d\n", __FUNCTION__, nodeID, i);
-//			COMEX_free_to_remote(nodeID, pageNO);
-			COMEX_in_buff++;
-			return 1;
-		}
-	}
-	return 0;
-}
-
-int COMEX_read_from_preFetch(struct page *new_page, int nodeID, int pageNO)
-{
-	int i;
-	char *buf_vAddr;
-	char *new_vAddr;
-	int buff_FLR = (pageNO & PreF_MASK) % COMEX_total_readIn;
-	
-	for(i=buff_FLR; i<buff_FLR+PreF_SIZE; i++){
-		if(COMEX_readIn_buff[i].nodeID == nodeID && 
-		   COMEX_readIn_buff[i].pageNO == pageNO)
-		{
-			buf_vAddr = (char *)get_readIn_buff(i);
-			new_vAddr = (char *)kmap(new_page);
-			memcpy(new_vAddr, (char *)COMEX_offset_to_addr((uint64_t)buf_vAddr), X86PageSize);
-			kunmap(new_page);
-			
-//			printk(KERN_INFO "%s: Hit preFetch!... %d %d\n", __FUNCTION__, nodeID, i);
-//			COMEX_free_to_remote(nodeID, pageNO);
-			COMEX_in_preF++;
-			return 1;
-		}
-	}
-	return 0;
-}
-
-void invalidate_buffer(int nodeID, int pageNO)
-{
-	int pageIDX = pageNO % COMEX_total_readIn;
-	if(COMEX_readIn_buff[pageIDX].nodeID == nodeID && COMEX_readIn_buff[pageIDX].pageNO == pageNO){
-		COMEX_readIn_buff[pageIDX].status = -1;
-		COMEX_readIn_buff[pageIDX].nodeID = -1;
-		COMEX_readIn_buff[pageIDX].pageNO = -1;
-		return;
-	}
-}
 
 void COMEX_page_receive(int nodeID, int pageNO, int group_size)
 {
@@ -340,42 +271,13 @@ void COMEX_free_buff(int nodeID, int pageNO, int con_page)
 }
 EXPORT_SYMBOL(COMEX_free_buff);
 
-void COMEX_flush_buff(int nodeID)
-{
-	int count = 0;
-	COMEX_address_t addr_struct;
-	
-	spin_lock(&buff_pos[nodeID].pos_lock);
-	while(COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].status == 2)
-	{
-		COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].status = 3;
-		count++;
-		if(buff_pos[nodeID].head + count == COMEX_total_writeOut)
-			break;
-	}
-	if(count == 0){
-		spin_unlock(&buff_pos[nodeID].pos_lock);
-		return;
-	}
-	
-	addr_struct.local  = (unsigned long)get_writeOut_buff(nodeID, buff_pos[nodeID].head);
-	addr_struct.remote = (unsigned long)COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head].pageNO << SHIFT_PAGE;
-	addr_struct.size   = count;
-	addr_struct.bufIDX = buff_pos[nodeID].head;
-	buff_pos[nodeID].head += count;
-	buff_pos[nodeID].head %= COMEX_total_writeOut;
-	spin_unlock(&buff_pos[nodeID].pos_lock);
-	
-	COMEX_RDMA(nodeID, CODE_COMEX_PAGE_WRTE, &addr_struct, sizeof(addr_struct));
-}
-
 void COMEX_flush_one(int nodeID, int slot)
 {
 	COMEX_address_t addr_struct;
 	
 	addr_struct.local  = (unsigned long)get_writeOut_buff(nodeID, slot);
 	addr_struct.remote = (unsigned long)COMEX_writeOut_buff[nodeID][slot].pageNO << SHIFT_PAGE;
-	addr_struct.size   = X86PageSize;
+	addr_struct.size   = 1;
 	addr_struct.bufIDX = slot;
 	COMEX_RDMA(nodeID, CODE_COMEX_PAGE_WRTE, &addr_struct, sizeof(addr_struct));
 }

@@ -166,6 +166,7 @@ struct krping_cb;
 /*
  * Control block struct.
  */
+struct semaphore sem_global_read;
 struct krping_cb {
 	int server;			/* 0 iff client */
 	struct ib_cq *cq_send;
@@ -270,7 +271,7 @@ static int regis_bigspace(struct krping_sharedspace *bigspace,int num_bigpages)
 }
 
 //big page align in 4MB chunks
-static uint64_t translate_useraddr(struct krping_cb *cb,uint64_t offset){
+static uint64_t translate_useraddr(struct krping_cb *cb, uint64_t offset){
 	if(cb->bigspace->bufferpages[offset/RPING_BUFSIZE] == NULL){
 		return NULL;
 	}
@@ -348,8 +349,12 @@ static int do_write(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 
 	struct ib_sge rdma_sgl_new= {0};		
 	struct semaphore sem_write;
 	
-	if(((local_offset%RPING_BUFSIZE+size>RPING_BUFSIZE)||(remote_offset%RPING_BUFSIZE+size>RPING_BUFSIZE))){ //chk misalignment
-		DEBUG_LOG("\nALERT, BUFFER MISALIGNMENT FOUND\n\n\n");
+	if((( local_offset%RPING_BUFSIZE + size > RPING_BUFSIZE)||
+	    (remote_offset%RPING_BUFSIZE + size > RPING_BUFSIZE)))
+	{ //chk misalignment
+		DEBUG_LOG("\nlocal %lu %lu %lu ",  local_offset, RPING_BUFSIZE, size);
+		DEBUG_LOG("\nremot %lu %lu %lu ", remote_offset, RPING_BUFSIZE, size);
+		DEBUG_LOG("\nALERT, BUFFER MISALIGNMENT FOUND\n");
 		return 1;
 	}else if(remote_offset/RPING_BUFSIZE>cb->remote_pcount){
 		DEBUG_LOG("\nALERT WRITE, %ld %ld %ld\n", local_offset, remote_offset, size);
@@ -359,20 +364,20 @@ static int do_write(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 
 		//memcpy(&rdma_sq_wr_copy,&cb->rdma_sq_wr_proto,sizeof(struct ib_send_wr));
 		// replace with
 		rdma_sq_wr_copy.wr.rdma.rkey = cb->remote_rkey;
-		rdma_sq_wr_copy.next = NULL;
-		rdma_sq_wr_copy.send_flags = IB_SEND_SIGNALED;
-		rdma_sq_wr_copy.num_sge = 1;
+		rdma_sq_wr_copy.next		 = NULL;
+		rdma_sq_wr_copy.send_flags	 = IB_SEND_SIGNALED;
+		rdma_sq_wr_copy.num_sge 	 = 1;
 		//
-		rdma_sq_wr_copy.opcode = IB_WR_RDMA_WRITE;
-		rdma_sq_wr_copy.wr_id = (uint64_t)&sem_write;
-		rdma_sq_wr_copy.sg_list=&rdma_sgl_new; 
-		rdma_sgl_new.lkey = cb->dma_mr->rkey;
-		rdma_sq_wr_copy.sg_list->length = size; //
-		rdma_sgl_new.addr = cb->bigspace->dmapages[local_offset/RPING_BUFSIZE]+(local_offset%RPING_BUFSIZE); //
+		rdma_sq_wr_copy.opcode				= IB_WR_RDMA_WRITE;
+		rdma_sq_wr_copy.wr_id				= (uint64_t)&sem_write;
+		rdma_sq_wr_copy.sg_list				= &rdma_sgl_new; 
+		rdma_sgl_new.lkey					= cb->dma_mr->rkey;
+		rdma_sq_wr_copy.sg_list->length 	= size; //
+		rdma_sgl_new.addr 					= cb->bigspace->dmapages[local_offset/RPING_BUFSIZE]+(local_offset%RPING_BUFSIZE); //
 		rdma_sq_wr_copy.wr.rdma.remote_addr = cb->remote_addr[remote_offset/RPING_BUFSIZE]+(remote_offset%RPING_BUFSIZE); //
 
 		ret = down_killable(&cb->sem_write_able);
-		//DEBUG_LOG("RDMA WRITE localoffset=%lld remoteoffset=%lld\n",local_offset,remote_offset);
+		//DEBUG_LOG("RDMA WRITE local=%lld remote=%lld\n", local_offset, remote_offset);
 		ret = ib_post_send(cb->qp, &rdma_sq_wr_copy, &bad_wr);
 		if (ret) {
 			printk(KERN_ERR PFX "post read err %d\n", ret);
@@ -385,7 +390,7 @@ static int do_write(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 
 }
 
 //NOT atomic, must check sem_read if it finish reading
-static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 size){
+static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 size, char *dstPage, char *srcPage){
 	int ret;
 	struct ib_send_wr *bad_wr;
 	struct ib_send_wr rdma_sq_wr_copy= {0};	
@@ -412,15 +417,18 @@ static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 s
 		rdma_sgl_new.addr = cb->bigspace->dmapages[local_offset/RPING_BUFSIZE]+(local_offset%RPING_BUFSIZE); //
 		rdma_sq_wr_copy.wr.rdma.remote_addr = cb->remote_addr[remote_offset/RPING_BUFSIZE]+(remote_offset%RPING_BUFSIZE); //
 
-		ret = down_killable(&cb->sem_read_able);
-		//DEBUG_LOG("RDMA READ localoffset=%lld remoteoffset=%lld\n",local_offset,remote_offset);
+	//	ret = down_killable(&cb->sem_read_able);
+	//	ret = down_killable(&sem_global_read);
+	//	DEBUG_LOG("RDMA READ localoffset=%lld remoteoffset=%lld\n",local_offset,remote_offset);
 		ret = ib_post_send(cb->qp, &rdma_sq_wr_copy, &bad_wr);
 		if (ret) {
 			printk(KERN_ERR PFX "post read err %d\n", ret);
 			return ret;
 		}
 		ret=down_killable(&cb->sem_read);
-		up(&cb->sem_read_able);
+		memcpy(dstPage, srcPage, 4096);
+	//	up(&cb->sem_read_able);
+	//	up(&sem_global_read);
 		return 0;
 	}
 }
@@ -449,6 +457,7 @@ static int do_read_bufferptr(struct krping_cb *cb)
 
     
 	ret = down_killable(&cb->sem_read_able);
+//	ret = down_killable(&sem_global_read);
 	ret = ib_post_send(cb->qp, &rdma_sq_wr_copy, &bad_wr);
 	if (ret) {
 
@@ -458,6 +467,7 @@ static int do_read_bufferptr(struct krping_cb *cb)
 
 	ret = down_killable(&cb->sem_read);
 	up(&cb->sem_read_able);
+//	up(&sem_global_read);
 	cb->state=RDMA_READY; ///////// set this state here?
 	return 0;
 }
@@ -1258,6 +1268,7 @@ int krping_doit(char *cmd)
 		printk(KERN_INFO "%s: Kmalloc -> %p\n", __FUNCTION__, bigspaceptr->bufferpages[i]);
 	}
 
+	sema_init(&sem_global_read, 1);
 	cbs = kmalloc(sizeof(void*)*CONF_totalCB,GFP_KERNEL);
 	for(i=0;i<totalcb;i++)
 	{

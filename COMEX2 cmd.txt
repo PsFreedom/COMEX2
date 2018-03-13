@@ -1,23 +1,19 @@
 cd /home/comex && rm -rf linux-3.10.87 && tar -zxf linux-3.10.87.tar.gz && cp myConfig linux-3.10.87/.config
 cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 8 && make -j 8 modules && make headers_install && make modules_install && make install && rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot
 
-
 cd /home/comex/krpingTrimmed
 yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/
 yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/
 dmesg -c && modprobe -r rdma_krping
 make clean && make && make install && modprobe rdma_krping
 
-
 cd /home/comex/krpingTrimmed
 python gen_myconfig.py 2 1 530 10.1.12. > myconfig.h
 python gen_myconfig.py 2 2 6160 10.1.12. > myconfig.h
 python gen_myconfig.py 2 3 6160 10.1.13. > myconfig.h
 
-
-echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=g_mpi_one" >/proc/krping &
+echo "total_pages=524288,writeOut_buff=256,readIn_buff=4096,proc_name=g_mpi_one" >/proc/krping &
 echo "total_pages=6291456,writeOut_buff=256,readIn_buff=4096,proc_name=g_mpi_one" >/proc/krping &
-
 
 screen
 cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v ./bt.D.x && grep "" /sys/kernel/debug/comex_info/*

@@ -2,6 +2,9 @@
 #include <linux/init.h>			/* Needed for the macros */
 #include <linux/mm.h>			/* Needed for COMEX additional function */
 
+#define Total_CHKSM 6291456
+unsigned long COMEX_CHKSM[2][Total_CHKSM];
+
 static char proc_name[100];
 static int total_pages;
 static int writeOut_buff;
@@ -13,7 +16,7 @@ struct workqueue_struct *COMEX_wq;
 static uint64_t translate_useraddr(struct krping_cb *, uint64_t);
 static int universal_send(struct krping_cb *cb, u64 imm, char* addr, u64 size);
 static int do_write(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 size);
-static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 size);
+static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 size, char *dstPage, char *srcPage);
 void COMEX_do_work(struct work_struct *work);
 
 typedef struct{
@@ -53,19 +56,22 @@ void COMEX_RDMA_fn(int target, int CMD_num, void *ptr, int struct_size)
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_RPLY){
 		reply_pages_t *myStruct = ptr;
-//		printk(KERN_INFO "PAGE_RPLY: %d->%d | %d %d %d\n", target, ID_to_CB(target), myStruct->src_node, myStruct->page_no, myStruct->size);
+		printk(KERN_INFO "PAGE_RPLY: %d->%d | %d %d %d\n", target, ID_to_CB(target), myStruct->src_node, myStruct->page_no, myStruct->size);
 		CHK(universal_send(cbs[ID_to_CB(target)], CMD_num, ptr, struct_size))
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_WRTE){
 		COMEX_address_t *myStruct = ptr;
 //		printk(KERN_INFO "PAGE_WRTE: %d | L %lu R %lu %d\n", target, myStruct->local/X86PageSize, myStruct->remote/X86PageSize, myStruct->size/X86PageSize);
 		CHK(do_write(cbs[target], myStruct->local, myStruct->remote + remote_shift_offset, myStruct->size << PAGE_SHIFT))
+		COMEX_CHKSM[target][(myStruct->remote) >> PAGE_SHIFT] = checkSum_Vpage(COMEX_offset_to_addr_fn(myStruct->local));
 		COMEX_free_buff(target, myStruct->bufIDX, myStruct->size);
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_READ){
 		COMEX_address_t *myStruct = ptr;
 //		printk(KERN_INFO "PAGE_READ: %d | L %lu R %lu %d\n", target, myStruct->local, myStruct->remote, myStruct->size);
-		CHK(do_read(cbs[target], myStruct->local, myStruct->remote + remote_shift_offset, myStruct->size))
+		CHK(do_read(cbs[target], myStruct->local, myStruct->remote + remote_shift_offset, myStruct->size << PAGE_SHIFT, myStruct->dstAddr, myStruct->srcAddr))
+		
+		printk(KERN_INFO "%s: %d %hu -> %lu - %lu\n", __FUNCTION__, target, myStruct->bufIDX, COMEX_CHKSM[target][(myStruct->remote) >> PAGE_SHIFT], checkSum_Vpage(myStruct->dstAddr));
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_FREE){
 		CHK(universal_send(cbs[target], CMD_num, ptr, struct_size))
