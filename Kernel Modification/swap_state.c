@@ -424,9 +424,13 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				SetPageUptodate(new_page);
 				unlock_page(new_page);
 				
+				COMEX_CHKSM[NodeID][COMEX_pageNO].counter++;
 //				printk(KERN_INFO "REMOTE: NodeID %d pageNO %d\n", NodeID, (int)COMEX_pageNO);
-				if(checkSum_page(new_page) != COMEX_CHKSM[NodeID][COMEX_pageNO])
-					printk(KERN_INFO "%s: %d %d -> %lu - %lu\n", __FUNCTION__, NodeID, COMEX_pageNO, COMEX_CHKSM[NodeID][COMEX_pageNO], checkSum_page(new_page));
+				if(checkSum_page(new_page) != COMEX_CHKSM[NodeID][COMEX_pageNO].val)
+					printk(KERN_INFO "%s: %d %d -> %lu - %lu\n", __FUNCTION__, NodeID, COMEX_pageNO, COMEX_CHKSM[NodeID][COMEX_pageNO].val, checkSum_page(new_page));
+				if(COMEX_CHKSM[NodeID][COMEX_pageNO].counter != 1)
+					printk(KERN_INFO "%s: Counter %d\n", __FUNCTION__, COMEX_CHKSM[NodeID][COMEX_pageNO].counter);
+					
 			}
 			else if(swp_type(entry) == 9)
 			{

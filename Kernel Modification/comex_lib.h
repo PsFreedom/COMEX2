@@ -24,7 +24,8 @@ void COMEX_init_Remote()
 		COMEX_free_group[i].mssg_qouta  = MAX_MSSG;
 		COMEX_free_group[i].total_group = 0;
 		COMEX_free_group[i].back_off 	= 0;
-		spin_lock_init(&COMEX_free_group[i].list_lock);
+//		spin_lock_init(&COMEX_free_group[i].list_lock);
+		mutex_init(&COMEX_free_group[i].mutex_FG);
 		INIT_LIST_HEAD(&COMEX_free_group[i].free_group);
 		
 		if(list_empty(&COMEX_free_group[i].free_group))
@@ -53,6 +54,7 @@ void COMEX_init_Remote()
 		COMEX_readIn_buff[i].status = -1;
 		COMEX_readIn_buff[i].nodeID = -1;
 		COMEX_readIn_buff[i].pageNO = -1;
+		mutex_init(&COMEX_readIn_buff[i].mutex_buff);
 	}
 	
 	COMEX_free_struct = (free_struct_t *)vmalloc(sizeof(free_struct_t)*COMEX_total_nodes);
@@ -93,7 +95,7 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 ///// Semalphore & MUTEX
 	spin_lock_init(&COMEX_buddy_spin);
 	spin_lock_init(&freePage_spin);
-	spin_lock_init(&readBack_spin);
+	mutex_init(&mutex_PF);
 	
 ///// Buddy System
 	for(i=0; i<COMEX_MAX_ORDER; i++){

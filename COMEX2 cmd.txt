@@ -4,7 +4,7 @@ cd /home/comex/linux-3.10.87 && touch -m .config && make clean && make -j 8 && m
 cd /home/comex/krpingTrimmed
 yes | cp /usr/src/ofa_kernel-3.3/include/rdma/ib_verbs.h /lib/modules/3.10.87/build/include/rdma/
 yes | cp /usr/src/ofa_kernel-3.3/include/rdma/rdma_cm.h /lib/modules/3.10.87/build/include/rdma/
-dmesg -c && modprobe -r rdma_krping
+modprobe -r rdma_krping
 make clean && make && make install && modprobe rdma_krping
 
 cd /home/comex/krpingTrimmed
@@ -35,6 +35,8 @@ cd /home/benchmark/PBBS/ && mount -t debugfs none /sys/kernel/debug/ && head -n 
 cd /home/benchmark/PBBS/ && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v comparisonSort/serialSort/sort -r 1 inputs/randomSeq-double-500M && grep "" /sys/kernel/debug/comex_info/*
 
 dmesg
+dmesg | grep -v COMEX_RDMA_fn
+dmesg | grep -v PAGE_RPLY
 tail -n 100 /var/log/messages
 tail -n 1000 /var/log/messages
 tail -n 10000 /var/log/messages
@@ -45,6 +47,7 @@ tail -n 30000 /var/log/messages
 vim /boot/grub/grub.conf
 head -n 16 /boot/grub/grub.conf | tail -n 1 
 rm -f /var/log/messages* && rm -f /var/spool/mail/root && reboot
+rm -rf /var/tmp/*
 poweroff
 free -h 
 

@@ -3167,8 +3167,8 @@ static int do_swap_page(struct mm_struct *mm, struct vm_area_struct *vma,
 		NodeID = (int)COMEX_pageNO & 1023;
 		COMEX_pageNO = COMEX_pageNO >> 10;
 
-		if(checkSum_page(page) != COMEX_CHKSM[NodeID][COMEX_pageNO])
-			printk(KERN_INFO "%s: %d %d -> %lu - %lu\n", __FUNCTION__, NodeID, COMEX_pageNO, COMEX_CHKSM[NodeID][COMEX_pageNO], checkSum_page(page));
+		if(checkSum_page(page) != COMEX_CHKSM[NodeID][COMEX_pageNO].val)
+			printk(KERN_INFO "%s: %d %d -> %lu - %lu\n", __FUNCTION__, NodeID, COMEX_pageNO, COMEX_CHKSM[NodeID][COMEX_pageNO].val, checkSum_page(page));
 //		printk(KERN_INFO "%p Free page %d - %d %lu\n", page, swp_type(entry), NodeID, (int)COMEX_pageNO);
 		COMEX_free_to_remote(NodeID, (int)COMEX_pageNO);
 	}

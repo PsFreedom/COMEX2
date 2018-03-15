@@ -6,7 +6,7 @@ int COMEX_total_writeOut = 0;
 int COMEX_total_readIn = 0;
 char proc_name[100];
 
-unsigned long COMEX_CHKSM[2][Total_CHKSM];
+CHKSM_t COMEX_CHKSM[2][Total_CHKSM];
 
 ///// Counter 
 unsigned long SWAP_to_Disk   = 0;
@@ -29,7 +29,7 @@ struct dentry *file_COMEX_in_Local;
 
 spinlock_t COMEX_buddy_spin;
 spinlock_t freePage_spin;
-spinlock_t readBack_spin;
+struct mutex mutex_PF;
 
 void (*COMEX_module_echo)(char *) = NULL;
 EXPORT_SYMBOL(COMEX_module_echo);

@@ -1233,6 +1233,11 @@ typedef struct{
 	short count[MAX_FREE];
 } free_struct_t;
 
+typedef struct{
+	unsigned long val;
+	int counter;
+}CHKSM_t;
+
 //	Global variable
 extern int COMEX_Ready;
 extern int COMEX_ID;
@@ -1241,7 +1246,7 @@ extern int COMEX_total_pages;
 
 extern unsigned long SWAP_out_total, SWAP_to_Disk, SWAP_to_COMEX;
 extern unsigned long COMEX_in_total, COMEX_in_preF, COMEX_in_buff, COMEX_in_RDMA, COMEX_in_Local;
-extern unsigned long COMEX_CHKSM[][Total_CHKSM];
+extern CHKSM_t COMEX_CHKSM[][Total_CHKSM];
 
 //	Module Function Pointer		// Function in kernel module 
 extern void 	(*COMEX_module_echo)(char *);
