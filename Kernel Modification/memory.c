@@ -1180,7 +1180,7 @@ again:
 			if(swp_type(entry) == 8)
 			{
 				COMEX_pageNO = (unsigned long)swp_offset(entry);
-				NodeID = (int)COMEX_pageNO & 1023;
+				NodeID       = (int)COMEX_pageNO & 1023;
 				COMEX_pageNO = COMEX_pageNO >> 10;
 				COMEX_free_to_remote(NodeID, (int)COMEX_pageNO);
 				goto COMEX_zap;
@@ -3162,19 +3162,24 @@ static int do_swap_page(struct mm_struct *mm, struct vm_area_struct *vma,
 	swap_free(entry);
 	if (swp_type(entry) == 8){
 		try_to_free_swap(page);
-
+		
 		COMEX_pageNO = (unsigned long)swp_offset(entry);
-		NodeID = (int)COMEX_pageNO & 1023;
+		NodeID       = (int)COMEX_pageNO & 1023;
 		COMEX_pageNO = COMEX_pageNO >> 10;
 
-		if(checkSum_page(page) != COMEX_CHKSM[NodeID][COMEX_pageNO].val)
-			printk(KERN_INFO "%s: %d %d -> %lu - %lu\n", __FUNCTION__, NodeID, COMEX_pageNO, COMEX_CHKSM[NodeID][COMEX_pageNO].val, checkSum_page(page));
-//		printk(KERN_INFO "%p Free page %d - %d %lu\n", page, swp_type(entry), NodeID, (int)COMEX_pageNO);
+	//	if(checkSum_page(page) != COMEX_CHKSM[NodeID][COMEX_pageNO].val)
+			printk(KERN_INFO "%s: %d %d [%d] -> %lu - %lu\n", __FUNCTION__, NodeID, COMEX_pageNO, COMEX_CHKSM[NodeID][COMEX_pageNO].counter, COMEX_CHKSM[NodeID][COMEX_pageNO].val, checkSum_page(page));
+		
+	//	printk(KERN_INFO "%p Free page %d - %d %lu\n", page, swp_type(entry), NodeID, (int)COMEX_pageNO);
 		COMEX_free_to_remote(NodeID, (int)COMEX_pageNO);
 	}
 	else if (swp_type(entry) == 9){
-		try_to_free_swap(page);	
-//		printk(KERN_INFO "%p Free page %d - %d\n", page, swp_type(entry), (int)swp_offset(entry));
+		try_to_free_swap(page);
+		
+	//	if(checkSum_page(page) != COMEX_CHKSM[2][(int)swp_offset(entry)].val)
+			printk(KERN_INFO "%s: %d [%d] -> %lu - %lu\n", __FUNCTION__, (int)swp_offset(entry), COMEX_CHKSM[2][(int)swp_offset(entry)].counter, COMEX_CHKSM[2][(int)swp_offset(entry)].val, checkSum_page(page));
+
+	//	printk(KERN_INFO "%p Free page %d - %d\n", page, swp_type(entry), (int)swp_offset(entry));
 		COMEX_free_page((int)swp_offset(entry), 0);
 	}
 	else if (vm_swap_full() || (vma->vm_flags & VM_LOCKED) || PageMlocked(page)){

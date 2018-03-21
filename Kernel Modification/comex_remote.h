@@ -97,6 +97,7 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 			if(COMEX_free_group[dest_node].back_off <= 0){
 				COMEX_free_group[dest_node].mssg_qouta--;
 				COMEX_free_group[dest_node].back_off += 1<<(12 - COMEX_free_group[dest_node].mssg_qouta);
+				
 				COMEX_RDMA(dest_node, CODE_COMEX_PAGE_RQST, &COMEX_ID, sizeof(COMEX_ID));
 			}
 			else{
@@ -123,11 +124,13 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 			COMEX_writeOut_buff[dest_node][buff_slot].status = 2;
 //			if(buff_slot%FLUSH == 0 && buff_slot != 0)
 //				COMEX_flush_buff(dest_node);
-
-			COMEX_CHKSM[dest_node][*retPageNO].val 	   = checkSum_page(old_page);
-			COMEX_CHKSM[dest_node][*retPageNO].counter = 0;
 			COMEX_flush_one(dest_node, buff_slot);
-			
+
+			COMEX_CHKSM[dest_node][*retPageNO].val = checkSum_page(old_page);
+			COMEX_CHKSM[dest_node][*retPageNO].counter++;
+//			if(COMEX_CHKSM[dest_node][*retPageNO].counter != 1)
+				printk(KERN_INFO "%s: %d %d Counter %d\n", __FUNCTION__, dest_node, *retPageNO, COMEX_CHKSM[dest_node][*retPageNO].counter);
+
 			mutex_unlock(&mutex_PF);
 			*retNodeID = dest_node;
 			return 1;
@@ -149,6 +152,7 @@ void COMEX_read_from_remote(struct page *new_page, int node_ID, int pageNO)
 
 //	mutex_lock(&COMEX_readIn_buff[buff_IDX].mutex_buff);
 	mutex_lock(&mutex_PF);
+
 	addr_struct.local  = (unsigned long)buf_vAddr;
 	addr_struct.remote = (unsigned long)pageNO << SHIFT_PAGE;
 	addr_struct.size   = 1;
@@ -157,10 +161,10 @@ void COMEX_read_from_remote(struct page *new_page, int node_ID, int pageNO)
 	addr_struct.dstAddr= new_vAddr;
 	addr_struct.srcAddr= (char *)COMEX_offset_to_addr((uint64_t)get_readIn_buff(buff_IDX));
 	COMEX_RDMA(node_ID, CODE_COMEX_PAGE_READ, &addr_struct, sizeof(addr_struct));
+
 //	mutex_unlock(&COMEX_readIn_buff[buff_IDX].mutex_buff);
 	mutex_unlock(&mutex_PF);
-	
-//	memcpy(new_vAddr, (char *)COMEX_offset_to_addr((uint64_t)get_readIn_buff(buff_FLR)), X86PageSize);
+
 	kunmap(new_page);
 	COMEX_in_RDMA++;
 }
@@ -218,12 +222,12 @@ void COMEX_free_to_remote(int nodeID, int pageNO)
 	int i;
 	spin_lock(&freePage_spin);
 	for(i=0; i<MAX_FREE; i++){
-		if( COMEX_free_struct[nodeID].pageNO[i] + COMEX_free_struct[nodeID].count[i] == pageNO && COMEX_free_struct[nodeID].count[i] < 16384){
+		if( COMEX_free_struct[nodeID].pageNO[i] + COMEX_free_struct[nodeID].count[i] == pageNO && COMEX_free_struct[nodeID].count[i] < 16383){
 			COMEX_free_struct[nodeID].count[i]++;
 			spin_unlock(&freePage_spin);
 			return;
 		}
-		if( COMEX_free_struct[nodeID].pageNO[i] - 1 == pageNO && COMEX_free_struct[nodeID].count[i] < 16384){
+		if( COMEX_free_struct[nodeID].pageNO[i] - 1 == pageNO && COMEX_free_struct[nodeID].count[i] < 16383){
 			COMEX_free_struct[nodeID].pageNO[i]--;
 			COMEX_free_struct[nodeID].count[i]++;
 			spin_unlock(&freePage_spin);

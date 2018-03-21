@@ -15,10 +15,9 @@ void COMEX_init_Remote()
 {
 	int i,j;
 	printk(KERN_INFO "%s... Begin\n", __FUNCTION__);
-	
+
 	COMEX_init_FS();
-//	memset(COMEX_checksum, 0, Total_CHKSM*sizeof(unsigned long));
-	
+
 	COMEX_free_group = (COMEX_R_free_group_t *)vmalloc(sizeof(COMEX_R_free_group_t)*COMEX_total_nodes);
 	for(i=0; i<COMEX_total_nodes; i++){
 		COMEX_free_group[i].mssg_qouta  = MAX_MSSG;
@@ -63,6 +62,15 @@ void COMEX_init_Remote()
 			COMEX_free_struct[i].pageNO[j] = -1;
 			COMEX_free_struct[i].count[j]  =  0;	
 		}
+	}
+	
+	for(i=0; i<Total_CHKSM; i++){
+		COMEX_CHKSM[0][i].val     = 0;
+		COMEX_CHKSM[0][i].counter = 0;
+		COMEX_CHKSM[1][i].val     = 0;
+		COMEX_CHKSM[1][i].counter = 0;
+		COMEX_CHKSM[2][i].val     = 0;
+		COMEX_CHKSM[2][i].counter = 0;
 	}
 	
 //	COMEX_checksum = (unsigned long **)vmalloc(sizeof(unsigned long *)*(COMEX_total_nodes+1));
@@ -153,9 +161,14 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 	offsetNO  = COMEX_pageNO + (COMEX_total_writeOut*COMEX_total_nodes) + COMEX_total_readIn;
 	new_vAddr = (char *)COMEX_offset_to_addr((uint64_t)offsetNO << SHIFT_PAGE);
 	old_vAddr = (char *)kmap(old_page);
-	memcpy(new_vAddr, old_vAddr, X86PageSize);
-	
+	memcpy(new_vAddr, old_vAddr, X86PageSize);	
 	kunmap(old_page);
+	
+	COMEX_CHKSM[2][COMEX_pageNO].val = checkSum_page(old_page);
+	COMEX_CHKSM[2][COMEX_pageNO].counter++;
+//	if(COMEX_CHKSM[2][COMEX_pageNO].counter != 1)
+		printk(KERN_INFO "%s: %d Counter %d\n", __FUNCTION__, COMEX_pageNO, COMEX_CHKSM[2][COMEX_pageNO].counter);
+	
 	*retNodeID = -11;
 	*retPageNO = COMEX_pageNO;
 	return 1;
@@ -176,7 +189,5 @@ void COMEX_read_from_local(struct page *new_page, int pageNO)
 	old_vAddr = (char *)COMEX_offset_to_addr((uint64_t)offsetNO << SHIFT_PAGE);
 	new_vAddr = (char *)kmap(new_page);
 	memcpy(new_vAddr, old_vAddr, X86PageSize);
-	
 	kunmap(new_page);
-//	COMEX_free_page(pageNO, 0);
 }

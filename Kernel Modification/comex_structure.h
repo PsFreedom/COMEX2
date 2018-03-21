@@ -6,7 +6,7 @@ int COMEX_total_writeOut = 0;
 int COMEX_total_readIn = 0;
 char proc_name[100];
 
-CHKSM_t COMEX_CHKSM[2][Total_CHKSM];
+CHKSM_t COMEX_CHKSM[3][Total_CHKSM];
 
 ///// Counter 
 unsigned long SWAP_to_Disk   = 0;

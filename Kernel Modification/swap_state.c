@@ -190,12 +190,12 @@ int add_to_swap(struct page *page, struct list_head *list)
 	if(COMEX_Ready == 1 && page_mapcount(page) == 1 && COMEX_task != NULL && strcmp(COMEX_task->comm, proc_name) == 0){
 		if(COMEX_move_to_COMEX(page, &NodeID, &PageNO) == 1){
 			offsetField = 0UL + (unsigned long)PageNO;
-			entry = swp_entry(9, offsetField);
+			entry       = swp_entry(9, offsetField);
 			COMEX_check = 1;
 		}
 		else if(COMEX_move_to_Remote(page, &NodeID, &PageNO) == 1){
 			offsetField = 0UL + (unsigned long)NodeID + ((unsigned long)PageNO << 10);
-			entry = swp_entry(8, offsetField);
+			entry       = swp_entry(8, offsetField);
 			COMEX_check = 1;
 		}
 	}
@@ -409,28 +409,24 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 			if(swp_type(entry) == 8)
 			{
 				COMEX_pageNO = (unsigned long)swp_offset(entry);
-				NodeID = (int)COMEX_pageNO & 1023;
+				NodeID       = (int)COMEX_pageNO & 1023;
 				COMEX_pageNO = COMEX_pageNO >> 10;
 				COMEX_in_total++;
-				
-//				if(COMEX_read_from_buffer(new_page, NodeID, (int)COMEX_pageNO) == 0){
-//					if(COMEX_read_from_preFetch(new_page, NodeID, (int)COMEX_pageNO) == 0){
-						COMEX_read_from_remote(new_page, NodeID, (int)COMEX_pageNO);
-//					}
-//				}
 
+			//	if(COMEX_read_from_buffer(new_page, NodeID, (int)COMEX_pageNO) == 0){
+			//		if(COMEX_read_from_preFetch(new_page, NodeID, (int)COMEX_pageNO) == 0){
+						COMEX_read_from_remote(new_page, NodeID, (int)COMEX_pageNO);
+			//		}
+			//	}
 				count_vm_event(PSWPIN);
 				SetPageDirty(new_page);
 				SetPageUptodate(new_page);
 				unlock_page(new_page);
 				
-				COMEX_CHKSM[NodeID][COMEX_pageNO].counter++;
-//				printk(KERN_INFO "REMOTE: NodeID %d pageNO %d\n", NodeID, (int)COMEX_pageNO);
-				if(checkSum_page(new_page) != COMEX_CHKSM[NodeID][COMEX_pageNO].val)
-					printk(KERN_INFO "%s: %d %d -> %lu - %lu\n", __FUNCTION__, NodeID, COMEX_pageNO, COMEX_CHKSM[NodeID][COMEX_pageNO].val, checkSum_page(new_page));
-				if(COMEX_CHKSM[NodeID][COMEX_pageNO].counter != 1)
-					printk(KERN_INFO "%s: Counter %d\n", __FUNCTION__, COMEX_CHKSM[NodeID][COMEX_pageNO].counter);
-					
+				COMEX_CHKSM[NodeID][COMEX_pageNO].counter--;
+			//	if(COMEX_CHKSM[NodeID][COMEX_pageNO].counter != 0)
+					printk(KERN_INFO "%s: %d %d Counter %d\n", __FUNCTION__, NodeID, COMEX_pageNO, COMEX_CHKSM[NodeID][COMEX_pageNO].counter);
+			//	printk(KERN_INFO "REMOTE: NodeID %d pageNO %d\n", NodeID, (int)COMEX_pageNO);
 			}
 			else if(swp_type(entry) == 9)
 			{
@@ -443,9 +439,10 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				SetPageUptodate(new_page);
 				unlock_page(new_page);
 				
-//				printk(KERN_INFO "LOCAL: pageNO %d\n", (int)swp_offset(entry));
-//				if(checkSum_page(new_page) != 0)
-//					printk(KERN_INFO "LOCAL: %d - %lu\n", (int)swp_offset(entry), checkSum_page(new_page));
+				COMEX_CHKSM[2][(int)swp_offset(entry)].counter--;
+			//	if(COMEX_CHKSM[2][(int)swp_offset(entry)] != 0)
+					printk(KERN_INFO "%s: %d Counter %d\n", __FUNCTION__, (int)swp_offset(entry), COMEX_CHKSM[2][(int)swp_offset(entry)].counter);
+			//	printk(KERN_INFO "LOCAL: pageNO %d\n", (int)swp_offset(entry));
 			}
 			else{
 				swap_readpage(new_page);
