@@ -23,7 +23,6 @@ void COMEX_init_Remote()
 		COMEX_free_group[i].mssg_qouta  = MAX_MSSG;
 		COMEX_free_group[i].total_group = 0;
 		COMEX_free_group[i].back_off 	= 0;
-//		spin_lock_init(&COMEX_free_group[i].list_lock);
 		mutex_init(&COMEX_free_group[i].mutex_FG);
 		INIT_LIST_HEAD(&COMEX_free_group[i].free_group);
 		
@@ -35,7 +34,7 @@ void COMEX_init_Remote()
 	for(i=0; i<COMEX_total_nodes; i++){
 		buff_pos[i].head = 0;
 		buff_pos[i].tail = 0;
-		spin_lock_init(&buff_pos[i].pos_lock);
+		mutex_init(&buff_pos[i].pos_mutex);
 	}
 	
 	COMEX_writeOut_buff = (buff_desc_t **)vmalloc(sizeof(buff_desc_t *)*COMEX_total_nodes);
@@ -64,7 +63,7 @@ void COMEX_init_Remote()
 		}
 	}
 	
-	for(i=0; i<Total_CHKSM; i++){
+/*	for(i=0; i<Total_CHKSM; i++){
 		COMEX_CHKSM[0][i].val     = 0;
 		COMEX_CHKSM[0][i].counter = 0;
 		COMEX_CHKSM[1][i].val     = 0;
@@ -72,7 +71,7 @@ void COMEX_init_Remote()
 		COMEX_CHKSM[2][i].val     = 0;
 		COMEX_CHKSM[2][i].counter = 0;
 	}
-	
+*/	
 //	COMEX_checksum = (unsigned long **)vmalloc(sizeof(unsigned long *)*(COMEX_total_nodes+1));
 //	for(i=0; i<(COMEX_total_nodes+1); i++){
 //		COMEX_checksum = (unsigned long *)vmalloc(sizeof(unsigned long)*Total_CHKSM);
@@ -164,10 +163,11 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 	memcpy(new_vAddr, old_vAddr, X86PageSize);	
 	kunmap(old_page);
 	
-	COMEX_CHKSM[2][COMEX_pageNO].val = checkSum_page(old_page);
-	COMEX_CHKSM[2][COMEX_pageNO].counter++;
+//	COMEX_CHKSM[2][COMEX_pageNO].val = checkSum_page(old_page);
+//	COMEX_CHKSM[2][COMEX_pageNO].counter++;
+//	printk(KERN_INFO "%s: Local Allocated %d\n", __FUNCTION__, COMEX_pageNO);
 //	if(COMEX_CHKSM[2][COMEX_pageNO].counter != 1)
-		printk(KERN_INFO "%s: %d Counter %d\n", __FUNCTION__, COMEX_pageNO, COMEX_CHKSM[2][COMEX_pageNO].counter);
+//		printk(KERN_INFO "%s: %d Counter %d\n", __FUNCTION__, COMEX_pageNO, COMEX_CHKSM[2][COMEX_pageNO].counter);
 	
 	*retNodeID = -11;
 	*retPageNO = COMEX_pageNO;

@@ -12,8 +12,8 @@ python gen_myconfig.py 2 1 530 10.1.12. > myconfig.h
 python gen_myconfig.py 2 2 6160 10.1.12. > myconfig.h
 python gen_myconfig.py 2 3 6160 10.1.13. > myconfig.h
 
-echo "total_pages=524288,writeOut_buff=256,readIn_buff=4096,proc_name=python2.7" >/proc/krping &
-echo "total_pages=6291456,writeOut_buff=256,readIn_buff=4096,proc_name=python2.7" >/proc/krping &
+echo "total_pages=524288,writeOut_buff=256,readIn_buff=4096,proc_name=sp.D.x" >/proc/krping &
+echo "total_pages=6291456,writeOut_buff=256,readIn_buff=4096,proc_name=sp.D.x" >/proc/krping &
 
 screen
 cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && mount -t debugfs none /sys/kernel/debug/ && head -n 16 /boot/grub/grub.conf | tail -n 1 && free -h && /usr/bin/time -v ./bt.D.x && grep "" /sys/kernel/debug/comex_info/*

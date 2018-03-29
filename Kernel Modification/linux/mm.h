@@ -1225,7 +1225,6 @@ typedef struct{
 	unsigned long remote;
 	int size;
 	short bufIDX;
-	char *dstAddr, *srcAddr;
 } COMEX_address_t;
 
 typedef struct{
@@ -1246,7 +1245,7 @@ extern int COMEX_total_pages;
 
 extern unsigned long SWAP_out_total, SWAP_to_Disk, SWAP_to_COMEX;
 extern unsigned long COMEX_in_total, COMEX_in_preF, COMEX_in_buff, COMEX_in_RDMA, COMEX_in_Local;
-extern CHKSM_t COMEX_CHKSM[][Total_CHKSM];
+//extern CHKSM_t COMEX_CHKSM[][Total_CHKSM];
 
 //	Module Function Pointer		// Function in kernel module 
 extern void 	(*COMEX_module_echo)(char *);
@@ -1267,6 +1266,7 @@ extern void COMEX_free_buff(int nodeID, int pageNO, int con_page);
 //	Global Private Function		// Only for kernel use.
 extern void COMEX_read_from_local(struct page *new_page, int pageNO);
 extern void COMEX_read_from_remote(struct page *new_page, int node_ID, int pageNO);
+extern void COMEX_read_from_remote_one(struct page *new_page, int node_ID, int pageNO);
 extern int COMEX_read_from_buffer(struct page *new_page, int nodeID, int pageNO);
 extern int COMEX_read_from_preFetch(struct page *new_page, int nodeID, int pageNO);
 
