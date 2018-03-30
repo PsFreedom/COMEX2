@@ -14,8 +14,8 @@ void COMEX_init_FS()
 void COMEX_init_Remote()
 {
 	int i,j;
+	
 	printk(KERN_INFO "%s... Begin\n", __FUNCTION__);
-
 	COMEX_init_FS();
 
 	COMEX_free_group = (COMEX_R_free_group_t *)vmalloc(sizeof(COMEX_R_free_group_t)*COMEX_total_nodes);
@@ -62,23 +62,6 @@ void COMEX_init_Remote()
 			COMEX_free_struct[i].count[j]  =  0;	
 		}
 	}
-	
-/*	for(i=0; i<Total_CHKSM; i++){
-		COMEX_CHKSM[0][i].val     = 0;
-		COMEX_CHKSM[0][i].counter = 0;
-		COMEX_CHKSM[1][i].val     = 0;
-		COMEX_CHKSM[1][i].counter = 0;
-		COMEX_CHKSM[2][i].val     = 0;
-		COMEX_CHKSM[2][i].counter = 0;
-	}
-*/	
-//	COMEX_checksum = (unsigned long **)vmalloc(sizeof(unsigned long *)*(COMEX_total_nodes+1));
-//	for(i=0; i<(COMEX_total_nodes+1); i++){
-//		COMEX_checksum = (unsigned long *)vmalloc(sizeof(unsigned long)*Total_CHKSM);
-//		for(j=0; j<Total_CHKSM; j++){
-//			COMEX_checksum[i][j] = 0;
-//		}
-//	}
 }
 
 void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff, int total_pages, char *namePtr)
@@ -153,7 +136,7 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 	char *old_vAddr;
 	
 	if(COMEX_pageNO < 0 || COMEX_pageNO >= COMEX_total_pages){	// No page available
-//		printk(KERN_INFO "%s: Wrong pageNO %d\n", __FUNCTION__, COMEX_pageNO);
+		printk(KERN_INFO "%s: Wrong pageNO %d\n", __FUNCTION__, COMEX_pageNO);
 		return -1;
 	}
 	
@@ -162,12 +145,6 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 	old_vAddr = (char *)kmap(old_page);
 	memcpy(new_vAddr, old_vAddr, X86PageSize);	
 	kunmap(old_page);
-	
-//	COMEX_CHKSM[2][COMEX_pageNO].val = checkSum_page(old_page);
-//	COMEX_CHKSM[2][COMEX_pageNO].counter++;
-//	printk(KERN_INFO "%s: Local Allocated %d\n", __FUNCTION__, COMEX_pageNO);
-//	if(COMEX_CHKSM[2][COMEX_pageNO].counter != 1)
-//		printk(KERN_INFO "%s: %d Counter %d\n", __FUNCTION__, COMEX_pageNO, COMEX_CHKSM[2][COMEX_pageNO].counter);
 	
 	*retNodeID = -11;
 	*retPageNO = COMEX_pageNO;

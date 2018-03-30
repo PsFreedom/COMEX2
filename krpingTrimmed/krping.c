@@ -374,7 +374,7 @@ static int do_write(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 
 		rdma_sgl_new.addr 					= cb->bigspace->dmapages[local_offset/RPING_BUFSIZE]+(local_offset%RPING_BUFSIZE); //
 		rdma_sq_wr_copy.wr.rdma.remote_addr = cb->remote_addr[remote_offset/RPING_BUFSIZE]+(remote_offset%RPING_BUFSIZE); //
 
-		ret = down_killable(&cb->sem_write_able);
+	//	ret = down_killable(&cb->sem_write_able);
 	//	DEBUG_LOG("RDMA WRITE local=%lld remote=%lld\n", local_offset, remote_offset);
 		ret = ib_post_send(cb->qp, &rdma_sq_wr_copy, &bad_wr);
 		if (ret) {
@@ -382,7 +382,7 @@ static int do_write(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 
 			return ret;
 		}
 		ret = down_killable(&sem_write);
-		up(&cb->sem_write_able);
+	//	up(&cb->sem_write_able);
 		return 0;
 	}
 }
@@ -416,7 +416,7 @@ static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 s
 		rdma_sgl_new.addr = cb->bigspace->dmapages[local_offset/RPING_BUFSIZE]+(local_offset%RPING_BUFSIZE); //
 		rdma_sq_wr_copy.wr.rdma.remote_addr = cb->remote_addr[remote_offset/RPING_BUFSIZE]+(remote_offset%RPING_BUFSIZE); //
 
-		ret = down_killable(&cb->sem_read_able);
+	//	ret = down_killable(&cb->sem_read_able);
 	//	DEBUG_LOG("RDMA READ localoffset=%lld remoteoffset=%lld\n",local_offset,remote_offset);
 		ret = ib_post_send(cb->qp, &rdma_sq_wr_copy, &bad_wr);
 		if (ret) {
@@ -424,7 +424,7 @@ static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 s
 			return ret;
 		}
 		ret = down_killable(&cb->sem_read);
-		up(&cb->sem_read_able);
+	//	up(&cb->sem_read_able);
 		return 0;
 	}
 }

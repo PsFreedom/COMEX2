@@ -138,7 +138,7 @@ static inline int COMEX_rmqueue_smallest(int order)
 		COMEX_expand(page, order, current_order, area);
 		
 //		printk(KERN_INFO "%s: %u - %d %u\n", __FUNCTION__, current_order, area->nr_free, page->pageNO);
-		COMEX_checkCtr(page->pageNO, order, 1);
+//		COMEX_checkCtr(page->pageNO, order, 1);
 		spin_unlock(&COMEX_buddy_spin);
 		return page->pageNO;
 	}
@@ -156,7 +156,7 @@ void COMEX_free_page(int inPageNO, int order)
 	COMEX_page *buddy;
 
 	spin_lock(&COMEX_buddy_spin);
-	COMEX_checkCtr(inPageNO, order, -1);
+//	COMEX_checkCtr(inPageNO, order, -1);
 	
 	page_idx = page->pageNO & ((1 << COMEX_MAX_ORDER) - 1);
 	while (order < COMEX_MAX_ORDER-1){

@@ -1258,9 +1258,6 @@ extern void COMEX_pages_request(int target);
 extern void COMEX_page_receive(int nodeID, int pageNO, int group_size);
 extern unsigned long checkSum_page(struct page *page);
 extern unsigned long checkSum_Vpage(unsigned char *chrPtr);
-
-extern void COMEX_free_page(int inPageNO, int order);
-extern void COMEX_free_to_remote(int nodeID, int pageNO);
 extern void COMEX_free_buff(int nodeID, int pageNO, int con_page);
 
 //	Global Private Function		// Only for kernel use.
@@ -1269,6 +1266,9 @@ extern void COMEX_read_from_remote(struct page *new_page, int node_ID, int pageN
 extern void COMEX_read_from_remote_one(struct page *new_page, int node_ID, int pageNO);
 extern int COMEX_read_from_buffer(struct page *new_page, int nodeID, int pageNO);
 extern int COMEX_read_from_preFetch(struct page *new_page, int nodeID, int pageNO);
+
+extern void COMEX_free_page(int inPageNO, int order);
+extern void COMEX_free_to_remote(int nodeID, int pageNO);
 
 ////////// 	End COMEX Section 	//////////
 

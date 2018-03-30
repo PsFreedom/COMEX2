@@ -1182,12 +1182,13 @@ again:
 				COMEX_pageNO = (unsigned long)swp_offset(entry);
 				NodeID       = (int)COMEX_pageNO & 1023;
 				COMEX_pageNO = COMEX_pageNO >> 10;
-			//	COMEX_free_to_remote(NodeID, (int)COMEX_pageNO);
+				
+				COMEX_free_to_remote(NodeID, (int)COMEX_pageNO);
 				goto COMEX_zap;
 			}
 			else if(swp_type(entry) == 9)
 			{
-			//	COMEX_free_page((int)swp_offset(entry), 0);
+				COMEX_free_page((int)swp_offset(entry), 0);
 				goto COMEX_zap;
 			}
 

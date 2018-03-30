@@ -414,21 +414,15 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				COMEX_in_total++;
 
 				if(COMEX_read_from_buffer(new_page, NodeID, (int)COMEX_pageNO) == 0){
-			//		if(COMEX_read_from_preFetch(new_page, NodeID, (int)COMEX_pageNO) == 0){
-						COMEX_read_from_remote_one(new_page, NodeID, (int)COMEX_pageNO);
-			//		}
+					if(COMEX_read_from_preFetch(new_page, NodeID, (int)COMEX_pageNO) == 0){
+						COMEX_read_from_remote(new_page, NodeID, (int)COMEX_pageNO);
+					}
 				}
 				count_vm_event(PSWPIN);
 				SetPageDirty(new_page);
 				SetPageUptodate(new_page);
 				unlock_page(new_page);
-				
-			//	COMEX_CHKSM[NodeID][COMEX_pageNO].counter--;
-			//	if(COMEX_CHKSM[NodeID][COMEX_pageNO].counter != 0)
-			//		printk(KERN_INFO "%s: %d %d Counter %d\n", __FUNCTION__, NodeID, COMEX_pageNO, COMEX_CHKSM[NodeID][COMEX_pageNO].counter);
-			//	if(COMEX_CHKSM[NodeID][COMEX_pageNO].val != checkSum_page(new_page))
-			//		printk(KERN_INFO "%s: %d %d %lu - %lu\n",__FUNCTION__, NodeID, COMEX_pageNO, COMEX_CHKSM[NodeID][COMEX_pageNO].val, checkSum_page(new_page));
-				
+					
 				COMEX_free_to_remote(NodeID, (int)COMEX_pageNO);
 			//	printk(KERN_INFO "REMOTE: NodeID %d pageNO %d\n", NodeID, (int)COMEX_pageNO);
 			}
@@ -442,12 +436,6 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				SetPageDirty(new_page);
 				SetPageUptodate(new_page);
 				unlock_page(new_page);
-				
-			//	COMEX_CHKSM[2][(int)swp_offset(entry)].counter--;
-			//	if(COMEX_CHKSM[2][(int)swp_offset(entry)].counter != 0)
-			//		printk(KERN_INFO "%s: %d Counter %d\n", __FUNCTION__, (int)swp_offset(entry), COMEX_CHKSM[2][(int)swp_offset(entry)].counter);
-			//	if(COMEX_CHKSM[2][(int)swp_offset(entry)].val != checkSum_page(new_page))
-			//		printk(KERN_INFO "%s: %d %lu - %lu\n",__FUNCTION__, (int)swp_offset(entry), COMEX_CHKSM[2][(int)swp_offset(entry)].val, checkSum_page(new_page));
 				
 				COMEX_free_page((int)swp_offset(entry), 0);
 			//	printk(KERN_INFO "LOCAL: pageNO %d\n", (int)swp_offset(entry));
