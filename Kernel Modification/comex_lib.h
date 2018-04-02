@@ -136,7 +136,7 @@ int COMEX_move_to_COMEX(struct page *old_page, int *retNodeID, int *retPageNO)
 	char *old_vAddr;
 	
 	if(COMEX_pageNO < 0 || COMEX_pageNO >= COMEX_total_pages){	// No page available
-		printk(KERN_INFO "%s: Wrong pageNO %d\n", __FUNCTION__, COMEX_pageNO);
+	//	printk(KERN_INFO "%s: Wrong pageNO %d\n", __FUNCTION__, COMEX_pageNO);
 		return -1;
 	}
 	
