@@ -12,8 +12,10 @@ python gen_myconfig.py 2 1 530 10.1.12. > myconfig.h
 python gen_myconfig.py 2 2 6160 10.1.12. > myconfig.h
 python gen_myconfig.py 2 3 6160 10.1.13. > myconfig.h
 
-echo "total_pages=524288,writeOut_buff=256,readIn_buff=4096,proc_name=sp.D.x" >/proc/krping &
-echo "total_pages=6291456,writeOut_buff=256,readIn_buff=4096,proc_name=sp.D.x" >/proc/krping &
+echo "total_pages=6291456,writeOut_buff=256,readIn_buff=4096,proc_name=mpiblast" >/proc/krping &
+echo "total_pages=6291456,writeOut_buff=256,readIn_buff=4096,proc_name=g_mpi_one" >/proc/krping &
+echo "total_pages=6291456,writeOut_buff=256,readIn_buff=4096,proc_name=mpi_main" >/proc/krping &
+echo "total_pages=6291456,writeOut_buff=256,readIn_buff=4096,proc_name=python2.7" >/proc/krping &
 
 screen
 screen -d -r

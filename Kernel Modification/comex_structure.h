@@ -17,6 +17,9 @@ unsigned long COMEX_in_buff  = 0;
 unsigned long COMEX_in_RDMA  = 0;
 unsigned long COMEX_in_Local = 0;
 
+unsigned long FlagCounter = 0;
+unsigned long AllCounter = 0;
+
 struct dentry *dir;
 struct dentry *file_SWAP_to_Disk;
 struct dentry *file_SWAP_to_COMEX;

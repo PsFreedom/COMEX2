@@ -117,10 +117,10 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 			buff_slot = buff_pos[dest_node].tail;
 			buff_pos[dest_node].tail++;
 			buff_pos[dest_node].tail %= COMEX_total_writeOut;
+			
 			COMEX_writeOut_buff[dest_node][buff_slot].status = 1;
 			mutex_unlock(&COMEX_free_group[dest_node].mutex_FG);
 			COMEX_void_preFetch(dest_node, *retPageNO);
-			
 			
 			buf_vAddr = (char *)get_writeOut_buff(dest_node, buff_slot);
 			old_vAddr = (char *)kmap(old_page);
@@ -468,8 +468,8 @@ void COMEX_flush_buff(int nodeID)
 	
 	buff_pos[nodeID].head += count;
 	buff_pos[nodeID].head %= COMEX_total_writeOut;
-	mutex_unlock(&buff_pos[nodeID].pos_mutex);
 	COMEX_RDMA(nodeID, CODE_COMEX_PAGE_WRTE, &addr_struct, sizeof(addr_struct));
+	mutex_unlock(&buff_pos[nodeID].pos_mutex);
 }
 
 void COMEX_flush_one(int nodeID, int slot)
