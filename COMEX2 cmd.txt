@@ -66,6 +66,10 @@ free -h
 
 ssh root@192.168.0.123
 ssh root@192.168.0.125
+
+ssh-copy-id 10.132.120.2
+ssh-copy-id 10.132.121.65
+
 aethi9Vei$ju
 Ca~La6I$Th3Bes+
 racadm serveraction hardreset

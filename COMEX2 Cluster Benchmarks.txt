@@ -1,0 +1,215 @@
+mkdir -p /home/benchmark/log
+
+cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && mount -t debugfs none /sys/kernel/debug/
+head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/FT.log && free -h &>> /home/benchmark/log/FT.log
+/usr/bin/time -v -o /home/benchmark/log/FT.time ./ft.D.x &>> /home/benchmark/log/FT.log && grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/FT.log &
+
+
+ssh 10.132.121.65 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.64 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.63 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.62 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.61 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.60 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.59 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.58 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.57 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.56 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.55 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.54 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.53 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.52 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.51 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.50 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.48 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.47 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.46 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.45 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.44 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.43 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.42 'mkdir -p /home/benchmark/log'
+ssh 10.132.121.41 'mkdir -p /home/benchmark/log'
+
+
+ssh 10.132.121.65 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.64 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.63 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.62 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.61 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.60 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.59 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.58 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.57 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.56 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.55 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.54 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.53 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.52 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.51 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.50 'mount -t debugfs none /sys/kernel/debug/'
+
+ssh 10.132.121.48 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.47 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.46 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.45 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.44 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.43 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.42 'mount -t debugfs none /sys/kernel/debug/'
+ssh 10.132.121.41 'mount -t debugfs none /sys/kernel/debug/'
+
+
+ssh 10.132.121.65 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.64 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.63 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.62 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.61 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.60 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.59 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.58 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.57 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.56 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.55 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.54 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.53 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.52 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.51 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.50 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+
+ssh 10.132.121.48 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.47 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.46 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.45 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.44 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.43 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.42 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.41 'head -n 16 /boot/grub/grub.conf | tail -n 1 &> /home/benchmark/log/mg-priority.log'
+
+
+ssh 10.132.121.65 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.64 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.63 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.62 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.61 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.60 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.59 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.58 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.57 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.56 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.55 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.54 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.53 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.52 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.51 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.50 'free -h &>> /home/benchmark/log/mg-priority.log'
+
+ssh 10.132.121.48 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.47 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.46 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.45 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.44 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.43 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.42 'free -h &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.41 'free -h &>> /home/benchmark/log/mg-priority.log'
+
+
+ssh 10.132.121.65 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.64 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.63 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.62 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.61 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.60 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.59 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.58 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.57 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.56 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.55 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.54 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.53 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.52 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.51 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.50 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+
+ssh 10.132.121.48 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.47 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.46 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.45 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.44 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.43 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.42 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+ssh 10.132.121.41 'cd /home/benchmark/NPB3.3.1/NPB3.3-SER/bin && /usr/bin/time -v -o /home/benchmark/log/mg-priority.time ./mg.D.x >> /home/benchmark/log/mg-priority.log 2>&1 &' &
+
+
+ssh 10.132.121.65 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.64 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.63 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.62 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.61 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.60 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.59 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.58 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.57 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.56 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.55 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.54 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.53 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.52 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.51 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.50 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.48 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.47 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.46 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.45 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.44 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.43 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.42 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+ssh 10.132.121.41 'grep "" /sys/kernel/debug/comex_info/* &>> /home/benchmark/log/mg-priority.log'
+
+
+ssh 10.132.121.65 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.64 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.63 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.62 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.61 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.60 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.59 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.58 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.57 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.56 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.55 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.54 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.53 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.52 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.51 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.50 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.48 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.47 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.46 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.45 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.44 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.43 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.42 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+ssh 10.132.121.41 'head -n 5 /home/benchmark/log/mg-priority.time | tail -n 1'
+
+
+
+ssh 10.132.121.65 'rm -rf /home/benchmark/log/*'
+ssh 10.132.121.64 'rm -rf /home/benchmark/log/*'
+ssh 10.132.121.63 'rm -rf /home/benchmark/log/*'
+ssh 10.132.121.62 'rm -rf /home/benchmark/log/*'
+ssh 10.132.121.61 'rm -rf /home/benchmark/log/*'
+ssh 10.132.121.60 'rm -rf /home/benchmark/log/*'
+ssh 10.132.121.59 'rm -rf /home/benchmark/log/*'
+ssh 10.132.121.58 'rm -rf /home/benchmark/log/*'
+ssh 10.132.121.57 'rm -rf /home/benchmark/log/*'
+ssh 10.132.121.56 'rm -rf /home/benchmark/log/*'
+ssh 10.132.121.55 'rm -rf /home/benchmark/log/*'
+ssh 10.132.121.54 'rm -rf /home/benchmark/log/*'
+ssh 10.132.121.53 'rm -rf /home/benchmark/log/*'
+ssh 10.132.121.52 'rm -rf /home/benchmark/log/*'
+ssh 10.132.121.51 'rm -rf /home/benchmark/log/*'
+ssh 10.132.121.50 'rm -rf /home/benchmark/log/*'
+
+
+
+
+

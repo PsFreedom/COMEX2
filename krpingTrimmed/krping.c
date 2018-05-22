@@ -615,8 +615,8 @@ static void krping_cq_event_handler_send(struct ib_cq *cq, void *ctx)
 				continue;
 			} else {
 				printk(KERN_ERR PFX "send cq completion failed with "
-					   "wr_id %Lx status %d opcode %d vender_err %x\n",
-					wc.wr_id, wc.status, wc.opcode, wc.vendor_err);
+					   "wr_id %Lx status %d opcode %d vender_err %x | Pair %d\n",
+					wc.wr_id, wc.status, wc.opcode, wc.vendor_err, cb->remotenodeID);
 				if(wc.status==13){
 					DEBUG_LOG("need to retry\n");
           goto error;

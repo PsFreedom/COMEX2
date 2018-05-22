@@ -1,0 +1,476 @@
+aethi9Vei$ju
+ssh-copy-id 10.132.121.65
+ssh-copy-id 10.132.121.64
+ssh-copy-id 10.132.121.63
+ssh-copy-id 10.132.121.62
+ssh-copy-id 10.132.121.61
+ssh-copy-id 10.132.121.60
+ssh-copy-id 10.132.121.59
+ssh-copy-id 10.132.121.58
+ssh-copy-id 10.132.121.57
+ssh-copy-id 10.132.121.56
+ssh-copy-id 10.132.121.55
+ssh-copy-id 10.132.121.54
+ssh-copy-id 10.132.121.53
+ssh-copy-id 10.132.121.52
+ssh-copy-id 10.132.121.51
+ssh-copy-id 10.132.121.50
+ssh-copy-id 10.132.121.48
+ssh-copy-id 10.132.121.47
+ssh-copy-id 10.132.121.46
+ssh-copy-id 10.132.121.45
+ssh-copy-id 10.132.121.44
+ssh-copy-id 10.132.121.43
+ssh-copy-id 10.132.121.42
+ssh-copy-id 10.132.121.41
+
+
+ssh 10.132.121.65 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.64 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.63 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.62 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.61 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.60 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.59 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.58 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.57 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.56 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.55 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.54 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.53 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.52 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.51 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.50 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.48 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.47 'date --set="21 MAY 2018 20:39:45"' &
+ssh 10.132.121.46 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.45 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.44 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.43 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.42 'date --set="18 MAY 2018 20:31:00"' &
+ssh 10.132.121.41 'date --set="18 MAY 2018 20:31:00"' &
+
+
+ssh 10.132.121.65 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.64 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.63 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.62 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.61 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.60 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.59 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.58 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.57 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.56 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.55 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.54 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.53 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.52 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.51 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.50 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.48 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.47 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.46 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.45 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.44 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.43 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.42 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+ssh 10.132.121.41 'mkdir -p /home/RDMA/ && mkdir -p /home/comex/ && mkdir -p /home/benchmark/' &
+
+
+
+Fix /etc/yum.repos.d
+
+
+ssh 10.132.121.65 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64 minicom.x86_64' &
+ssh 10.132.121.64 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.63 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.62 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' & 
+ssh 10.132.121.61 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.60 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.59 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.58 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.57 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.56 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.55 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.54 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.53 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.52 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.51 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.50 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.48 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.47 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.46 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.45 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.44 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.43 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.42 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+ssh 10.132.121.41 'yum install -y vim-enhanced.x86_64 wget.x86_64 rsync.x86_64 mcelog.x86_64 time.x86_64 ncurses-devel bc.x86_64 pciutils.x86_64 pciutils-devel.x86_64 openssh-clients.x86_64 screen.x86_64 vconfig.x86_64' &
+
+
+ssh 10.132.121.65 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.64 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.63 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.62 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.61 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.60 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.59 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.58 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.57 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.56 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.55 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.54 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.53 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.52 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.51 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.50 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.48 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.47 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.46 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.45 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.44 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.43 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.42 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+ssh 10.132.121.41 'yum install -y gcc-c++.x86_64 gcc-gfortran.x86_64 kernel-headers.x86_64 kernel-devel.x86_64' &
+
+ssh 10.132.121.65 'yum update -y; reboot' &
+ssh 10.132.121.64 'yum update -y; reboot' &
+ssh 10.132.121.63 'yum update -y; reboot' &
+ssh 10.132.121.62 'yum update -y; reboot' &
+ssh 10.132.121.61 'yum update -y; reboot' &
+ssh 10.132.121.60 'yum update -y; reboot' &
+ssh 10.132.121.59 'yum update -y; reboot' &
+ssh 10.132.121.58 'yum update -y; reboot' &
+ssh 10.132.121.57 'yum update -y; reboot' &
+ssh 10.132.121.56 'yum update -y; reboot' &
+ssh 10.132.121.55 'yum update -y; reboot' &
+ssh 10.132.121.54 'yum update -y; reboot' &
+ssh 10.132.121.53 'yum update -y; reboot' &
+ssh 10.132.121.52 'yum update -y; reboot' &
+ssh 10.132.121.51 'yum update -y; reboot' &
+ssh 10.132.121.50 'yum update -y; reboot' &
+ssh 10.132.121.48 'yum update -y; reboot' &
+ssh 10.132.121.47 'yum update -y; reboot' &
+ssh 10.132.121.46 'yum update -y; reboot' &
+ssh 10.132.121.45 'yum update -y; reboot' &
+ssh 10.132.121.44 'yum update -y; reboot' &
+ssh 10.132.121.43 'yum update -y; reboot' &
+ssh 10.132.121.42 'yum update -y; reboot' &
+ssh 10.132.121.41 'yum update -y; reboot' &
+
+
+=== Set UP DHCP ===
+ssh 10.132.121.65
+yum install -y dhcp.x86_64
+vim /etc/sysconfig/dhcpd [eth0]
+vim /etc/dhcp/dhcpd.conf 
+vim /etc/sysconfig/iptables [67]
+
+service iptables restart
+service dhcpd start
+chkconfig dhcpd on
+
+
+ssh 10.132.121.65 'ifconfig eth0' &
+ssh 10.132.121.64 'ifconfig eth0' &
+ssh 10.132.121.63 'ifconfig eth0' &
+ssh 10.132.121.62 'ifconfig eth0' &
+ssh 10.132.121.61 'ifconfig eth0' &
+ssh 10.132.121.60 'ifconfig eth0' &
+ssh 10.132.121.59 'ifconfig eth0' &
+ssh 10.132.121.58 'ifconfig eth0' &
+ssh 10.132.121.57 'ifconfig eth0' &
+ssh 10.132.121.56 'ifconfig eth0' &
+ssh 10.132.121.55 'ifconfig eth0' &
+ssh 10.132.121.54 'ifconfig eth0' &
+ssh 10.132.121.53 'ifconfig eth0' &
+ssh 10.132.121.52 'ifconfig eth0' &
+ssh 10.132.121.51 'ifconfig eth0' &
+ssh 10.132.121.50 'ifconfig eth0' &
+ssh 10.132.121.48 'ifconfig eth0' &
+ssh 10.132.121.47 'ifconfig eth0' &
+ssh 10.132.121.46 'ifconfig eth0' &
+ssh 10.132.121.45 'ifconfig eth0' &
+ssh 10.132.121.44 'ifconfig eth0' &
+ssh 10.132.121.43 'ifconfig eth0' &
+ssh 10.132.121.42 'ifconfig eth0' &
+ssh 10.132.121.41 'ifconfig eth0' &
+
+
+ssh 10.132.121.65 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.64 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.63 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.62 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.61 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.60 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.59 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.58 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.57 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.56 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.55 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.54 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.53 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.52 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.51 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.50 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.48 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.47 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.46 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.45 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.44 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.43 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.42 'ifconfig eth0 | grep "HWaddr" '
+ssh 10.132.121.41 'ifconfig eth0 | grep "HWaddr" '
+
+
+RDMA Driver (Install the Kernel FIRST!)
+
+ssh 10.132.121.65 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.64 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.63 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.62 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.61 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.60 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.59 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.58 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.57 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.56 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.55 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.54 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.53 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.52 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.51 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.50 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.48 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.47 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.46 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.45 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.44 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.43 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.42 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+ssh 10.132.121.41 'yum -y install createrepo.noarch python-devel lsof redhat-rpm-config rpm-build libnl gtk2 atk cairo tcl numactl tcsh tk' &
+
+
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.65:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.64:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.63:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.62:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.61:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.60:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.59:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.58:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.57:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.56:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.55:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.54:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.53:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.52:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.51:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.50:/home/RDMA/.
+
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.48:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.47:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.46:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.45:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.44:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.43:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.42:/home/RDMA/.
+rsync -avz /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz root@10.132.121.41:/home/RDMA/.
+
+
+ssh 10.132.121.65 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.64 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.63 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.62 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.61 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.60 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.59 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.58 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.57 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.56 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.55 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.54 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.53 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.52 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.51 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.50 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+
+ssh 10.132.121.48 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.47 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.46 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.45 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.44 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.43 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.42 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+ssh 10.132.121.41 'cd /home/RDMA/ && tar xf MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64.tgz && cd /home/RDMA/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.8-x86_64 && ./mlnx_add_kernel_support.sh --yes --distro rhel6.9 -m .' &
+
+
+ssh 10.132.121.65 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.64 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.63 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.62 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.61 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.60 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.59 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.58 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.57 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.56 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.55 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.54 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.53 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.52 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.51 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.50 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+
+ssh 10.132.121.48 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.47 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.46 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.45 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.44 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.43 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.42 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+ssh 10.132.121.41 'cd /home/RDMA/ && tar xf /tmp/MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext.tgz && cd MLNX_OFED_LINUX-3.3-1.0.4.0-rhel6.9-x86_64-ext && ./mlnxofedinstall --distro rhel6.9 --force' &
+
+
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.65:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.64:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.63:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.62:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.61:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.60:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.59:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.58:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.57:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.56:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.55:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.54:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.53:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.52:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.51:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.50:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.48:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.47:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.46:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.45:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.44:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.43:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.42:/home/benchmark/
+rsync -avz /home/benchmark/NPB3.3.1 root@10.132.121.41:/home/benchmark/
+
+
+ssh 10.132.121.65 'reboot' &
+ssh 10.132.121.64 'reboot' &
+ssh 10.132.121.63 'reboot' &
+ssh 10.132.121.62 'reboot' &
+ssh 10.132.121.61 'reboot' &
+ssh 10.132.121.60 'reboot' &
+ssh 10.132.121.59 'reboot' &
+ssh 10.132.121.58 'reboot' &
+ssh 10.132.121.57 'reboot' &
+ssh 10.132.121.56 'reboot' &
+ssh 10.132.121.55 'reboot' &
+ssh 10.132.121.54 'reboot' &
+ssh 10.132.121.53 'reboot' &
+ssh 10.132.121.52 'reboot' &
+ssh 10.132.121.51 'reboot' &
+ssh 10.132.121.50 'reboot' &
+ssh 10.132.121.48 'reboot' &
+ssh 10.132.121.47 'reboot' &
+ssh 10.132.121.46 'reboot' &
+ssh 10.132.121.45 'reboot' &
+ssh 10.132.121.44 'reboot' &
+ssh 10.132.121.43 'reboot' &
+ssh 10.132.121.42 'reboot' &
+ssh 10.132.121.41 'reboot' &
+
+
+ssh 10.132.121.65 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.64 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.63 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.62 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.61 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.60 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.59 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.58 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.57 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.56 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.55 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.54 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.53 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.52 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.51 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.50 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.48 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.47 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.46 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.45 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.44 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.43 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.42 'ethtool -A eth2 rx off tx off' &
+ssh 10.132.121.41 'ethtool -A eth2 rx off tx off' &
+
+
+ssh 10.132.121.65 'ethtool -a eth0'
+ssh 10.132.121.64 'ethtool -a eth0'
+ssh 10.132.121.63 'ethtool -a eth0'
+ssh 10.132.121.62 'ethtool -a eth0'
+ssh 10.132.121.61 'ethtool -a eth0'
+ssh 10.132.121.60 'ethtool -a eth0'
+ssh 10.132.121.59 'ethtool -a eth0'
+ssh 10.132.121.58 'ethtool -a eth0'
+ssh 10.132.121.57 'ethtool -a eth0'
+ssh 10.132.121.56 'ethtool -a eth0'
+ssh 10.132.121.55 'ethtool -a eth0'
+ssh 10.132.121.54 'ethtool -a eth0'
+ssh 10.132.121.53 'ethtool -a eth0'
+ssh 10.132.121.52 'ethtool -a eth0'
+ssh 10.132.121.51 'ethtool -a eth0'
+ssh 10.132.121.50 'ethtool -a eth0'
+ssh 10.132.121.48 'ethtool -a eth0'
+ssh 10.132.121.47 'ethtool -a eth0'
+ssh 10.132.121.46 'ethtool -a eth0'
+ssh 10.132.121.45 'ethtool -a eth0'
+ssh 10.132.121.44 'ethtool -a eth0'
+ssh 10.132.121.43 'ethtool -a eth0'
+ssh 10.132.121.42 'ethtool -a eth0'
+ssh 10.132.121.41 'ethtool -a eth0'
+
+
+ssh 10.132.121.65 '' &
+ssh 10.132.121.64 '' &
+ssh 10.132.121.63 '' &
+ssh 10.132.121.62 '' &
+ssh 10.132.121.61 '' &
+ssh 10.132.121.60 '' &
+ssh 10.132.121.59 '' &
+ssh 10.132.121.58 '' &
+ssh 10.132.121.57 '' &
+ssh 10.132.121.56 '' &
+ssh 10.132.121.55 '' &
+ssh 10.132.121.54 '' &
+ssh 10.132.121.53 '' &
+ssh 10.132.121.52 '' &
+ssh 10.132.121.51 '' &
+ssh 10.132.121.50 '' &
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
