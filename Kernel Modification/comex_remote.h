@@ -96,7 +96,9 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 	
 	for(i=0; i<COMEX_total_nodes; i++)
 	{
-		mutex_lock(&COMEX_free_group[dest_node].mutex_FG);
+		if(mutex_trylock(&COMEX_free_group[dest_node].mutex_FG) == 0)
+			return -1;
+		
 		if(COMEX_free_group[dest_node].total_group < MAX_MSSG && 
 		   COMEX_free_group[dest_node].mssg_qouta  > 0)
 		{

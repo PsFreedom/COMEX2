@@ -114,9 +114,9 @@ ssh 10.132.121.60 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 23 6 143
 ssh 10.132.121.59 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 23 7 14360 192.168.10. > myconfig.h;' &
 ssh 10.132.121.58 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 23 8 14360 192.168.10. > myconfig.h;' &
 ssh 10.132.121.57 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 23 9 14360 192.168.10. > myconfig.h;' &
-ssh 10.132.121.56 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 23 10 14360 192.168.10. > myconfig.h;' &
-ssh 10.132.121.55 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 23 11 14360 192.168.10. > myconfig.h;' &
-ssh 10.132.121.54 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 23 12 14360 192.168.10. > myconfig.h;' &
+ssh 10.132.121.56 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 23 10 1050 192.168.10. > myconfig.h;' &
+ssh 10.132.121.55 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 23 11 1050 192.168.10. > myconfig.h;' &
+ssh 10.132.121.54 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 23 12 1050 192.168.10. > myconfig.h;' &
 ssh 10.132.121.53 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 23 13 1050 192.168.10. > myconfig.h;' &
 ssh 10.132.121.52 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 23 14 1050 192.168.10. > myconfig.h;' &
 ssh 10.132.121.51 'cd /home/comex/krpingTrimmed; python gen_myconfig.py 23 15 1050 192.168.10. > myconfig.h;' &
@@ -249,9 +249,9 @@ ssh 10.132.121.60 'cd /home/comex/; echo "total_pages=14680064,writeOut_buff=256
 ssh 10.132.121.59 'cd /home/comex/; echo "total_pages=14680064,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x" >/proc/krping &'
 ssh 10.132.121.58 'cd /home/comex/; echo "total_pages=14680064,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x" >/proc/krping &'
 ssh 10.132.121.57 'cd /home/comex/; echo "total_pages=14680064,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x" >/proc/krping &'
-ssh 10.132.121.56 'cd /home/comex/; echo "total_pages=14680064,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x" >/proc/krping &'
-ssh 10.132.121.55 'cd /home/comex/; echo "total_pages=14680064,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x" >/proc/krping &'
-ssh 10.132.121.54 'cd /home/comex/; echo "total_pages=14680064,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x" >/proc/krping &'
+ssh 10.132.121.56 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x" >/proc/krping &'
+ssh 10.132.121.55 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x" >/proc/krping &'
+ssh 10.132.121.54 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x" >/proc/krping &'
 ssh 10.132.121.53 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x" >/proc/krping &'
 ssh 10.132.121.52 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x" >/proc/krping &'
 ssh 10.132.121.51 'cd /home/comex/; echo "total_pages=1048576,writeOut_buff=256,readIn_buff=4096,proc_name=mg.D.x" >/proc/krping &'
@@ -362,6 +362,14 @@ ssh 10.132.121.53 '' &
 ssh 10.132.121.52 '' &
 ssh 10.132.121.51 '' &
 ssh 10.132.121.50 '' &
+ssh 10.132.121.48 '' &
+ssh 10.132.121.47 '' &
+ssh 10.132.121.46 '' &
+ssh 10.132.121.45 '' &
+ssh 10.132.121.44 '' &
+ssh 10.132.121.43 '' &
+ssh 10.132.121.42 '' &
+ssh 10.132.121.41 '' &
 
 
 ssh 10.132.121.65 '' &
@@ -388,6 +396,32 @@ ssh 10.132.121.44 '' &
 ssh 10.132.121.43 '' &
 ssh 10.132.121.42 '' &
 ssh 10.132.121.41 '' &
+
+
+ssh 10.132.121.65 'uptime'
+ssh 10.132.121.64 'uptime'
+ssh 10.132.121.63 'uptime'
+ssh 10.132.121.62 'uptime'
+ssh 10.132.121.61 'uptime'
+ssh 10.132.121.60 'uptime'
+ssh 10.132.121.59 'uptime'
+ssh 10.132.121.58 'uptime'
+ssh 10.132.121.57 'uptime'
+ssh 10.132.121.56 'uptime'
+ssh 10.132.121.55 'uptime'
+ssh 10.132.121.54 'uptime'
+ssh 10.132.121.53 'uptime'
+ssh 10.132.121.52 'uptime'
+ssh 10.132.121.51 'uptime'
+ssh 10.132.121.50 'uptime'
+ssh 10.132.121.48 'uptime'
+ssh 10.132.121.47 'uptime'
+ssh 10.132.121.46 'uptime'
+ssh 10.132.121.45 'uptime'
+ssh 10.132.121.44 'uptime'
+ssh 10.132.121.43 'uptime'
+ssh 10.132.121.42 'uptime'
+ssh 10.132.121.41 'uptime'
 
 
 ssh 10.132.121.65 'uname -r'
