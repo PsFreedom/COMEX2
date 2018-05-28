@@ -1,55 +1,55 @@
 cd /home/comex && rm -rf linux-3.10.87 && tar -zxf linux-3.10.87.tar.gz && cp myConfig linux-3.10.87/.config
 
 
-ssh 10.132.121.65 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.64 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.63 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.62 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.61 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.60 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.59 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.58 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.57 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.56 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.55 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.54 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.53 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.52 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.51 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.50 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.48 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.47 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.46 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.45 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.44 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.43 'rm -rf /home/comex/linux-3.10.87' &
-ssh 10.132.121.42 'rm -rf /home/comex/linux-3.10.87' &
+ssh 10.132.121.65 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.64 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.63 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.62 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.61 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.60 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.59 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.58 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.57 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.56 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.55 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.54 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.53 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.52 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.51 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.50 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.48 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.47 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.46 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.45 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.44 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.43 'rm -rf /home/comex/linux-3.10.87'
+ssh 10.132.121.42 'rm -rf /home/comex/linux-3.10.87'
 ssh 10.132.121.41 'rm -rf /home/comex/linux-3.10.87' 
 
 
-ssh 10.132.121.65 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.64 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.63 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.62 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.61 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.60 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.59 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.58 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.57 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.56 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.55 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.54 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.53 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.52 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.51 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.50 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.48 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.47 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.46 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.45 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.44 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.43 'rm -rf /home/comex/krpingTrimmed' &
-ssh 10.132.121.42 'rm -rf /home/comex/krpingTrimmed' &
+ssh 10.132.121.65 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.64 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.63 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.62 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.61 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.60 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.59 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.58 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.57 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.56 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.55 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.54 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.53 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.52 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.51 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.50 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.48 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.47 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.46 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.45 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.44 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.43 'rm -rf /home/comex/krpingTrimmed'
+ssh 10.132.121.42 'rm -rf /home/comex/krpingTrimmed'
 ssh 10.132.121.41 'rm -rf /home/comex/krpingTrimmed' 
 
 

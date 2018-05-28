@@ -96,9 +96,6 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 	
 	for(i=0; i<COMEX_total_nodes; i++)
 	{
-		if(mutex_trylock(&COMEX_free_group[dest_node].mutex_FG) == 0)
-			return -1;
-		
 		if(COMEX_free_group[dest_node].total_group < MAX_MSSG && 
 		   COMEX_free_group[dest_node].mssg_qouta  > 0)
 		{
@@ -111,6 +108,10 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 				COMEX_free_group[dest_node].back_off--;
 			}
 		}
+		
+		if(mutex_trylock(&COMEX_free_group[dest_node].mutex_FG) == 0)
+			return -1;
+		
 		if(COMEX_free_group[dest_node].total_group > 0 && 
 		   COMEX_writeOut_buff[dest_node][buff_pos[dest_node].tail].status == -1)
 		{
@@ -325,7 +326,6 @@ void COMEX_read_from_remote_one(struct page *new_page, int nodeID, int pageNO)
 
 void COMEX_page_receive(int nodeID, int pageNO, int group_size)
 {
-	mutex_lock(&COMEX_free_group[nodeID].mutex_FG);
 	if(pageNO >= 0){
 		free_group_t *group_ptr = (free_group_t *)kzalloc(sizeof(free_group_t), GFP_KERNEL);
 		
@@ -334,15 +334,18 @@ void COMEX_page_receive(int nodeID, int pageNO, int group_size)
 		INIT_LIST_HEAD(&group_ptr->link);
 
 	//	printk(KERN_INFO "%s: %d %d - %d\n", __FUNCTION__, nodeID, group_ptr->page_start, group_ptr->page_end);
+		mutex_lock(&COMEX_free_group[nodeID].mutex_FG);
 		list_add_tail(&group_ptr->link, &COMEX_free_group[nodeID].free_group);
 		COMEX_free_group[nodeID].mssg_qouta++;
 		COMEX_free_group[nodeID].total_group++;
+		mutex_unlock(&COMEX_free_group[nodeID].mutex_FG);
 	}
 	else{
+		mutex_lock(&COMEX_free_group[nodeID].mutex_FG);
 		COMEX_free_group[nodeID].mssg_qouta++;
 		COMEX_free_group[nodeID].back_off += 50000;
+		mutex_unlock(&COMEX_free_group[nodeID].mutex_FG);
 	}
-	mutex_unlock(&COMEX_free_group[nodeID].mutex_FG);
 }
 EXPORT_SYMBOL(COMEX_page_receive);
 
