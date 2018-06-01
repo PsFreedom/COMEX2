@@ -27,7 +27,6 @@ void COMEX_init_Remote()
 		COMEX_free_group[i].tail		= 0;
 		
 		mutex_init(&COMEX_free_group[i].mutex_slot);
-		mutex_init(&COMEX_free_group[i].mutex_ctr);
 		for(j=0; j<MAX_GROUP; j++){
 			COMEX_free_group[i].group[j].page_start = -1;
 			COMEX_free_group[i].group[j].page_end   = -1;
@@ -48,7 +47,7 @@ void COMEX_init_Remote()
 		for(j=0; j<COMEX_total_writeOut; j++){
 			COMEX_writeOut_buff[i][j].status = -1;
 			COMEX_writeOut_buff[i][j].nodeID = -1;
-			COMEX_writeOut_buff[i][j].pageNO = -1;
+			COMEX_writeOut_buff[i][j].pageNO = -222;
 		}
 	}
 	
