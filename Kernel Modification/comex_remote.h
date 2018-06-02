@@ -135,7 +135,7 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 				COMEX_flush_buff(dest_node);
 			
 			*retNodeID = dest_node;
-			return -1;
+			return 1;
 		}
 		mutex_unlock(&COMEX_free_group[dest_node].mutex_slot);
 		dest_node = COMEX_hash(dest_node);
@@ -452,7 +452,7 @@ void COMEX_flush_buff(int nodeID)
 		}
 		if(	COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].pageNO - 1 !=
 			COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count -1].pageNO &&
-			buff_pos[nodeID].head + count != 0){
+			buff_pos[nodeID].head + count != 1){
 			printk(KERN_INFO "%s: Not contiguous %d %d\n", __FUNCTION__, 
 						COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count -1],
 						COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].pageNO);
