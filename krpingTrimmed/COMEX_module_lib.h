@@ -61,7 +61,7 @@ void COMEX_RDMA_fn(int target, int CMD_num, void *ptr, int struct_size)
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_WRTE){
 		COMEX_address_t *myStruct = ptr;
-		printk(KERN_INFO "PAGE_WRTE: %d | L %lu R %lu Size %d\n", target, myStruct->local >> PAGE_SHIFT, myStruct->remote >> PAGE_SHIFT, myStruct->size);
+	//	printk(KERN_INFO "PAGE_WRTE: %d | L %lu R %lu Size %d\n", target, myStruct->local >> PAGE_SHIFT, myStruct->remote >> PAGE_SHIFT, myStruct->size);
 		CHK(do_write(cbs[target], myStruct->local, myStruct->remote + remote_shift_offset, myStruct->size << PAGE_SHIFT))
 		COMEX_free_buff(target, myStruct->bufIDX, myStruct->size);
 	}

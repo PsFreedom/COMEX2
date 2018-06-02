@@ -353,13 +353,9 @@ EXPORT_SYMBOL(COMEX_page_receive);
 void COMEX_freelist_getpage(int list_ID, int slot)
 {
 	int i;
-	for(i=0; i<FLUSH; i++){
-		if(COMEX_writeOut_buff[list_ID][slot+i].pageNO == -222){
-			COMEX_writeOut_buff[list_ID][slot+i].pageNO = COMEX_free_group[list_ID].group[COMEX_free_group[list_ID].head].page_start++;
-		}
-		else{
-			printk(KERN_INFO "%s: page buffer is not free!\n", __FUNCTION__);
-		}
+	for(i=0; i<FLUSH && COMEX_writeOut_buff[list_ID][slot+i].pageNO == -222; i++)
+	{
+		COMEX_writeOut_buff[list_ID][slot+i].pageNO = COMEX_free_group[list_ID].group[COMEX_free_group[list_ID].head].page_start++;
 	}
 	if(COMEX_free_group[list_ID].group[COMEX_free_group[list_ID].head].page_start > 
 	   COMEX_free_group[list_ID].group[COMEX_free_group[list_ID].head].page_end)
@@ -452,7 +448,6 @@ void COMEX_flush_buff(int nodeID)
 		count++;
 				
 		if(buff_pos[nodeID].head + count >= COMEX_total_writeOut){
-	//		printk(KERN_INFO "%s: Last Slot\n", __FUNCTION__);
 			break;
 		}
 		if(	COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].pageNO - 1 !=
