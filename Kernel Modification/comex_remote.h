@@ -454,7 +454,7 @@ void COMEX_flush_buff(int nodeID)
 			COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count -1].pageNO &&
 			buff_pos[nodeID].head + count != 1){
 			printk(KERN_INFO "%s: Not contiguous %d %d\n", __FUNCTION__, 
-						COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count -1],
+						COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count -1].pageNO,
 						COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].pageNO);
 			break;
 		}

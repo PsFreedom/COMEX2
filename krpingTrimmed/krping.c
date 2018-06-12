@@ -350,12 +350,12 @@ static int do_write(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 
 	
 	if(( local_offset%RPING_BUFSIZE + size > RPING_BUFSIZE)||
 	   (remote_offset%RPING_BUFSIZE + size > RPING_BUFSIZE)){ //chk misalignment
-		DEBUG_LOG("\nlocal %lu %lu %lu ",  local_offset, RPING_BUFSIZE, size);
-		DEBUG_LOG("\nremot %lu %lu %lu ", remote_offset, RPING_BUFSIZE, size);
+		DEBUG_LOG("\nlocal %lu %lu %lu ",  (unsigned long)local_offset, (unsigned long)RPING_BUFSIZE, (unsigned long)size);
+		DEBUG_LOG("\nremot %lu %lu %lu ", (unsigned long)remote_offset, (unsigned long)RPING_BUFSIZE, (unsigned long)size);
 		DEBUG_LOG("\nALERT, BUFFER MISALIGNMENT FOUND\n");
 		return 1;
 	}else if(remote_offset/RPING_BUFSIZE>cb->remote_pcount){
-		DEBUG_LOG("\nALERT WRITE, %ld %ld %ld\n", local_offset, remote_offset, size);
+		DEBUG_LOG("\nALERT WRITE, %ld %ld %ld\n", (long)local_offset, (long)remote_offset, (long)size);
 		return 1;
     }else{
 		sema_init(&sem_write,0);  
@@ -399,7 +399,7 @@ static int do_read(struct krping_cb *cb,u64 local_offset,u64 remote_offset,u64 s
 		DEBUG_LOG("\nALERT, BUFFER MISALIGNMENT FOUND\n\n");
 		return 1;
 	}else if(remote_offset/RPING_BUFSIZE>cb->remote_pcount){
-		DEBUG_LOG("\nALERT READ, %ld %ld %ld\n", local_offset, remote_offset, size);
+		DEBUG_LOG("\nALERT READ, %ld %ld %ld\n", (long)local_offset, (long)remote_offset, (long)size);
 		return 1;
 	}else{
 		rdma_sq_wr_copy.wr.rdma.rkey= cb->remote_rkey;
@@ -555,7 +555,7 @@ static int send_buffer_info(struct krping_cb *cb)
 
 static void universal_recv_handler(struct krping_cb *cb, uint64_t imm, uint64_t slot)
 {
-	int i, ret;
+	int ret;
 	uint64_t bad_wr;
 	//removed saved_buff, need &cb->recv_buf[slot] instead
 	//DEBUG_LOG("%d: recv slot:%d\n",cb->cbindex,slot);
@@ -672,7 +672,7 @@ static void krping_cq_event_handler_recv(struct ib_cq *cq, void *ctx)
 {
 	struct krping_cb *cb = ctx;
 	struct ib_wc wc;
-	int ret,i;
+	int ret;
 	int breakingout=0;
 
 	BUG_ON(cb->cq_recv != cq);
@@ -1250,7 +1250,6 @@ int krping_doit(char *cmd)
 	char stri[] = "responsethread  ";
 	
 	// for debug
-	int j;
 	char t[170] = "zxg   ";
 	
 	sema_init(&sem_killsw,0);

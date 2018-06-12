@@ -22,9 +22,7 @@ void COMEX_do_work(struct work_struct *work);
 typedef struct{
 	struct work_struct my_work_struct;
 	int CMD_num;
-//	struct krping_cb *cb;
-//	uint64_t slot;
-	char args[6*MAX_FREE];
+	char *args;
 } work_content;
 
 void COMEX_module_echo_fn(char *str)
@@ -86,27 +84,39 @@ void COMEX_do_verb(int CMD_num, struct krping_cb *cb, uint64_t slot)
 	void *piggy = &cb->recv_buf[slot];
 	work_content *myWork_cont = kzalloc(sizeof(work_content), GFP_ATOMIC);
 	
-	INIT_WORK(&myWork_cont->my_work_struct, COMEX_do_work);
+	if(myWork_cont == NULL)
+		return;
+	
 	myWork_cont->CMD_num = CMD_num;
 	switch(CMD_num){
 		case CODE_COMEX_PAGE_RQST:
-//			printk(KERN_INFO "Received... PAGE_RQST\n");
-			memcpy( &myWork_cont->args[0], piggy, sizeof(int));
+	//		printk(KERN_INFO "Received... PAGE_RQST\n");
+			myWork_cont->args = kzalloc(sizeof(int), GFP_ATOMIC);
+			if(myWork_cont->args == NULL)
+				return;
+			memcpy( myWork_cont->args, piggy, sizeof(int));
 			break;
 		case CODE_COMEX_PAGE_RPLY:
-//			printk(KERN_INFO "Received... PAGE_RPLY\n");
-			memcpy( &myWork_cont->args[0], piggy, sizeof(reply_pages_t));
+	//		printk(KERN_INFO "Received... PAGE_RPLY\n");
+			myWork_cont->args = kzalloc(sizeof(reply_pages_t), GFP_ATOMIC);
+			if(myWork_cont->args == NULL)
+				return;
+			memcpy( myWork_cont->args, piggy, sizeof(reply_pages_t));
 			break;
 		case CODE_COMEX_PAGE_CKSM:
-			printk(KERN_INFO "PAGE_CKSM: %lu - %lu\n", *(unsigned long *)piggy, checkSum_Vpage(COMEX_offset_to_addr_fn(*(unsigned long *)piggy)));
+			printk(KERN_INFO "PAGE_CKSM: %lu - %lu\n", *(unsigned long *)piggy, checkSum_Vpage((char *)COMEX_offset_to_addr_fn(*(unsigned long *)piggy)));
 			return;
 		case CODE_COMEX_PAGE_FREE:
-			memcpy( &myWork_cont->args[0], piggy, sizeof(free_struct_t));
+			myWork_cont->args = kzalloc(sizeof(free_struct_t), GFP_ATOMIC);
+			if(myWork_cont->args == NULL)
+				return;
+			memcpy( myWork_cont->args, piggy, sizeof(free_struct_t));
 			break;
 		default:
 			printk(KERN_INFO "%s: %d | ERROR Unknown CMD_num %d\n", __FUNCTION__, *(int *)piggy, CMD_num);
 			return;
 	}
+	INIT_WORK(&myWork_cont->my_work_struct, COMEX_do_work);
 	queue_work(COMEX_wq, &myWork_cont->my_work_struct);
 }
 
@@ -115,7 +125,7 @@ void COMEX_do_work(struct work_struct *work)
 //	work_content *myWork_cont = (work_content *)container_of(work, work_content, my_work_struct);
 	work_content *myWork_cont = (work_content *)work;
 	int CMD_num = myWork_cont->CMD_num;
-	void *piggy = &myWork_cont->args[0];
+	void *piggy = myWork_cont->args;
 	
 	if(CMD_num == CODE_COMEX_PAGE_RQST){
 //		printk(KERN_INFO "PAGE_RQST: From node %d\n", *(int *)piggy);
