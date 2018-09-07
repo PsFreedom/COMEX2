@@ -74,6 +74,7 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 	char initMSG[50];
 	int i, ret = 0;
 	int offsetNO = 0;
+	swp_entry_t swp_test;
 	
 	COMEX_ID			 = node_ID;
 	COMEX_total_nodes	 = n_nodes;
@@ -126,7 +127,7 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 
 ///// Footer
 	COMEX_init_Remote();
-	sprintf(initMSG,"Finish initialization... Prototype! 02");
+	sprintf(initMSG,"Finish initialization... Prototype! 02 -> %d", SWP_TYPE_SHIFT(swp_test));
 	COMEX_module_echo(initMSG);
 	COMEX_Ready = 1;
 }
