@@ -9,6 +9,7 @@ char proc_name[100];
 //CHKSM_t COMEX_CHKSM[3][Total_CHKSM];
 
 ///// Counter 
+unsigned long SWAP_total 	 = 0;
 unsigned long SWAP_to_Disk   = 0;
 unsigned long SWAP_to_COMEX  = 0;
 unsigned long COMEX_in_total = 0;
@@ -17,10 +18,8 @@ unsigned long COMEX_in_buff  = 0;
 unsigned long COMEX_in_RDMA  = 0;
 unsigned long COMEX_in_Local = 0;
 
-unsigned long FlagCounter = 0;
-unsigned long AllCounter = 0;
-
 struct dentry *dir;
+struct dentry *file_SWAP_total;
 struct dentry *file_SWAP_to_Disk;
 struct dentry *file_SWAP_to_COMEX;
 struct dentry *file_COMEX_in_total;

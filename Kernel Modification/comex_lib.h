@@ -1,6 +1,7 @@
 void COMEX_init_FS()
 {
 	dir = debugfs_create_dir("comex_info", NULL);
+	file_SWAP_total		= debugfs_create_u64("SWAP_total",     0644, dir, &SWAP_total);
 	file_SWAP_to_Disk	= debugfs_create_u64("SWAP_to_Disk",   0644, dir, &SWAP_to_Disk);
 	file_SWAP_to_COMEX	= debugfs_create_u64("SWAP_to_COMEX",  0644, dir, &SWAP_to_COMEX);
 	file_COMEX_in_total	= debugfs_create_u64("COMEX_in_total", 0644, dir, &COMEX_in_total);
@@ -127,7 +128,7 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 
 ///// Footer
 	COMEX_init_Remote();
-	sprintf(initMSG,"Finish initialization... Prototype! 02 -> %d", SWP_TYPE_SHIFT(swp_test));
+	sprintf(initMSG,"Finish initialization... %s! 02 -> %d", namePtr, SWP_TYPE_SHIFT(swp_test));
 	COMEX_module_echo(initMSG);
 	COMEX_Ready = 1;
 }
