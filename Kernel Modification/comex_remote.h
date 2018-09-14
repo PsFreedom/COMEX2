@@ -107,9 +107,10 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 				COMEX_free_group[dest_node].back_off--;
 			}
 		}
-			
+		
 		if(mutex_trylock(&COMEX_free_group[dest_node].mutex_slot) == 0)
 			return -1;
+		
 		if(atomic_read(&COMEX_free_group[dest_node].total_group) > 0 && 
 		   COMEX_writeOut_buff[dest_node][buff_pos[dest_node].tail].status == -1)
 		{
@@ -120,7 +121,9 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 			COMEX_writeOut_buff[dest_node][buff_slot].status = 1;
 			if(COMEX_writeOut_buff[dest_node][buff_slot].pageNO == -222)
 				COMEX_freelist_getpage(dest_node, buff_slot);
-			*retPageNO = COMEX_writeOut_buff[dest_node][buff_slot].pageNO;
+			
+			if(COMEX_writeOut_buff[dest_node][buff_slot].pageNO == -222)
+				return -1;
 			
 			mutex_unlock(&COMEX_free_group[dest_node].mutex_slot);
 		//	printk(KERN_INFO "%s: PageNO %d %d\n", __FUNCTION__, dest_node, *retPageNO);
@@ -134,6 +137,7 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 			if(buff_slot%FLUSH == 0)
 				COMEX_flush_buff(dest_node);
 			
+			*retPageNO = COMEX_writeOut_buff[dest_node][buff_slot].pageNO;
 			*retNodeID = dest_node;
 			return 1;
 		}
@@ -353,7 +357,9 @@ EXPORT_SYMBOL(COMEX_page_receive);
 void COMEX_freelist_getpage(int list_ID, int slot)
 {
 	int i;
-	for(i=0; i<FLUSH && COMEX_writeOut_buff[list_ID][slot+i].pageNO == -222; i++)
+	for(i=0; i<FLUSH && COMEX_writeOut_buff[list_ID][slot+i].pageNO == -222 && 
+			 COMEX_free_group[list_ID].group[COMEX_free_group[list_ID].head].page_start <= 
+			 COMEX_free_group[list_ID].group[COMEX_free_group[list_ID].head].page_end; i++)
 	{
 		COMEX_writeOut_buff[list_ID][slot+i].pageNO = COMEX_free_group[list_ID].group[COMEX_free_group[list_ID].head].page_start++;
 	}
@@ -452,7 +458,8 @@ void COMEX_flush_buff(int nodeID)
 		}
 		if(	COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].pageNO - 1 !=
 			COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count -1].pageNO &&
-			buff_pos[nodeID].head + count != 1){
+			buff_pos[nodeID].head + count != 1)
+		{
 			printk(KERN_INFO "%s: Not contiguous %d %d\n", __FUNCTION__, 
 						COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count -1].pageNO,
 						COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].pageNO);
