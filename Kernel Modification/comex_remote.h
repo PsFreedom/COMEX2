@@ -85,7 +85,7 @@ uint64_t get_readIn_buff(int buff_slot){
 int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 {
 	char *old_vAddr, *buf_vAddr;
-	int i, buff_slot, dest_node = COMEX_hash(get_page_PID(old_page));
+	int i, buff_slot, dest_node = COMEX_hash(COMEX_ID);
 	
 	for(i=0; i<COMEX_total_nodes; i++)
 	{
@@ -126,14 +126,14 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 				return -1;
 			
 			mutex_unlock(&COMEX_free_group[dest_node].mutex_slot);
-		//	printk(KERN_INFO "%s: PageNO %d %d\n", __FUNCTION__, dest_node, *retPageNO);
 			
 			buf_vAddr = (char *)get_writeOut_buff(dest_node, buff_slot);
 			old_vAddr = (char *)kmap(old_page);
 			memcpy((char *)COMEX_offset_to_addr((uint64_t)buf_vAddr), old_vAddr, X86PageSize);
 			kunmap(old_page);
-			
 			COMEX_writeOut_buff[dest_node][buff_slot].status = 2;
+			
+		//	COMEX_flush_one(dest_node, buff_slot);
 			if(buff_slot%FLUSH == 0)
 				COMEX_flush_buff(dest_node);
 			
@@ -156,7 +156,8 @@ int COMEX_read_from_buffer(struct page *new_page, int nodeID, int pageNO)
 	char *new_vAddr;
 	
 	for(i=0; i<COMEX_total_writeOut; i++){
-		if(COMEX_writeOut_buff[nodeID][i].pageNO == pageNO)
+		if(COMEX_writeOut_buff[nodeID][i].pageNO == pageNO &&
+		   COMEX_writeOut_buff[nodeID][i].status == 2)
 		{
 			buf_vAddr = (char *)get_writeOut_buff(nodeID, i);
 			new_vAddr = (char *)kmap(new_page);
