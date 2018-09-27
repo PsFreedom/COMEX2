@@ -176,7 +176,7 @@ int add_to_swap(struct page *page, struct list_head *list)
 	swp_entry_t entry;
 	int err;
 	
-	int NodeID, PageNO, COMEX_check;
+	int NodeID, PageNO, COMEX_check, Rmap_counter;
 	unsigned long offsetField;
 	struct task_struct *COMEX_task;
 	
@@ -190,6 +190,7 @@ int add_to_swap(struct page *page, struct list_head *list)
 	VM_BUG_ON(!PageUptodate(page));
 
 	COMEX_check = 0;
+	Rmap_counter= 0;
 	COMEX_task = get_taskStruct(page);
 	
 	if(	COMEX_Ready 		== 1 	&& 
@@ -216,25 +217,18 @@ int add_to_swap(struct page *page, struct list_head *list)
 		COMEX_task 			!= NULL && 
 		strcmp(COMEX_task->comm, proc_name) == 0)
 	{
-	/*	anon_vma = page_get_anon_vma(page);
+		anon_vma = page_lock_anon_vma_read(page);
 		if (!anon_vma)
 			goto COMEX_filter;
 		
 		pgoff = page->index << (PAGE_CACHE_SHIFT - PAGE_SHIFT);
-		anon_vma_interval_tree_foreach(avc, &anon_vma->rb_root, pgoff, pgoff) {
-			struct vm_area_struct *vma = avc->vma;
-			pte = page_check_address(page, vma->vm_mm, vma_address(page, vma), &ptl, 0);
-			if(pte){
-				pteval = *pte;
-				pte_unmap_unlock(pte, ptl);
-			}
-			else{
-				printk(KERN_INFO "%s: NULL pte\n", __FUNCTION__);
-				goto COMEX_filter;
-			}
+		anon_vma_interval_tree_foreach(avc, &anon_vma->rb_root, pgoff, pgoff)
+		{
+			Rmap_counter++;
 		}
-	*/	
-	//	if(!pte_write(pteval)){
+		page_unlock_anon_vma_read(anon_vma);
+		
+		if(Rmap_counter == 1){
 			if(COMEX_move_to_COMEX(page, &NodeID, &PageNO) == 1){
 				offsetField = 0UL + (unsigned long)PageNO;
 				entry       = swp_entry(9, offsetField);
@@ -247,10 +241,11 @@ int add_to_swap(struct page *page, struct list_head *list)
 				COMEX_check = 1;
 				SWAP_to_COMEX++;
 			}
-	//	}
+		}
+		else{
+			printk(KERN_INFO "%s: _mapcount %d _count %d Rmap %d\n", __FUNCTION__, page_mapcount(page), page_count(page), Rmap_counter);
+		}
 	}
-	if(SWAP_total++ % 100000 == 0)
-		printk(KERN_INFO "%s: %lu/%lu\n", __FUNCTION__, SWAP_to_COMEX, SWAP_total);
 	
 COMEX_filter:
 	if(COMEX_check == 0){
@@ -259,6 +254,9 @@ COMEX_filter:
 	}
 	if (!entry.val)
 		return 0;
+	
+	if(SWAP_total++ % 100000 == 0)
+		printk(KERN_INFO "%s: %lu/%lu\n", __FUNCTION__, SWAP_to_COMEX, SWAP_total);
 
 	if (unlikely(PageTransHuge(page)))
 		if (unlikely(split_huge_page_to_list(page, list))) {
@@ -479,7 +477,7 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				unlock_page(new_page);
 					
 				COMEX_free_to_remote(NodeID, (int)COMEX_pageNO);
-			//	printk(KERN_INFO "REMOTE: NodeID %d pageNO %d\n", NodeID, (int)COMEX_pageNO);
+			//	printk(KERN_INFO "%s: Remote %d Page %d - %lu\n", __FUNCTION__, NodeID, (int)COMEX_pageNO, checkSum_page(new_page));
 			}
 			else if(swp_type(entry) == 9)
 			{
@@ -493,7 +491,7 @@ struct page *read_swap_cache_async(swp_entry_t entry, gfp_t gfp_mask,
 				unlock_page(new_page);
 				
 				COMEX_free_page((int)swp_offset(entry), 0);
-			//	printk(KERN_INFO "LOCAL: pageNO %d\n", (int)swp_offset(entry));
+			//	printk(KERN_INFO "%s: Local %d - %lu\n", __FUNCTION__, (int)swp_offset(entry), checkSum_page(new_page));
 			}
 			else{
 				swap_readpage(new_page);

@@ -55,6 +55,11 @@ void COMEX_RDMA_fn(int target, int CMD_num, void *ptr, int struct_size)
 	else if(CMD_num == CODE_COMEX_PAGE_RPLY){
 		reply_pages_t *myStruct = ptr;
 		printk(KERN_INFO "PAGE_RPLY: %d->%d | %d %d %d\n", target, ID_to_CB(target), myStruct->src_node, myStruct->page_no, myStruct->size);
+		
+		if(myStruct->page_no % (1 << myStruct->size) != 0){
+			printk(KERN_INFO "PAGE_RPLY: Wrong Addr!\n");
+		}
+		
 		CHK(universal_send(cbs[ID_to_CB(target)], CMD_num, ptr, struct_size))
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_WRTE){
@@ -139,7 +144,15 @@ void COMEX_do_work(struct work_struct *work)
 	else if(CMD_num == CODE_COMEX_PAGE_FREE){
 		int i, pow, page_idx;
 		free_struct_t *myStruct = piggy;
-		
+/*		
+		for(i=0; i<MAX_FREE; i++){
+			while(myStruct->count[i] > 0){
+				COMEX_free_page(myStruct->pageNO[i], 0);
+				myStruct->pageNO[i]++;
+				myStruct->count[i]--;
+			}
+		}
+*/		
 //		printk(KERN_INFO "PAGE_FREE: ##################\n");
 		for(i=0; i<MAX_FREE; i++){
 //			printk(" >>> %d %hd\n", myStruct->pageNO[i], myStruct->count[i]);
@@ -155,7 +168,7 @@ void COMEX_do_work(struct work_struct *work)
 				myStruct->count[i]  -= (1<<pow);
 //				printk(" ------ %d - %d | %d %hd\n", page_idx, (1<<pow), myStruct->pageNO[i], myStruct->count[i]);
 			}
-		}		
+		}
 	}
 	kfree(myWork_cont);
 }

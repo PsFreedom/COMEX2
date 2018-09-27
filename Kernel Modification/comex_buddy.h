@@ -102,29 +102,19 @@ static inline void COMEX_expand(COMEX_page *page, int low, int high, COMEX_free_
 	}
 }
 
-void invalidate_block(int pageNO)
-{
-	int i;
-	
-	pageNO = (pageNO >> 10) << 10;
-	for(i=0; i<Biggest_Group; i++){
-		COMEX_Buddy_page[pageNO+i].CMX_cntr = 200;
-	}
-}
-
 int COMEX_checkCtr(int pageNO, int order, int val)
 {
 	int i;
-	for(i=0; i<(1UL<<order); i++){
+	for(i=0; i<(1UL<<order); i++)
+	{
 		COMEX_Buddy_page[pageNO+i].CMX_cntr += val;
+		
 		if(val == 1 && COMEX_Buddy_page[pageNO+i].CMX_cntr != 1){
-			printk(KERN_INFO "Alloc FAILED! - val %d counter %d\n", val, COMEX_Buddy_page[pageNO+i].CMX_cntr);
-			invalidate_block(pageNO+i);
+			printk(KERN_INFO "Alloc %d FAILED! - val %d counter %d\n", pageNO+i, val, COMEX_Buddy_page[pageNO+i].CMX_cntr);
 			return 0;
 		}
 		else if(val == -1 && COMEX_Buddy_page[pageNO+i].CMX_cntr != 0){
-			printk(KERN_INFO "Free  FAILED! - val %d counter %d\n", val, COMEX_Buddy_page[pageNO+i].CMX_cntr);
-			invalidate_block(pageNO+i);
+			printk(KERN_INFO "Free %d FAILED! - val %d counter %d\n", pageNO+i, val, COMEX_Buddy_page[pageNO+i].CMX_cntr);
 			return 0;
 		}
 	}
@@ -153,10 +143,11 @@ static inline int COMEX_rmqueue_smallest(int order)
 		COMEX_expand(page, order, current_order, area);
 		
 //		printk(KERN_INFO "%s: %u - %d %u\n", __FUNCTION__, current_order, area->nr_free, page->pageNO);
-//		if(COMEX_checkCtr(page->pageNO, order, 1) == 0){
-//			spin_unlock(&COMEX_buddy_spin);
-//			return -1;
-//		}
+		if(COMEX_checkCtr(page->pageNO, order, 1) == 0){
+			spin_unlock(&COMEX_buddy_spin);
+			return -1;
+		}
+
 		spin_unlock(&COMEX_buddy_spin);
 		return page->pageNO;
 	}
@@ -174,9 +165,10 @@ void COMEX_free_page(int inPageNO, int order)
 	COMEX_page *buddy;
 
 	spin_lock(&COMEX_buddy_spin);
-//	if(COMEX_checkCtr(inPageNO, order, -1) == 0){
-//		return;
-//	}
+	if(COMEX_checkCtr(inPageNO, order, -1) == 0){
+		spin_unlock(&COMEX_buddy_spin);
+		return;
+	}
 	
 	page_idx = page->pageNO & ((1 << COMEX_MAX_ORDER) - 1);
 	while (order < COMEX_MAX_ORDER-1){
