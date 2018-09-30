@@ -52,7 +52,6 @@ void COMEX_freelist_getpage(int list_ID, int slot);
 void COMEX_free_to_remote(int nodeID, int pageNO);
 void COMEX_flush_buff(int nodeID);
 void COMEX_flush_one(int nodeID, int slot);
-void invalidate_buffer(int nodeID, int pageNO);
 ////////////////////
 
 int COMEX_hash(int seed){
@@ -454,7 +453,7 @@ void COMEX_flush_buff(int nodeID)
 	{
 		COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].status = 3;
 		count++;
-				
+
 		if(buff_pos[nodeID].head + count >= COMEX_total_writeOut){
 			break;
 		}

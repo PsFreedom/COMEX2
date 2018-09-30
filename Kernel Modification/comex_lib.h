@@ -116,7 +116,7 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 	while(ret >= 0){
 		ret = COMEX_rmqueue_smallest(0);
 	}
-	print_nr_free();	
+	print_nr_free();
 	for(i=0; i<total_pages; i++){
 		offsetNO  = i + (COMEX_total_writeOut*COMEX_total_nodes) + COMEX_total_readIn;
 		new_vAddr = (char *)COMEX_offset_to_addr((uint64_t)offsetNO << SHIFT_PAGE);
