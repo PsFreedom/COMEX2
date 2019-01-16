@@ -1243,7 +1243,7 @@ extern int COMEX_ID;
 extern int COMEX_total_nodes;
 extern int COMEX_total_pages;
 
-extern unsigned long SWAP_total, SWAP_to_Disk, SWAP_to_COMEX;
+extern unsigned long SWAP_out_total, SWAP_to_Disk, SWAP_to_COMEX;
 extern unsigned long COMEX_in_total, COMEX_in_preF, COMEX_in_buff, COMEX_in_RDMA, COMEX_in_Local;
 //extern CHKSM_t COMEX_CHKSM[][Total_CHKSM];
 

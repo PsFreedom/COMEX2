@@ -21,25 +21,21 @@ void COMEX_init_Remote()
 
 	COMEX_free_group = (COMEX_R_free_group_t *)vmalloc(sizeof(COMEX_R_free_group_t)*COMEX_total_nodes);
 	for(i=0; i<COMEX_total_nodes; i++){
-		atomic_set(&COMEX_free_group[i].total_group, 0);
-		atomic_set(&COMEX_free_group[i].mssg_quota , MAX_MSSG);
+		COMEX_free_group[i].mssg_qouta  = MAX_MSSG;
+		COMEX_free_group[i].total_group = 0;
 		COMEX_free_group[i].back_off 	= 0;
-		COMEX_free_group[i].head 		= 0;
-		COMEX_free_group[i].tail		= 0;
+		mutex_init(&COMEX_free_group[i].mutex_FG);
+		INIT_LIST_HEAD(&COMEX_free_group[i].free_group);
 		
-		mutex_init(&COMEX_free_group[i].mutex_slot);
-		for(j=0; j<MAX_GROUP; j++){
-			COMEX_free_group[i].group[j].page_start = -1;
-			COMEX_free_group[i].group[j].page_end   = -1;
-		}
-		printk(KERN_INFO "Free group %d... Ready!\n", i);
+		if(list_empty(&COMEX_free_group[i].free_group))
+			printk(KERN_INFO "%d... list_empty!\n", i);
 	}
 	
 	buff_pos = (buff_pos_t *)vmalloc(sizeof(buff_pos_t)*COMEX_total_nodes);
 	for(i=0; i<COMEX_total_nodes; i++){
 		buff_pos[i].head = 0;
 		buff_pos[i].tail = 0;
-		mutex_init(&buff_pos[i].mutex_flush);
+		mutex_init(&buff_pos[i].pos_mutex);
 	}
 	
 	COMEX_writeOut_buff = (buff_desc_t **)vmalloc(sizeof(buff_desc_t *)*COMEX_total_nodes);
@@ -48,7 +44,7 @@ void COMEX_init_Remote()
 		for(j=0; j<COMEX_total_writeOut; j++){
 			COMEX_writeOut_buff[i][j].status = -1;
 			COMEX_writeOut_buff[i][j].nodeID = -1;
-			COMEX_writeOut_buff[i][j].pageNO = -222;
+			COMEX_writeOut_buff[i][j].pageNO = -1;
 		}
 	}
 	

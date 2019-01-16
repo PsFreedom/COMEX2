@@ -135,11 +135,13 @@ void COMEX_do_work(struct work_struct *work)
 	if(CMD_num == CODE_COMEX_PAGE_RQST){
 //		printk(KERN_INFO "PAGE_RQST: From node %d\n", *(int *)piggy);
 		COMEX_pages_request(*(int *)piggy);
+        kfree((int *)piggy);
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_RPLY){
 		reply_pages_t *myStruct = piggy;
 //		printk(KERN_INFO "PAGE_RPLY: %d->%d | %d %d %d\n", myStruct->src_node, ID_to_CB(myStruct->src_node), myStruct->src_node, myStruct->page_no, myStruct->size);
 		COMEX_page_receive(ID_to_CB(myStruct->src_node), myStruct->page_no, myStruct->size);
+        kfree(myStruct);
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_FREE){
 		int i, pow, page_idx;
@@ -169,6 +171,7 @@ void COMEX_do_work(struct work_struct *work)
 //				printk(" ------ %d - %d | %d %hd\n", page_idx, (1<<pow), myStruct->pageNO[i], myStruct->count[i]);
 			}
 		}
+        kfree(myStruct);
 	}
 	kfree(myWork_cont);
 }

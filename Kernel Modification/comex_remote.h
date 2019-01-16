@@ -1,6 +1,5 @@
 #define MAX_TRY 5
 #define MAX_MSSG 8
-#define MAX_GROUP MAX_MSSG*3
 #define FLUSH 32
 #define PreF_BITS 4
 #define PreF_SIZE (1UL << PreF_BITS)	// 0000 1000
@@ -13,22 +12,20 @@
 #define HASH_Shift 8
 
 typedef struct{
-	int page_start;
-	int page_end;
-} free_group_t;
-
-typedef struct{
-	free_group_t group[MAX_GROUP];
-	
-	atomic_t mssg_quota;
-	atomic_t total_group;
-	int		 back_off;
-	int		 head;
-	int		 tail;
-	
-	struct mutex mutex_slot;
+	int mssg_qouta;
+	int total_group;
+	int back_off;
+	struct mutex mutex_FG;
+    
+	struct list_head free_group;
 } COMEX_R_free_group_t;
 COMEX_R_free_group_t *COMEX_free_group;
+
+typedef struct{
+	int page_start;
+	int page_end;
+	struct list_head link;
+} free_group_t;
 
 typedef struct{
 	char status;
@@ -42,17 +39,27 @@ buff_desc_t *COMEX_readIn_buff;
 typedef struct{
 	short  head;
 	short  tail;
-	struct mutex mutex_flush;
+	struct mutex pos_mutex;
 } buff_pos_t;
 buff_pos_t *buff_pos;
 
 free_struct_t *COMEX_free_struct;
 
-void COMEX_freelist_getpage(int list_ID, int slot);
+int COMEX_freelist_getpage(int list_ID);
 void COMEX_free_to_remote(int nodeID, int pageNO);
 void COMEX_flush_buff(int nodeID);
 void COMEX_flush_one(int nodeID, int slot);
+void COMEX_void_preFetch(int nodeID, int pageNO);
+
 ////////////////////
+
+void COMEX_freelist_print(int nodeID){
+	free_group_t *myPtr;
+	printk(KERN_INFO "List NO - %d\n", nodeID);
+	list_for_each_entry(myPtr, &COMEX_free_group[nodeID].free_group, link){
+		printk(KERN_INFO " >>> %d - %d\n", myPtr->page_start, myPtr->page_end);
+	}
+}
 
 int COMEX_hash(int seed){
 	return (seed+1)%COMEX_total_nodes;
@@ -84,58 +91,55 @@ uint64_t get_readIn_buff(int buff_slot){
 int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 {
 	char *old_vAddr, *buf_vAddr;
-	int i, buff_slot, dest_node = COMEX_hash(COMEX_ID);
+	int i, buff_slot, dest_node = COMEX_hash(get_page_PID(old_page));
 	
 	for(i=0; i<COMEX_total_nodes; i++)
 	{
-		if(	atomic_read(&COMEX_free_group[dest_node].total_group) < MAX_MSSG && 
-			atomic_read(&COMEX_free_group[dest_node].mssg_quota)  > 0)
+		if(mutex_trylock(&COMEX_free_group[dest_node].mutex_FG) == 0)
+			return -1;
+		
+		if( COMEX_free_group[dest_node].total_group < MAX_MSSG && 
+            COMEX_free_group[dest_node].mssg_qouta  > 0)
 		{
-			if(	COMEX_free_group[dest_node].back_off <= 0)
-			{
-				atomic_dec(&COMEX_free_group[dest_node].mssg_quota);
-				COMEX_free_group[dest_node].back_off += 1<<(12 - atomic_read(&COMEX_free_group[dest_node].mssg_quota));
-				
+			if( COMEX_free_group[dest_node].back_off <= 0){
+				COMEX_free_group[dest_node].mssg_qouta--;
+				COMEX_free_group[dest_node].back_off += 1UL<<(12 - COMEX_free_group[dest_node].mssg_qouta);
 				COMEX_RDMA(dest_node, CODE_COMEX_PAGE_RQST, &COMEX_ID, sizeof(COMEX_ID));
 			}
 			else{
 				COMEX_free_group[dest_node].back_off--;
 			}
 		}
-		
-		if(mutex_trylock(&COMEX_free_group[dest_node].mutex_slot) == 0)
-			return -1;
-		
-		if(atomic_read(&COMEX_free_group[dest_node].total_group) > 0 && 
+		if(COMEX_free_group[dest_node].total_group > 0 && 
 		   COMEX_writeOut_buff[dest_node][buff_pos[dest_node].tail].status == -1)
 		{
+			*retPageNO = COMEX_freelist_getpage(dest_node);
+			
 			buff_slot = buff_pos[dest_node].tail;
 			buff_pos[dest_node].tail++;
 			buff_pos[dest_node].tail %= COMEX_total_writeOut;
 			
 			COMEX_writeOut_buff[dest_node][buff_slot].status = 1;
-			if(COMEX_writeOut_buff[dest_node][buff_slot].pageNO == -222)
-				COMEX_freelist_getpage(dest_node, buff_slot);
-			
-			if(COMEX_writeOut_buff[dest_node][buff_slot].pageNO == -222)
-				return -1;
-			mutex_unlock(&COMEX_free_group[dest_node].mutex_slot);
+			mutex_unlock(&COMEX_free_group[dest_node].mutex_FG);
+			COMEX_void_preFetch(dest_node, *retPageNO);
 			
 			buf_vAddr = (char *)get_writeOut_buff(dest_node, buff_slot);
 			old_vAddr = (char *)kmap(old_page);
 			memcpy((char *)COMEX_offset_to_addr((uint64_t)buf_vAddr), old_vAddr, X86PageSize);
 			kunmap(old_page);
 			
-			*retNodeID = dest_node;
-			*retPageNO = COMEX_writeOut_buff[dest_node][buff_slot].pageNO;
+			COMEX_writeOut_buff[dest_node][buff_slot].nodeID = dest_node;
+			COMEX_writeOut_buff[dest_node][buff_slot].pageNO = *retPageNO;
 			COMEX_writeOut_buff[dest_node][buff_slot].status = 2;
-	//		printk(KERN_INFO "%s: Dst %d pageNO %d - %lu\n", __FUNCTION__, *retNodeID, *retPageNO, checkSum_page(old_page));
-			
-			if(buff_slot%FLUSH == 0)
+		//	COMEX_flush_one(dest_node, buff_slot);
+		//	mutex_unlock(&COMEX_free_group[dest_node].mutex_FG);
+			if(buff_slot%FLUSH == 0 && buff_slot != 0)
 				COMEX_flush_buff(dest_node);
+
+			*retNodeID = dest_node;
 			return 1;
 		}
-		mutex_unlock(&COMEX_free_group[dest_node].mutex_slot);
+		mutex_unlock(&COMEX_free_group[dest_node].mutex_FG);
 		dest_node = COMEX_hash(dest_node);
 	}
 	*retNodeID = 0;
@@ -258,18 +262,15 @@ COMEX_retry:
 		COMEX_readIn_buff[buff_FLR + i].nodeID = nodeID;
 		COMEX_readIn_buff[buff_FLR + i].pageNO = page_FLR + i;
 	}
-	COMEX_readIn_buff[buff_IDX].status = -1;
-	COMEX_readIn_buff[buff_IDX].nodeID = -1;
-	COMEX_readIn_buff[buff_IDX].pageNO = -1;
 	COMEX_in_RDMA++;
 }
 */
 void COMEX_read_from_remote(struct page *new_page, int nodeID, int pageNO)
 {
 	int i;
-	int page_FLR = pageNO & PreF_MASK;
 	int buff_IDX = pageNO % COMEX_total_readIn;
 	int buff_FLR = buff_IDX & PreF_MASK;
+	int page_FLR = pageNO & PreF_MASK;
 	
 	char *buf_vAddr = (char *)get_readIn_buff(buff_FLR);
 	char *new_vAddr = (char *)kmap(new_page);
@@ -294,10 +295,6 @@ void COMEX_read_from_remote(struct page *new_page, int nodeID, int pageNO)
 		COMEX_readIn_buff[buff_FLR + i].nodeID = nodeID;
 		COMEX_readIn_buff[buff_FLR + i].pageNO = page_FLR + i;
 	}
-	COMEX_readIn_buff[buff_IDX].status = -1;
-	COMEX_readIn_buff[buff_IDX].nodeID = -1;
-	COMEX_readIn_buff[buff_IDX].pageNO = -1;
-	
 	mutex_unlock(&COMEX_readIn_buff[buff_FLR].mutex_buff);
 	kunmap(new_page);
 	COMEX_in_RDMA++;
@@ -328,45 +325,42 @@ void COMEX_read_from_remote_one(struct page *new_page, int nodeID, int pageNO)
 
 void COMEX_page_receive(int nodeID, int pageNO, int group_size)
 {
+	mutex_lock(&COMEX_free_group[nodeID].mutex_FG);
 	if(pageNO >= 0){
-		COMEX_free_group[nodeID].group[COMEX_free_group[nodeID].tail].page_start = pageNO;
-		COMEX_free_group[nodeID].group[COMEX_free_group[nodeID].tail].page_end   = pageNO + (1UL<<group_size) - 1;
-		COMEX_free_group[nodeID].tail++;
-		COMEX_free_group[nodeID].tail%=MAX_GROUP;
+		free_group_t *group_ptr = (free_group_t *)kzalloc(sizeof(free_group_t), GFP_KERNEL);
 		
-		atomic_inc(&COMEX_free_group[nodeID].total_group);
-	//	printk(	KERN_INFO "%s: Group[%d] %d Quota %d BackOFF %d (%d - %d)\n", __FUNCTION__, nodeID,
-	//										atomic_read(&COMEX_free_group[nodeID].total_group),
-	//										atomic_read(&COMEX_free_group[nodeID].mssg_quota),
-	//										COMEX_free_group[nodeID].back_off,
-	//				COMEX_free_group[nodeID].group[COMEX_free_group[nodeID].tail-1].page_start,
-	//				COMEX_free_group[nodeID].group[COMEX_free_group[nodeID].tail-1].page_end);
+		group_ptr->page_start = pageNO;
+		group_ptr->page_end   = pageNO + (1UL<<group_size) - 1;
+		INIT_LIST_HEAD(&group_ptr->link);
+
+	//	printk(KERN_INFO "%s: %d %d - %d\n", __FUNCTION__, nodeID, group_ptr->page_start, group_ptr->page_end);
+		list_add_tail(&group_ptr->link, &COMEX_free_group[nodeID].free_group);
+		COMEX_free_group[nodeID].mssg_qouta = MAX_MSSG;
+		COMEX_free_group[nodeID].total_group++;
 	}
 	else{
+		COMEX_free_group[nodeID].mssg_qouta = MAX_MSSG;
 		COMEX_free_group[nodeID].back_off += 50000;
 	}
-	atomic_inc(&COMEX_free_group[nodeID].mssg_quota);
+	mutex_unlock(&COMEX_free_group[nodeID].mutex_FG);
 }
 EXPORT_SYMBOL(COMEX_page_receive);
 
-void COMEX_freelist_getpage(int list_ID, int slot)
+int COMEX_freelist_getpage(int list_ID)
 {
-	int i;
-	for(i=0; i<FLUSH && COMEX_writeOut_buff[list_ID][slot+i].pageNO == -222 && 
-			 COMEX_free_group[list_ID].group[COMEX_free_group[list_ID].head].page_start <= 
-			 COMEX_free_group[list_ID].group[COMEX_free_group[list_ID].head].page_end; i++)
-	{
-		COMEX_writeOut_buff[list_ID][slot+i].pageNO = COMEX_free_group[list_ID].group[COMEX_free_group[list_ID].head].page_start++;
+	free_group_t *myPtr;
+	int ret_pageNO = -1;
+	
+	myPtr      = list_entry(COMEX_free_group[list_ID].free_group.next, free_group_t, link);
+	ret_pageNO = myPtr->page_start;
+	myPtr->page_start++;
+	if(myPtr->page_start > myPtr->page_end){
+		list_del(&myPtr->link);
+		COMEX_free_group[list_ID].total_group--;
+		kfree(myPtr);
 	}
-	if(COMEX_free_group[list_ID].group[COMEX_free_group[list_ID].head].page_start > 
-	   COMEX_free_group[list_ID].group[COMEX_free_group[list_ID].head].page_end)
-	{
-		COMEX_free_group[list_ID].group[COMEX_free_group[list_ID].head].page_start = -300;
-		COMEX_free_group[list_ID].group[COMEX_free_group[list_ID].head].page_end   = -333;
-		COMEX_free_group[list_ID].head++;
-		COMEX_free_group[list_ID].head%=MAX_GROUP;
-		atomic_dec(&COMEX_free_group[list_ID].total_group);
-	}
+//	printk(KERN_INFO "%s: %d | %d %d - %d\n", __FUNCTION__, list_ID, ret_pageNO, myPtr->page_start, myPtr->page_end);
+	return ret_pageNO;
 }
 
 void clean_free_struct(int nodeID){
@@ -406,7 +400,6 @@ void COMEX_free_to_remote(int nodeID, int pageNO)
 		}
 	}
 	COMEX_RDMA(nodeID, CODE_COMEX_PAGE_FREE, &COMEX_free_struct[nodeID], sizeof(COMEX_free_struct[nodeID]));
-	
 	clean_free_struct(nodeID);
 	COMEX_free_struct[nodeID].pageNO[0] = pageNO;
 	COMEX_free_struct[nodeID].count[0]  = 1;
@@ -435,7 +428,7 @@ void COMEX_free_buff(int nodeID, int pageNO, int con_page)
 	while(con_page > 0){
 //		printk(KERN_INFO "Free Buff: %d %d\n", nodeID, pageNO);
 		COMEX_writeOut_buff[nodeID][pageNO].nodeID = -1;
-		COMEX_writeOut_buff[nodeID][pageNO].pageNO = -222;
+		COMEX_writeOut_buff[nodeID][pageNO].pageNO = -1;
 		COMEX_writeOut_buff[nodeID][pageNO].status = -1;
 		con_page--;
 		pageNO++;
@@ -443,12 +436,25 @@ void COMEX_free_buff(int nodeID, int pageNO, int con_page)
 }
 EXPORT_SYMBOL(COMEX_free_buff);
 
+void COMEX_void_preFetch(int nodeID, int pageNO)
+{
+	int index = pageNO%COMEX_total_readIn;
+	
+	if(COMEX_readIn_buff[index].nodeID == nodeID &&
+	   COMEX_readIn_buff[index].pageNO == pageNO )
+	{
+		COMEX_readIn_buff[index].status = -1;
+		COMEX_readIn_buff[index].nodeID = -1;
+		COMEX_readIn_buff[index].pageNO = -1;
+	}
+}
+
 void COMEX_flush_buff(int nodeID)
 {
 	int count = 0;
 	COMEX_address_t addr_struct;
 	
-	mutex_lock(&buff_pos[nodeID].mutex_flush);
+	mutex_lock(&buff_pos[nodeID].pos_mutex);
 	while(COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].status == 2)
 	{
 		COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].status = 3;
@@ -458,8 +464,9 @@ void COMEX_flush_buff(int nodeID)
 			break;
 		}
 		if(	COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].pageNO - 1 !=
-			COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count -1].pageNO &&
-			buff_pos[nodeID].head + count != 1)
+			COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count -1].pageNO   && 
+			COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].status == 2 &&
+			count >= 2 )
 		{
 			printk(KERN_INFO "%s: Not contiguous %d %d\n", __FUNCTION__, 
 						COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count -1].pageNO,
@@ -468,7 +475,7 @@ void COMEX_flush_buff(int nodeID)
 		}
 	}
 	if(count == 0){
-		mutex_unlock(&buff_pos[nodeID].mutex_flush);
+		mutex_unlock(&buff_pos[nodeID].pos_mutex);
 		return;
 	}
 	
@@ -480,7 +487,7 @@ void COMEX_flush_buff(int nodeID)
 	buff_pos[nodeID].head += count;
 	buff_pos[nodeID].head %= COMEX_total_writeOut;
 	COMEX_RDMA(nodeID, CODE_COMEX_PAGE_WRTE, &addr_struct, sizeof(addr_struct));
-	mutex_unlock(&buff_pos[nodeID].mutex_flush);
+	mutex_unlock(&buff_pos[nodeID].pos_mutex);
 }
 
 void COMEX_flush_one(int nodeID, int slot)
