@@ -23,6 +23,7 @@ void COMEX_init_Remote()
 	for(i=0; i<COMEX_total_nodes; i++){
 		COMEX_free_group[i].mssg_qouta  = MAX_MSSG;
 		COMEX_free_group[i].total_group = 0;
+		COMEX_free_group[i].total_page  = 0;
 		COMEX_free_group[i].back_off 	= 0;
 		mutex_init(&COMEX_free_group[i].mutex_FG);
 		INIT_LIST_HEAD(&COMEX_free_group[i].free_group);
@@ -83,6 +84,7 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 	printk(KERN_INFO "COMEX Kernel v.2 --> %s\n", proc_name);
 	printk(KERN_INFO "ID %d n_nodes %d total_pages %d\n", node_ID, n_nodes, total_pages);
 	printk(KERN_INFO "writeOut_buff %d readIn_buff %d\n", writeOut_buff, readIn_buff);
+    printk(KERN_INFO "Pool threshold -> 0\n");
 
 ///// Semalphore & MUTEX
 	spin_lock_init(&COMEX_buddy_spin);
@@ -124,7 +126,7 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 
 ///// Footer
 	COMEX_init_Remote();
-	sprintf(initMSG,"Finish initialization... %s! 02 -> %d", namePtr, SWP_TYPE_SHIFT(swp_test));
+	sprintf(initMSG, "Finish initialization... %s! 02 -> %d", namePtr, SWP_TYPE_SHIFT(swp_test));
 	COMEX_module_echo(initMSG);
 	COMEX_Ready = 1;
 }

@@ -14,6 +14,7 @@
 typedef struct{
 	int mssg_qouta;
 	int total_group;
+	int total_page;
 	int back_off;
 	struct mutex mutex_FG;
     
@@ -62,6 +63,7 @@ void COMEX_freelist_print(int nodeID){
 }
 
 int COMEX_hash(int seed){
+//	return 1;
 	return (seed+1)%COMEX_total_nodes;
 }
 
@@ -98,7 +100,7 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 		if(mutex_trylock(&COMEX_free_group[dest_node].mutex_FG) == 0)
 			return -1;
 		
-		if( COMEX_free_group[dest_node].total_group < MAX_MSSG && 
+		if( COMEX_free_group[dest_node].total_page <= 512 && 
             COMEX_free_group[dest_node].mssg_qouta  > 0)
 		{
 			if( COMEX_free_group[dest_node].back_off <= 0){
@@ -315,7 +317,7 @@ void COMEX_read_from_remote_one(struct page *new_page, int nodeID, int pageNO)
 	addr_struct.size   = 1;
 	addr_struct.bufIDX = buff_IDX;
 	COMEX_RDMA(nodeID, CODE_COMEX_PAGE_READ, &addr_struct, sizeof(addr_struct));
-	memcpy(new_vAddr, (char *)COMEX_offset_to_addr((uint64_t)get_readIn_buff(buff_IDX)), X86PageSize);
+	memcpy(new_vAddr, (char *)COMEX_offset_to_addr((uint64_t)buf_vAddr), X86PageSize);
 	
 	mutex_unlock(&mutex_PF);
 	
@@ -337,6 +339,7 @@ void COMEX_page_receive(int nodeID, int pageNO, int group_size)
 		list_add_tail(&group_ptr->link, &COMEX_free_group[nodeID].free_group);
 		COMEX_free_group[nodeID].mssg_qouta = MAX_MSSG;
 		COMEX_free_group[nodeID].total_group++;
+		COMEX_free_group[nodeID].total_page += (1UL<<group_size);
 	}
 	else{
 		COMEX_free_group[nodeID].mssg_qouta = MAX_MSSG;
@@ -359,6 +362,8 @@ int COMEX_freelist_getpage(int list_ID)
 		COMEX_free_group[list_ID].total_group--;
 		kfree(myPtr);
 	}
+    
+    COMEX_free_group[list_ID].total_page--;
 //	printk(KERN_INFO "%s: %d | %d %d - %d\n", __FUNCTION__, list_ID, ret_pageNO, myPtr->page_start, myPtr->page_end);
 	return ret_pageNO;
 }
@@ -374,7 +379,7 @@ void clean_free_struct(int nodeID){
 void COMEX_free_to_remote(int nodeID, int pageNO)
 {
 	int i;
-	spin_lock(&freePage_spin);
+    spin_lock(&freePage_spin);
 	for(i=0; i<MAX_FREE; i++){
 		if( COMEX_free_struct[nodeID].pageNO[i] + COMEX_free_struct[nodeID].count[i] == pageNO && 
 			COMEX_free_struct[nodeID].count[i] < 16383)
@@ -414,7 +419,7 @@ void COMEX_pages_request(int target)
 	myStruct.src_node = COMEX_ID;
 	myStruct.page_no  = COMEX_rmqueue_smallest(i);
 	myStruct.size     = i;
-	while(myStruct.page_no<0 && i>8){
+	while(myStruct.page_no < 0 && i >= 8){
 		i--;
 		myStruct.page_no  = COMEX_rmqueue_smallest(i);
 		myStruct.size     = i;
@@ -464,9 +469,8 @@ void COMEX_flush_buff(int nodeID)
 			break;
 		}
 		if(	COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].pageNO - 1 !=
-			COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count -1].pageNO   && 
-			COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].status == 2 &&
-			count >= 2 )
+			COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count -1].pageNO  && 
+			COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].status == 2 )
 		{
 			printk(KERN_INFO "%s: Not contiguous %d %d\n", __FUNCTION__, 
 						COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count -1].pageNO,
