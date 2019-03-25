@@ -2,7 +2,7 @@
 #define MAX_MSSG 8
 #define FLUSH 32
 #define PreF_BITS 4
-#define PreF_SIZE (1UL << PreF_BITS)	// 0000 1000
+#define PreF_SIZE (1UL << PreF_BITS)	// 0000 1000 (When PreF_BITS == 3)
 #define PreF_MASK (~(PreF_SIZE - 1))	// 0000 0111 -> 1111 1000
 
 #define Hash_BITS 24
@@ -136,7 +136,7 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 		//	COMEX_flush_one(dest_node, buff_slot);
 		//	mutex_unlock(&COMEX_free_group[dest_node].mutex_FG);
 			if(buff_slot%FLUSH == 0 && buff_slot != 0)
-				COMEX_flush_buff(dest_node);
+                COMEX_flush_buff(dest_node);
 
 			*retNodeID = dest_node;
 			return 1;
@@ -419,7 +419,7 @@ void COMEX_pages_request(int target)
 	myStruct.src_node = COMEX_ID;
 	myStruct.page_no  = COMEX_rmqueue_smallest(i);
 	myStruct.size     = i;
-	while(myStruct.page_no < 0 && i >= 8){
+	while(myStruct.page_no < 0 && i >= 5){
 		i--;
 		myStruct.page_no  = COMEX_rmqueue_smallest(i);
 		myStruct.size     = i;
@@ -468,8 +468,8 @@ void COMEX_flush_buff(int nodeID)
 		if(buff_pos[nodeID].head + count >= COMEX_total_writeOut){
 			break;
 		}
-		if(	COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].pageNO - 1 !=
-			COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count -1].pageNO  && 
+		if(	(COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].pageNO % 1024) - 1 !=
+			(COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count -1].pageNO % 1024)  && 
 			COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].status == 2 )
 		{
 			printk(KERN_INFO "%s: Not contiguous %d %d\n", __FUNCTION__, 

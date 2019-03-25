@@ -64,7 +64,7 @@ void COMEX_RDMA_fn(int target, int CMD_num, void *ptr, int struct_size)
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_WRTE){
 		COMEX_address_t *myStruct = ptr;
-	//	printk(KERN_INFO "PAGE_WRTE: %d | L %lu R %lu Size %d\n", target, myStruct->local >> PAGE_SHIFT, myStruct->remote >> PAGE_SHIFT, myStruct->size);
+		printk(KERN_INFO "PAGE_WRTE: %d | L %lu R %lu Size %d\n", target, myStruct->local >> PAGE_SHIFT, myStruct->remote >> PAGE_SHIFT, myStruct->size);
 		CHK(do_write(cbs[target], myStruct->local, myStruct->remote + remote_shift_offset, myStruct->size << PAGE_SHIFT))
 		COMEX_free_buff(target, myStruct->bufIDX, myStruct->size);
 	}
@@ -184,7 +184,15 @@ void COMEX_init(){
 	remote_shift_offset  = 0UL;
 	remote_shift_offset += writeOut_buff*CONF_totalCB;
 	remote_shift_offset += readIn_buff;
+    printk(KERN_INFO "Total offset %lu pages\n", remote_shift_offset);
+    
+    remote_shift_offset  = remote_shift_offset >> 10;
+    remote_shift_offset  = remote_shift_offset + 1;
+    remote_shift_offset  = remote_shift_offset << 10;
+    printk(KERN_INFO "Total ceiled offset %lu pages\n", remote_shift_offset);
+    
 	remote_shift_offset  = remote_shift_offset << 12;
+    printk(KERN_INFO "Total ceiled offset %lu bytes\n", remote_shift_offset);
 	
 //	COMEX_wq = alloc_workqueue("COMEX WorkQueue", WQ_MEM_RECLAIM | WQ_NON_REENTRANT | WQ_HIGHPRI, 0);
 	COMEX_wq = create_singlethread_workqueue("COMEX WorkQueue");

@@ -60,6 +60,8 @@
 #include <rdma/ib_verbs.h>
 #include <rdma/rdma_cm.h>
 
+//#include <linux/time.h>         // add for COMEX
+
 #include "getopt.h"
 #include "myconfig.h"
 
@@ -74,6 +76,9 @@ MODULE_PARM_DESC(debug, "Debug level (0=none, 1=all)");
 MODULE_AUTHOR("Chavit");
 MODULE_DESCRIPTION("RDMA page frame transfer test");
 MODULE_LICENSE("Dual BSD/GPL");
+
+//unsigned long total_time = 0;           // add for COMEX
+//unsigned long total_time_count = 0;     // add for COMEX
 
 /*
  * Default max buffer size for IO...
@@ -674,6 +679,10 @@ static void krping_cq_event_handler_recv(struct ib_cq *cq, void *ctx)
 	struct ib_wc wc;
 	int ret;
 	int breakingout=0;
+    
+//    struct timespec myTimespec1;
+//    struct timespec myTimespec2;
+//    getnstimeofday(&myTimespec1);       //COMEX
 
 	BUG_ON(cb->cq_recv != cq);
 	if (cb->state == ERROR) {
@@ -706,7 +715,16 @@ static void krping_cq_event_handler_recv(struct ib_cq *cq, void *ctx)
 */
 				if(wc.wc_flags & IB_WC_WITH_IMM){   
 					universal_recv_handler(cb,wc.ex.imm_data,wc.wr_id);
-
+                /*    getnstimeofday(&myTimespec2);
+                    
+                    if(wc.ex.imm_data == CODE_COMEX_PAGE_RQST){
+                        total_time += (myTimespec2.tv_nsec - myTimespec1.tv_nsec);
+                        total_time_count++;
+                        printk(KERN_INFO "Total time %ld %ld = %ld | AVG = %ld\n", myTimespec1.tv_nsec, myTimespec2.tv_nsec, 
+                                                                                   myTimespec2.tv_nsec - myTimespec1.tv_nsec,
+                                                                                   total_time / total_time_count);
+                    }
+                */
 				}else{
 					printk("call recv handler but no imm\n");
 				}
