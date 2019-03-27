@@ -100,7 +100,7 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 		if(mutex_trylock(&COMEX_free_group[dest_node].mutex_FG) == 0)
 			return -1;
 		
-		if( COMEX_free_group[dest_node].total_page <= 512 && 
+		if( COMEX_free_group[dest_node].total_page <= COMEX_threshold && 
             COMEX_free_group[dest_node].mssg_qouta  > 0)
 		{
 			if( COMEX_free_group[dest_node].back_off <= 0){
@@ -413,13 +413,13 @@ void COMEX_free_to_remote(int nodeID, int pageNO)
 
 void COMEX_pages_request(int target)
 {
-	int i = COMEX_MAX_ORDER-1;
+	int i = COMEX_refill;
 	reply_pages_t myStruct;
 	
 	myStruct.src_node = COMEX_ID;
 	myStruct.page_no  = COMEX_rmqueue_smallest(i);
 	myStruct.size     = i;
-	while(myStruct.page_no < 0 && i >= 5){
+	while(myStruct.page_no < 0 && i >= 6){
 		i--;
 		myStruct.page_no  = COMEX_rmqueue_smallest(i);
 		myStruct.size     = i;
@@ -472,9 +472,9 @@ void COMEX_flush_buff(int nodeID)
 			(COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count -1].pageNO % 1024)  && 
 			COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].status == 2 )
 		{
-			printk(KERN_INFO "%s: Not contiguous %d %d\n", __FUNCTION__, 
-						COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count -1].pageNO,
-						COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].pageNO);
+	//		printk(KERN_INFO "%s: Not contiguous %d %d\n", __FUNCTION__, 
+	//					COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count -1].pageNO,
+	//					COMEX_writeOut_buff[nodeID][buff_pos[nodeID].head + count].pageNO);
 			break;
 		}
 	}

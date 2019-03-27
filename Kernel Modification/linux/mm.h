@@ -1253,7 +1253,7 @@ extern void 	(*COMEX_RDMA)(int, int, void *, int);
 extern uint64_t (*COMEX_offset_to_addr)(uint64_t);
 
 //	Global Exported Function	// Exported to kernel module 
-extern void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff, int total_pages, char *namePtr);
+extern void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff, int total_pages, int threshold, int refill, char *namePtr);
 extern void COMEX_pages_request(int target);
 extern void COMEX_page_receive(int nodeID, int pageNO, int group_size);
 extern unsigned long checkSum_page(struct page *page);

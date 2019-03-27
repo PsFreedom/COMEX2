@@ -66,7 +66,7 @@ void COMEX_init_Remote()
 	}
 }
 
-void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff, int total_pages, char *namePtr)
+void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff, int total_pages, int threshold, int refill, char *namePtr)
 {
 	char *new_vAddr;
 	char initMSG[50];
@@ -79,6 +79,8 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 	COMEX_total_pages	 = total_pages;
 	COMEX_total_writeOut = writeOut_buff;
 	COMEX_total_readIn   = readIn_buff;
+    COMEX_threshold      = threshold;
+    COMEX_refill         = refill;
 	
 	strcpy(proc_name, namePtr);
 	printk(KERN_INFO "COMEX Kernel v.2 --> %s\n", proc_name);

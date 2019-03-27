@@ -4,6 +4,8 @@ int COMEX_total_nodes = 0;
 int COMEX_total_pages = 0;
 int COMEX_total_writeOut = 0;
 int COMEX_total_readIn = 0;
+int COMEX_threshold = 0;
+int COMEX_refill = 0;
 char proc_name[100];
 
 //CHKSM_t COMEX_CHKSM[3][Total_CHKSM];
