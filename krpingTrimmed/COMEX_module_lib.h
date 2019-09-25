@@ -57,7 +57,7 @@ void COMEX_RDMA_fn(int target, int CMD_num, void *ptr, int struct_size)
 		printk(KERN_INFO "PAGE_RPLY: %d->%d | %d %d %d\n", target, ID_to_CB(target), myStruct->src_node, myStruct->page_no, myStruct->size);
 		
 		if(myStruct->page_no % (1 << myStruct->size) != 0){
-			printk(KERN_INFO "PAGE_RPLY: Wrong Addr!\n");
+            printk(KERN_INFO "PAGE_RPLY: Wrong Addr! %d->%d | %d %d %d\n", target, ID_to_CB(target), myStruct->src_node, myStruct->page_no, myStruct->size);
 		}
 		
 		CHK(universal_send(cbs[ID_to_CB(target)], CMD_num, ptr, struct_size))
@@ -89,23 +89,29 @@ void COMEX_do_verb(int CMD_num, struct krping_cb *cb, uint64_t slot)
 	void *piggy = &cb->recv_buf[slot];
 	work_content *myWork_cont = kzalloc(sizeof(work_content), GFP_ATOMIC);
 	
-	if(myWork_cont == NULL)
+	if(myWork_cont == NULL){
+        printk(KERN_INFO "%s: OOM - kzalloc\n", __FUNCTION__);
 		return;
+    }
 	
 	myWork_cont->CMD_num = CMD_num;
 	switch(CMD_num){
 		case CODE_COMEX_PAGE_RQST:
 	//		printk(KERN_INFO "Received... PAGE_RQST\n");
 			myWork_cont->args = kzalloc(sizeof(int), GFP_ATOMIC);
-			if(myWork_cont->args == NULL)
-				return;
+			if(myWork_cont->args == NULL){
+                printk(KERN_INFO "%s: OOM - kzalloc switch\n", __FUNCTION__);
+                return;
+            }
 			memcpy( myWork_cont->args, piggy, sizeof(int));
 			break;
 		case CODE_COMEX_PAGE_RPLY:
 	//		printk(KERN_INFO "Received... PAGE_RPLY\n");
 			myWork_cont->args = kzalloc(sizeof(reply_pages_t), GFP_ATOMIC);
-			if(myWork_cont->args == NULL)
-				return;
+			if(myWork_cont->args == NULL){
+                printk(KERN_INFO "%s: OOM - kzalloc switch\n", __FUNCTION__);
+                return;
+            }
 			memcpy( myWork_cont->args, piggy, sizeof(reply_pages_t));
 			break;
 		case CODE_COMEX_PAGE_CKSM:
@@ -113,8 +119,10 @@ void COMEX_do_verb(int CMD_num, struct krping_cb *cb, uint64_t slot)
 			return;
 		case CODE_COMEX_PAGE_FREE:
 			myWork_cont->args = kzalloc(sizeof(free_struct_t), GFP_ATOMIC);
-			if(myWork_cont->args == NULL)
-				return;
+			if(myWork_cont->args == NULL){
+                printk(KERN_INFO "%s: OOM - kzalloc switch\n", __FUNCTION__);
+                return;
+            }
 			memcpy( myWork_cont->args, piggy, sizeof(free_struct_t));
 			break;
 		default:
@@ -139,7 +147,7 @@ void COMEX_do_work(struct work_struct *work)
 	}
 	else if(CMD_num == CODE_COMEX_PAGE_RPLY){
 		reply_pages_t *myStruct = piggy;
-//		printk(KERN_INFO "PAGE_RPLY: %d->%d | %d %d %d\n", myStruct->src_node, ID_to_CB(myStruct->src_node), myStruct->src_node, myStruct->page_no, myStruct->size);
+		printk(KERN_INFO "PAGE_RPLY: %d->%d | %d %d %d\n", myStruct->src_node, ID_to_CB(myStruct->src_node), myStruct->src_node, myStruct->page_no, myStruct->size);
 		COMEX_page_receive(ID_to_CB(myStruct->src_node), myStruct->page_no, myStruct->size);
         kfree(myStruct);
 	}

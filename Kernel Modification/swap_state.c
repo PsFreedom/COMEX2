@@ -24,6 +24,7 @@
 #include <linux/fs.h>			// add for COMEX
 #include <linux/debugfs.h>		// add for COMEX
 #include <linux/rmap.h>			// add for COMEX
+#include <linux/delay.h>        // add for COMEX
 
 #include "comex_structure.h"	// add for COMEX
 #include "internal.h"			// add for COMEX
@@ -241,10 +242,7 @@ int add_to_swap(struct page *page, struct list_head *list)
 				COMEX_check = 1;
 				SWAP_to_COMEX++;
 			}
-    //        printk(KERN_INFO "%s: _mapcount %d _count %d Rmap %d\n", __FUNCTION__, page_mapcount(page), page_count(page), Rmap_counter);
-		}
-		else{
-			printk(KERN_INFO "%s: _mapcount %d _count %d Rmap %d\n", __FUNCTION__, page_mapcount(page), page_count(page), Rmap_counter);
+            printk(KERN_INFO "%s: _mapcount %d _count %d Rmap %d\n", __FUNCTION__, page_mapcount(page), page_count(page), Rmap_counter);
 		}
 	}
 	
