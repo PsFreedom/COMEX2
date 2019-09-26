@@ -2,6 +2,10 @@
 #include <linux/init.h>			/* Needed for the macros */
 #include <linux/mm.h>			/* Needed for COMEX additional function */
 
+#define THRESHOLD   1024
+#define REFILL_SIZE 10
+#define COMPUTE_N   9
+
 //#define Total_CHKSM 6291456
 //unsigned long module_CHKSM[2][Total_CHKSM];
 
@@ -38,6 +42,13 @@ int ID_to_CB(int nodeID){
 		}
 	}
 	return -1;
+}
+
+void print_all_nodeID(){
+	int i;	
+	for(i=0; i<CONF_totalCB; i++){
+        printk(KERN_INFO "%s: CB[%d] -> %d (nodeID)\n", __FUNCTION__, i, cbs[i]->remotenodeID);
+	}
 }
 
 uint64_t COMEX_offset_to_addr_fn(uint64_t offset){
@@ -184,7 +195,8 @@ void COMEX_do_work(struct work_struct *work)
 	kfree(myWork_cont);
 }
 
-void COMEX_init(){	
+void COMEX_init()
+{	
 	COMEX_module_echo    = &COMEX_module_echo_fn;
 	COMEX_offset_to_addr = &COMEX_offset_to_addr_fn;
 	COMEX_RDMA 			 = &COMEX_RDMA_fn;
@@ -201,8 +213,10 @@ void COMEX_init(){
     
 	remote_shift_offset  = remote_shift_offset << 12;
     printk(KERN_INFO "Total ceiled offset %lu bytes\n", remote_shift_offset);
+    
+    print_all_nodeID();
 	
 //	COMEX_wq = alloc_workqueue("COMEX WorkQueue", WQ_MEM_RECLAIM | WQ_NON_REENTRANT | WQ_HIGHPRI, 0);
 	COMEX_wq = create_singlethread_workqueue("COMEX WorkQueue");
-	COMEX_init_ENV(CONF_nodeID, CONF_totalCB, writeOut_buff, readIn_buff, total_pages, 1024, 10, proc_name);
+	COMEX_init_ENV(CONF_nodeID, CONF_totalCB, writeOut_buff, readIn_buff, total_pages, THRESHOLD, REFILL_SIZE, COMPUTE_N, proc_name);
 }

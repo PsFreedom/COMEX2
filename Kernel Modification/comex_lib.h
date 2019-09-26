@@ -18,20 +18,31 @@ void COMEX_init_Remote()
 	
 	printk(KERN_INFO "%s... Begin\n", __FUNCTION__);
 	COMEX_init_FS();
+    
 
 	COMEX_free_group = (COMEX_R_free_group_t *)vmalloc(sizeof(COMEX_R_free_group_t)*COMEX_total_nodes);
 	for(i=0; i<COMEX_total_nodes; i++){
-		COMEX_free_group[i].mssg_qouta  = MAX_MSSG;
-		COMEX_free_group[i].total_group = 0;
 		COMEX_free_group[i].total_page  = 0;
 		COMEX_free_group[i].back_off 	= 0;
 		mutex_init(&COMEX_free_group[i].mutex_FG);
 		INIT_LIST_HEAD(&COMEX_free_group[i].free_group);
-		
-		if(list_empty(&COMEX_free_group[i].free_group))
-			printk(KERN_INFO "%d... list_empty!\n", i);
+
+//        COMEX_RDMA(i, CODE_COMEX_PAGE_RQST, &COMEX_ID, sizeof(COMEX_ID));
 	}
-	
+/*
+    msleep(1000);
+    for(i=0; i<COMEX_total_nodes; i++){
+        if(COMEX_free_group[i].total_page <= 0){
+            COMEX_free_group[i].total_page = -444;
+            printk(KERN_INFO "total_page[%d] = %d => ... Disable\n", i, COMEX_free_group[i].total_page);
+        }
+        else{
+            printk(KERN_INFO "total_page[%d] = %d => ... OK\n", i, COMEX_free_group[i].total_page);
+            COMEX_nMemNodes++;
+        }
+    }
+	printk(KERN_INFO "Total memory nodes -> %d\n", COMEX_nMemNodes);
+*/
 	buff_pos = (buff_pos_t *)vmalloc(sizeof(buff_pos_t)*COMEX_total_nodes);
 	for(i=0; i<COMEX_total_nodes; i++){
 		buff_pos[i].head = 0;
@@ -66,7 +77,7 @@ void COMEX_init_Remote()
 	}
 }
 
-void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff, int total_pages, int threshold, int refill, char *namePtr)
+void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff, int total_pages, int threshold, int refill, int nComNodes, char *namePtr)
 {
 	char *new_vAddr;
 	char initMSG[50];
@@ -79,14 +90,19 @@ void COMEX_init_ENV(int node_ID, int n_nodes, int writeOut_buff, int readIn_buff
 	COMEX_total_pages	 = total_pages;
 	COMEX_total_writeOut = writeOut_buff;
 	COMEX_total_readIn   = readIn_buff;
+    
     COMEX_threshold      = threshold;
     COMEX_refill         = refill;
+    COMEX_nComNodes      = nComNodes;
+    COMEX_nMemNodes      = n_nodes - nComNodes;
 	
 	strcpy(proc_name, namePtr);
 	printk(KERN_INFO "COMEX Kernel v.2 --> %s\n", proc_name);
 	printk(KERN_INFO "ID %d n_nodes %d total_pages %d\n", node_ID, n_nodes, total_pages);
 	printk(KERN_INFO "writeOut_buff %d readIn_buff %d\n", writeOut_buff, readIn_buff);
-    printk(KERN_INFO "Pool threshold -> 0\n");
+    printk(KERN_INFO "Pool threshold -> %d\n", COMEX_threshold);
+    printk(KERN_INFO "Compute Node -> %d\n", COMEX_nComNodes);
+    printk(KERN_INFO "Support Node -> %d\n", COMEX_nMemNodes);
 
 ///// Semalphore & MUTEX
 	spin_lock_init(&COMEX_buddy_spin);

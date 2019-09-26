@@ -1,5 +1,3 @@
-#define MAX_TRY 5
-#define MAX_MSSG 8
 #define FLUSH 32
 #define PreF_BITS 4
 #define PreF_SIZE (1UL << PreF_BITS)	// 0000 1000 (When PreF_BITS == 3)
@@ -12,8 +10,6 @@
 #define HASH_Shift 8
 
 typedef struct{
-	int mssg_qouta;
-	int total_group;
 	int total_page;
 	int back_off;
 	struct mutex mutex_FG;
@@ -62,9 +58,9 @@ void COMEX_freelist_print(int nodeID){
 	}
 }
 
-int COMEX_hash(int seed){
-//	return 1;
-	return (seed+1)%COMEX_total_nodes;
+int COMEX_hash(int seed, int nodeID){
+    int result = ((seed*nodeID)+1) % COMEX_nMemNodes;
+    return result;
 }
 
 uint64_t get_writeOut_buff(int node_ID, int buff_slot){
@@ -93,29 +89,37 @@ uint64_t get_readIn_buff(int buff_slot){
 int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 {
 	char *old_vAddr, *buf_vAddr;
-	int i, buff_slot, dest_node = COMEX_hash(get_page_PID(old_page));
+	int i, buff_slot, dest_node = COMEX_hash(get_page_PID(old_page), COMEX_ID);
 	
-	for(i=0; i<COMEX_total_nodes; i++)
+	for(i=0; i<COMEX_nMemNodes; i++)
 	{
 		if(mutex_trylock(&COMEX_free_group[dest_node].mutex_FG) == 0)
 			return -1;
 		
-		if( COMEX_free_group[dest_node].total_page <= COMEX_threshold && 
-            COMEX_free_group[dest_node].mssg_qouta  > 0)
+		if( COMEX_free_group[dest_node].total_page <= COMEX_threshold)
 		{
-			if( COMEX_free_group[dest_node].back_off <= 0){
-				COMEX_free_group[dest_node].mssg_qouta--;
-				COMEX_free_group[dest_node].back_off += 1UL<<(12 - COMEX_free_group[dest_node].mssg_qouta);
-				COMEX_RDMA(dest_node, CODE_COMEX_PAGE_RQST, &COMEX_ID, sizeof(COMEX_ID));
-			}
-			else{
-				COMEX_free_group[dest_node].back_off--;
-			}
+            if(COMEX_free_group[dest_node].back_off <= 0){
+                COMEX_free_group[dest_node].back_off = 10000;
+                COMEX_RDMA(dest_node, CODE_COMEX_PAGE_RQST, &COMEX_ID, sizeof(COMEX_ID));
+            }
+            else{
+                COMEX_free_group[dest_node].back_off--;
+            }
 		}
-		if(COMEX_free_group[dest_node].total_group > 0 && 
-		   COMEX_writeOut_buff[dest_node][buff_pos[dest_node].tail].status == -1)
+        
+        if( COMEX_writeOut_buff[dest_node][buff_pos[dest_node].tail].status == 2){
+            COMEX_flush_buff(dest_node);
+        }
+
+		if( COMEX_free_group[dest_node].total_page > 0 && 
+            COMEX_writeOut_buff[dest_node][buff_pos[dest_node].tail].status == -1)
 		{
 			*retPageNO = COMEX_freelist_getpage(dest_node);
+            if(*retPageNO == -1){
+                dest_node = COMEX_hash(dest_node, COMEX_ID);
+                mutex_unlock(&COMEX_free_group[dest_node].mutex_FG);
+                continue;
+            }
 			
 			buff_slot = buff_pos[dest_node].tail;
 			buff_pos[dest_node].tail++;
@@ -133,16 +137,14 @@ int COMEX_move_to_Remote(struct page *old_page, int *retNodeID, int *retPageNO)
 			COMEX_writeOut_buff[dest_node][buff_slot].nodeID = dest_node;
 			COMEX_writeOut_buff[dest_node][buff_slot].pageNO = *retPageNO;
 			COMEX_writeOut_buff[dest_node][buff_slot].status = 2;
-		//	COMEX_flush_one(dest_node, buff_slot);
-		//	mutex_unlock(&COMEX_free_group[dest_node].mutex_FG);
-			if(buff_slot%FLUSH == 0 && buff_slot != 0)
+            if(buff_slot%FLUSH == 0 && buff_slot != 0)
                 COMEX_flush_buff(dest_node);
 
 			*retNodeID = dest_node;
 			return 1;
 		}
 		mutex_unlock(&COMEX_free_group[dest_node].mutex_FG);
-		dest_node = COMEX_hash(dest_node);
+		dest_node = COMEX_hash(dest_node, COMEX_ID);
 	}
 	*retNodeID = 0;
 	*retPageNO = 0;
@@ -330,6 +332,10 @@ void COMEX_page_receive(int nodeID, int pageNO, int group_size)
 	mutex_lock(&COMEX_free_group[nodeID].mutex_FG);
 	if(pageNO >= 0){
 		free_group_t *group_ptr = (free_group_t *)kzalloc(sizeof(free_group_t), GFP_KERNEL);
+        if(group_ptr == NULL){
+            printk(KERN_INFO "%s: OOM kzalloc\n", __FUNCTION__);
+            return;
+        }
 		
 		group_ptr->page_start = pageNO;
 		group_ptr->page_end   = pageNO + (1UL<<group_size) - 1;
@@ -337,14 +343,13 @@ void COMEX_page_receive(int nodeID, int pageNO, int group_size)
 
 	//	printk(KERN_INFO "%s: %d %d - %d\n", __FUNCTION__, nodeID, group_ptr->page_start, group_ptr->page_end);
 		list_add_tail(&group_ptr->link, &COMEX_free_group[nodeID].free_group);
-		COMEX_free_group[nodeID].mssg_qouta = MAX_MSSG;
-		COMEX_free_group[nodeID].total_group++;
 		COMEX_free_group[nodeID].total_page += (1UL<<group_size);
+        COMEX_free_group[nodeID].back_off = 0;
 	}
-	else{
-		COMEX_free_group[nodeID].mssg_qouta = MAX_MSSG;
-		COMEX_free_group[nodeID].back_off += 50000;
-	}
+    if(group_size <= COMEX_refill-2 || pageNO < 0){
+        COMEX_free_group[nodeID].back_off = 100000;
+        printk(KERN_INFO "%s: back_off[%d] = %d\n", __FUNCTION__, nodeID, COMEX_free_group[nodeID].back_off);
+    }
 	mutex_unlock(&COMEX_free_group[nodeID].mutex_FG);
 }
 EXPORT_SYMBOL(COMEX_page_receive);
@@ -354,12 +359,16 @@ int COMEX_freelist_getpage(int list_ID)
 	free_group_t *myPtr;
 	int ret_pageNO = -1;
 	
-	myPtr      = list_entry(COMEX_free_group[list_ID].free_group.next, free_group_t, link);
+	myPtr = list_entry(COMEX_free_group[list_ID].free_group.next, free_group_t, link);
+    if(myPtr == NULL){
+        printk(KERN_INFO "%s: myPtr == NULL\n", __FUNCTION__);
+        return -1;
+    }
+    
 	ret_pageNO = myPtr->page_start;
 	myPtr->page_start++;
 	if(myPtr->page_start > myPtr->page_end){
 		list_del(&myPtr->link);
-		COMEX_free_group[list_ID].total_group--;
 		kfree(myPtr);
 	}
     
@@ -419,7 +428,7 @@ void COMEX_pages_request(int target)
 	myStruct.src_node = COMEX_ID;
 	myStruct.page_no  = COMEX_rmqueue_smallest(i);
 	myStruct.size     = i;
-	while(myStruct.page_no < 0 && i >= 6){
+	while(myStruct.page_no < 0 && i > 5){
 		i--;
 		myStruct.page_no  = COMEX_rmqueue_smallest(i);
 		myStruct.size     = i;
